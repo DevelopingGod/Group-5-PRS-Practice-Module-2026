@@ -1,0 +1,12 @@
+{
+  "name": "bin-buddy",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "gen": "uv run python scripts/gen_contracts.py && pnpm --filter web gen:types",
+    "check:web": "pnpm --filter web lint && pnpm --filter web format:check && pnpm --filter web typecheck && pnpm --filter web test"
+  }
+}

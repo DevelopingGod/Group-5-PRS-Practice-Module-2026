@@ -1,0 +1,231 @@
+{
+  "$defs": {
+    "BinSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "channel": {
+          "$ref": "#/$defs/Channel"
+        },
+        "colour": {
+          "anyOf": [
+            {
+              "pattern": "^#[0-9A-Fa-f]{6}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Colour"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "channel"
+      ],
+      "title": "BinSpec",
+      "type": "object"
+    },
+    "Channel": {
+      "description": "Disposal channel a site bin belongs to. Site policies map channels to concrete bins.",
+      "enum": [
+        "recycle",
+        "general_waste",
+        "e_waste",
+        "donation",
+        "abstain"
+      ],
+      "title": "Channel",
+      "type": "string"
+    },
+    "Condition": {
+      "description": "Contamination state (proposal: food residue, leftover liquid, items left inside).",
+      "enum": [
+        "clean",
+        "food_residue",
+        "leftover_liquid",
+        "item_inside"
+      ],
+      "title": "Condition",
+      "type": "string"
+    },
+    "Material": {
+      "description": "What the item is made of (proposal 1.3, 4.2).",
+      "enum": [
+        "paper",
+        "plastic",
+        "glass",
+        "metal",
+        "beverage_carton",
+        "styrofoam",
+        "e_waste",
+        "textile",
+        "food_waste",
+        "other_general"
+      ],
+      "title": "Material",
+      "type": "string"
+    },
+    "PolicyRule": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/RuleWhen"
+        },
+        "then": {
+          "description": "Bin key",
+          "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+          "title": "Then",
+          "type": "string"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "tip": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tip"
+        },
+        "source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Url"
+        }
+      },
+      "required": [
+        "id",
+        "when",
+        "then",
+        "reason"
+      ],
+      "title": "PolicyRule",
+      "type": "object"
+    },
+    "RuleWhen": {
+      "additionalProperties": false,
+      "description": "Omitted list = matches any value.",
+      "properties": {
+        "materials": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Material"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Materials"
+        },
+        "conditions": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Condition"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conditions"
+        }
+      },
+      "title": "RuleWhen",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "site": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+      "title": "Site",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Version",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "bins": {
+      "items": {
+        "$ref": "#/$defs/BinSpec"
+      },
+      "minItems": 1,
+      "title": "Bins",
+      "type": "array"
+    },
+    "rules": {
+      "items": {
+        "$ref": "#/$defs/PolicyRule"
+      },
+      "minItems": 1,
+      "title": "Rules",
+      "type": "array"
+    },
+    "uncertain_fallback": {
+      "description": "Bin used when still uncertain after all questions",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+      "title": "Uncertain Fallback",
+      "type": "string"
+    },
+    "abstain_source_url": {
+      "description": "Link shown when the system abstains",
+      "title": "Abstain Source Url",
+      "type": "string"
+    }
+  },
+  "required": [
+    "site",
+    "version",
+    "description",
+    "bins",
+    "rules",
+    "uncertain_fallback",
+    "abstain_source_url"
+  ],
+  "title": "SitePolicy",
+  "type": "object"
+}

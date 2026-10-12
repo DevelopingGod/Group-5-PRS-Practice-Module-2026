@@ -1,0 +1,27 @@
+# WS1 is filled in. Replace the remaining @TODO-... handles with teammates' GitHub usernames
+# (a PR from the admin) as soon as they accept the collaborator invite; GitHub ignores unknown handles.
+# With "Require review from Code Owners" on, a PR touching these paths needs the owner's approval.
+# Every path lists two owners because GitHub never lets you approve your own pull request:
+# the second owner is the reviewer when the first owner is the author.
+#
+# WS1 See              Indish Sankalp Sandeep     @DevelopingGod
+# WS2 Think            Chopra Aryan               @TODO-aryan
+# WS3 Ask and Decide   Baral Diwash               @TODO-diwash
+# WS4 Verify and Play  Sarade Shreyash Jitendra   @TODO-shreyash
+
+*                                        @DevelopingGod @TODO-aryan @TODO-diwash @TODO-shreyash
+
+# Shared contracts: any member can approve on GitHub, but the team rule (CONTRIBUTING.md)
+# is that both the producing and the consuming workstream approve.
+/contracts/                              @DevelopingGod @TODO-aryan @TODO-diwash @TODO-shreyash
+/data/labels.csv                         @DevelopingGod @TODO-aryan @TODO-diwash @TODO-shreyash
+
+/services/inference/                     @DevelopingGod @TODO-aryan
+/services/inference/app/vision.py        @DevelopingGod @TODO-aryan
+/services/inference/app/decision.py      @TODO-diwash @DevelopingGod
+/services/inference/app/verify.py        @TODO-shreyash @DevelopingGod
+/ml/                                     @DevelopingGod @TODO-aryan
+/policies/                               @TODO-diwash @TODO-shreyash
+/supabase/                               @TODO-shreyash @TODO-aryan
+/apps/web/                               @TODO-shreyash @TODO-diwash
+/.github/                                @TODO-shreyash @DevelopingGod

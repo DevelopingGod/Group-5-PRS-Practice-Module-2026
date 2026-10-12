@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "description": "JSON encoded in the QR code on each demonstration bin.",
+  "properties": {
+    "v": {
+      "const": 1,
+      "default": 1,
+      "title": "V",
+      "type": "integer"
+    },
+    "bin_id": {
+      "description": "Unique physical bin, e.g. 'demo-hdb-01'",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+      "title": "Bin Id",
+      "type": "string"
+    },
+    "site_policy": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+      "title": "Site Policy",
+      "type": "string"
+    },
+    "bin_key": {
+      "description": "Bin key in that site policy, e.g. 'blue_bin'",
+      "pattern": "^[a-z0-9][a-z0-9_-]{1,39}$",
+      "title": "Bin Key",
+      "type": "string"
+    },
+    "location_label": {
+      "maxLength": 60,
+      "minLength": 1,
+      "title": "Location Label",
+      "type": "string"
+    }
+  },
+  "required": [
+    "bin_id",
+    "site_policy",
+    "bin_key",
+    "location_label"
+  ],
+  "title": "BinQrPayload",
+  "type": "object"
+}

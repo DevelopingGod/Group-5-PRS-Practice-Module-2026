@@ -1,0 +1,9 @@
+# Same line endings on Windows, macOS and Linux, so ruff/prettier checks and generated files
+# do not differ between teammates' machines and CI.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.pdf binary
+*.docx binary
+*.pptx binary
+*.ico binary

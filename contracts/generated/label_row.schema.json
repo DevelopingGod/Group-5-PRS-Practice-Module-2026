@@ -1,0 +1,181 @@
+{
+  "columns": [
+    "photo_id",
+    "item_id",
+    "collector",
+    "capture",
+    "drive_path",
+    "material",
+    "condition",
+    "hdb_bin_key",
+    "q1_recycling_symbol",
+    "q2_cleaned",
+    "q3_sitting_time",
+    "split",
+    "notes"
+  ],
+  "row": {
+    "$defs": {
+      "Capture": {
+        "description": "Dataset only: paired capture (proposal 4.2).",
+        "enum": [
+          "as_used",
+          "cleaned"
+        ],
+        "title": "Capture",
+        "type": "string"
+      },
+      "Condition": {
+        "description": "Contamination state (proposal: food residue, leftover liquid, items left inside).",
+        "enum": [
+          "clean",
+          "food_residue",
+          "leftover_liquid",
+          "item_inside"
+        ],
+        "title": "Condition",
+        "type": "string"
+      },
+      "Material": {
+        "description": "What the item is made of (proposal 1.3, 4.2).",
+        "enum": [
+          "paper",
+          "plastic",
+          "glass",
+          "metal",
+          "beverage_carton",
+          "styrofoam",
+          "e_waste",
+          "textile",
+          "food_waste",
+          "other_general"
+        ],
+        "title": "Material",
+        "type": "string"
+      },
+      "SittingTime": {
+        "enum": [
+          "under_1_hour",
+          "same_day",
+          "more_than_1_day"
+        ],
+        "title": "SittingTime",
+        "type": "string"
+      },
+      "Split": {
+        "description": "Dataset only: split by item, never by photo (proposal 4.2).",
+        "enum": [
+          "train",
+          "val",
+          "test",
+          "field"
+        ],
+        "title": "Split",
+        "type": "string"
+      },
+      "YesNoUnsure": {
+        "enum": [
+          "yes",
+          "no",
+          "not_sure"
+        ],
+        "title": "YesNoUnsure",
+        "type": "string"
+      }
+    },
+    "additionalProperties": false,
+    "properties": {
+      "photo_id": {
+        "description": "e.g. ws2-0017-b",
+        "pattern": "^ws[1-4]-\\d{4}-[a-z]$",
+        "title": "Photo Id",
+        "type": "string"
+      },
+      "item_id": {
+        "description": "e.g. ws2-0017",
+        "pattern": "^ws[1-4]-\\d{4}$",
+        "title": "Item Id",
+        "type": "string"
+      },
+      "collector": {
+        "enum": [
+          "ws1",
+          "ws2",
+          "ws3",
+          "ws4"
+        ],
+        "title": "Collector",
+        "type": "string"
+      },
+      "capture": {
+        "$ref": "#/$defs/Capture"
+      },
+      "drive_path": {
+        "pattern": "^local/ws[1-4]-\\d{4}/ws[1-4]-\\d{4}-[a-z]\\.(jpg|jpeg|png)$",
+        "title": "Drive Path",
+        "type": "string"
+      },
+      "material": {
+        "$ref": "#/$defs/Material"
+      },
+      "condition": {
+        "$ref": "#/$defs/Condition"
+      },
+      "hdb_bin_key": {
+        "title": "Hdb Bin Key",
+        "type": "string"
+      },
+      "q1_recycling_symbol": {
+        "$ref": "#/$defs/YesNoUnsure"
+      },
+      "q2_cleaned": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/YesNoUnsure"
+          },
+          {
+            "const": "na",
+            "type": "string"
+          }
+        ],
+        "title": "Q2 Cleaned"
+      },
+      "q3_sitting_time": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/SittingTime"
+          },
+          {
+            "const": "na",
+            "type": "string"
+          }
+        ],
+        "title": "Q3 Sitting Time"
+      },
+      "split": {
+        "$ref": "#/$defs/Split"
+      },
+      "notes": {
+        "default": "",
+        "title": "Notes",
+        "type": "string"
+      }
+    },
+    "required": [
+      "photo_id",
+      "item_id",
+      "collector",
+      "capture",
+      "drive_path",
+      "material",
+      "condition",
+      "hdb_bin_key",
+      "q1_recycling_symbol",
+      "q2_cleaned",
+      "q3_sitting_time",
+      "split"
+    ],
+    "title": "LabelRow",
+    "type": "object"
+  }
+}

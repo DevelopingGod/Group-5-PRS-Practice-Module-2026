@@ -1,0 +1,41 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Data and models never go in git (photos live on Google Drive, weights on the Hugging Face Hub)
+data/raw/
+data/local/
+*.jpg
+*.jpeg
+*.png
+*.heic
+*.webp
+*.pt
+*.pth
+*.onnx
+*.safetensors
+*.ckpt
+*.pkl
+*.joblib
+!apps/web/public/**/*.png
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/

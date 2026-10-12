@@ -1,0 +1,94 @@
+# HDB default policy (proposal 1.3). Owner: WS3. Validated in CI by contracts/binbuddy_contracts/policy.py.
+# Rules are checked top to bottom; the first match wins. Every material/condition pair must be covered.
+site: hdb_default
+version: 0.1.0
+description: Singapore HDB estates - single commingled blue recycling bin.
+uncertain_fallback: general_waste
+abstain_source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+bins:
+  - key: blue_bin
+    label: Blue recycling bin
+    channel: recycle
+    colour: "#1F5FAD"
+  - key: general_waste
+    label: General waste
+    channel: general_waste
+    colour: "#5A5A5A"
+  - key: e_waste_point
+    label: E-waste collection point
+    channel: e_waste
+  - key: donation
+    label: Donate or use another channel
+    channel: donation
+
+rules:
+  - id: e_waste_items
+    when: { materials: [e_waste] }
+    then: e_waste_point
+    reason: Small electronic appliances and light bulbs are commonly misclassified; they are recyclable through e-waste collection, not the blue bin.
+    source_url: https://asianews.network/unsure-if-you-can-recycle-a-frying-pan-ask-neas-new-ai-chatbot/
+
+  - id: textiles
+    when: { materials: [textile] }
+    then: donation
+    reason: Old clothing does not go in the blue bin; donate it or use another channel.
+    source_url: https://asianews.network/unsure-if-you-can-recycle-a-frying-pan-ask-neas-new-ai-chatbot/
+
+  - id: styrofoam
+    when: { materials: [styrofoam] }
+    then: general_waste
+    reason: Styrofoam is not accepted in blue bins, even with a recycling symbol.
+    source_url: https://www.c3a.org.sg/node/26053
+
+  - id: food_waste
+    when: { materials: [food_waste] }
+    then: general_waste
+    reason: Food is not recyclable and contaminates the blue bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: other_general
+    when: { materials: [other_general] }
+    then: general_waste
+    reason: This item is not accepted in the blue bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: stained_paper
+    when: { materials: [paper], conditions: [food_residue] }
+    then: general_waste
+    reason: Oil- or food-stained paper cannot be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: wet_or_filled_paper
+    when: { materials: [paper], conditions: [leftover_liquid, item_inside] }
+    then: general_waste
+    reason: Wet or filled paper contaminates other recyclables.
+    tip: Empty it first; clean, dry paper can go in the blue bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_item_inside
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [item_inside] }
+    then: general_waste
+    reason: Food or items left inside contaminate the blue bin.
+    tip: Empty and rinse it, and the container can be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_leftover_liquid
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [leftover_liquid] }
+    then: general_waste
+    reason: Liquid contaminates other recyclables.
+    tip: Empty and rinse it first.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_food_residue
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [food_residue] }
+    then: general_waste
+    reason: Food residue contaminates the blue bin.
+    tip: Rinse it clean, and the container can be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: clean_recyclables
+    when: { materials: [paper, plastic, glass, metal, beverage_carton], conditions: [clean] }
+    then: blue_bin
+    reason: Clean paper, plastic, glass, metal and cartons go in the blue bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/

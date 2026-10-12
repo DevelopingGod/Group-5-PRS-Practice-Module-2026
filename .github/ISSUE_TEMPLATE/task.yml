@@ -1,0 +1,32 @@
+name: Task
+description: A unit of work for one workstream
+labels: [task]
+body:
+  - type: dropdown
+    id: workstream
+    attributes:
+      label: Workstream
+      options: [WS1 See, WS2 Think, WS3 Ask and Decide, WS4 Verify and Play, Shared]
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should exist when this is done?
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: Tests or checks that prove it works.
+      value: |
+        - [ ] 
+    validations:
+      required: true
+  - type: input
+    id: due
+    attributes:
+      label: Due
+      placeholder: e.g. 6 Oct (first presentation)
