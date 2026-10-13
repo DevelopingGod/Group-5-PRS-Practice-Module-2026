@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter
 
-from app.quality import _grey_for_quality, check_quality
+from app.quality import MOTION_RATIO_MIN, _grey_for_quality, check_quality, motion_ratio
 from binbuddy_contracts.enums import QualityIssue
 
 
@@ -55,3 +55,25 @@ def test_white_item_on_white_table_is_not_too_bright() -> None:
 def test_aspect_ratio_kept_and_small_photos_not_upscaled() -> None:
     assert _grey_for_quality(Image.new("RGB", (2000, 500))).shape == (128, 512)
     assert _grey_for_quality(Image.new("RGB", (300, 200))).shape == (200, 300)
+
+
+def _shake(img: Image.Image, dy: int, dx: int, length: int) -> Image.Image:
+    arr = np.asarray(img, dtype=np.float64)
+    out = np.zeros_like(arr)
+    for k in range(length):
+        s = k - length // 2
+        out += np.roll(arr, (s * dy, s * dx), axis=(0, 1))
+    return Image.fromarray((out / length).astype(np.uint8))
+
+
+@pytest.mark.parametrize("direction", [(0, 1), (1, 0), (1, 1), (1, -1)])
+def test_shaky_photo_is_rejected(direction: tuple[int, int]) -> None:
+    small = _scene().resize((512, 384))  # shake measured at the checker's working scale
+    shaken = _shake(small, *direction, length=9)
+    assert check_quality(small).ok
+    assert QualityIssue.TOO_BLURRY in check_quality(shaken).issues
+
+
+def test_flat_image_has_no_direction() -> None:
+    assert motion_ratio(np.full((50, 50), 128.0)) == 1.0
+    assert MOTION_RATIO_MIN < 1.0
