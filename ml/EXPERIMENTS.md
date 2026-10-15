@@ -87,6 +87,32 @@ correction gets its own entry. Numbers come from the saved result files named in
   into v2's training set, and Run 1 could not be compared with later runs on the same photos.
   Notebook 01 stops if any v1 test photo leaves the test set.
 - The team's final batch is the last data change: after v2, only training settings change.
+- **Built 15 Oct (notebook 01, code `42bdad0`):** 9,785 images = the same 8,513 public images +
+  **1,241 team photos** (207 Round 1 + 1,034 Round 2; 905 items, 263 with more than one photo) + 31 web
+  images (train only). Round 2 = 1,041 photos from 4 collectors, 7 left out (mixed or unclear items);
+  labels proposed from contact sheets and accepted by the owner; name/date watermark strips cropped.
+- **Checks (passed):** public images and splits identical to v1; all 207 v1 team photos present, 206 in
+  the same split and all 64 v1 test photos still in test (one v1 photo moved split by joining a new
+  photo's item group); 0 groups across splits; 0 web images outside training.
+- **Team photos per split:** train 599 / val 247 / test 395 (v1 test: 64), so Singapore scores are
+  far less noisy than in Run 1.
+
+| Material | train | val | test |
+|---|---|---|---|
+| plastic | 198 | 83 | 134 |
+| glass | 105 | 35 | 70 |
+| other_general | 90 | 40 | 51 |
+| paper | 56 | 16 | 41 |
+| beverage_carton | 42 | 15 | 29 |
+| e_waste | 37 | 11 | 17 |
+| textile | 29 | 15 | 19 |
+| metal | 28 | 21 | 13 |
+| food_waste | 12 | 4 | 13 |
+| styrofoam | 2 | 7 | 8 |
+
+- **Known limits:** most Round 2 photos show new products in shops, not used items at home (possible
+  gap to the demo); styrofoam has only 2 team training photos (groups were split by item), so its
+  score will rest mainly on TACO crops; plastic dominates the team photos (33%).
 
 ## Run 2 · planned · effect of the new photos alone
 
