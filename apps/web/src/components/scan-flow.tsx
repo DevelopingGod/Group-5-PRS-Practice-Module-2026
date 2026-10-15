@@ -9,6 +9,7 @@ import type { BinQrPayload, VerdictResult } from "@/lib/contracts";
 import { fileToBase64Jpeg } from "@/lib/image";
 import { checkBin } from "@/lib/qr";
 import { QrScanner } from "@/components/qr-scanner";
+import { ensureSignedIn } from "@/lib/supabase/browser";
 import {
   NEA_CHECK_MY_ITEM,
   answerLabel,
@@ -29,6 +30,11 @@ const WAKING_AFTER_MS = 8_000;
 
 export function ScanFlow() {
   const [state, setState] = useState<ScanState>({ step: "capture" });
+
+  // Start the anonymous (pseudonymous) session early so the first scan can be saved.
+  useEffect(() => {
+    void ensureSignedIn();
+  }, []);
   const [lastImage, setLastImage] = useState<string | null>(null);
   const photoUrl = state.step === "capture" ? null : state.photoUrl;
 
@@ -50,7 +56,7 @@ export function ScanFlow() {
   async function onPhoto(file: File) {
     const url = URL.createObjectURL(file);
     try {
-      const image = await fileToBase64Jpeg(file);
+      const [image] = await Promise.all([fileToBase64Jpeg(file), ensureSignedIn()]);
       setLastImage(image);
       await runPredict(url, image);
     } catch {
