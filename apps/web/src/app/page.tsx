@@ -1,16 +1,16 @@
-import { CONTRACTS_VERSION, QUESTION_BANK } from "@/contracts/constants";
+import { ScanFlow } from "@/components/scan-flow";
 
-// Placeholder home page. WS4 owns the real capture -> question -> verdict flow.
 export default function Home() {
   return (
-    <main className="mx-auto max-w-xl p-6">
-      <h1 className="text-2xl font-semibold">Bin Buddy</h1>
-      <p className="mt-2">Scaffold running against contracts v{CONTRACTS_VERSION}.</p>
-      <ul className="mt-4 list-disc pl-6">
-        {Object.values(QUESTION_BANK).map((q) => (
-          <li key={q.text}>{q.text}</li>
-        ))}
-      </ul>
-    </main>
+    <>
+      <header className="bg-ink text-light">
+        <div className="mx-auto flex max-w-xl items-center px-4 py-3">
+          <span className="font-heading text-xl font-bold">Bin Buddy</span>
+        </div>
+      </header>
+      <main className="mx-auto w-full max-w-xl flex-1 px-4 py-6">
+        <ScanFlow />
+      </main>
+    </>
   );
 }
