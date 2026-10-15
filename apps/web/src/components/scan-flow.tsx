@@ -5,8 +5,10 @@ import { useEffect, useRef, useState } from "react";
 
 import { DEFAULT_SITE_POLICY } from "@/contracts/constants";
 import * as api from "@/lib/api-client";
-import type { VerdictResult } from "@/lib/contracts";
+import type { BinQrPayload, VerdictResult } from "@/lib/contracts";
 import { fileToBase64Jpeg } from "@/lib/image";
+import { checkBin } from "@/lib/qr";
+import { QrScanner } from "@/components/qr-scanner";
 import {
   NEA_CHECK_MY_ITEM,
   answerLabel,
@@ -232,6 +234,10 @@ function VerdictScreen({
 }) {
   const { verdict, analysis } = state;
   const abstain = verdict.channel === "abstain";
+  // Demonstration bins exist only for blue-bin and general-waste verdicts.
+  const hasDemoBin = verdict.channel === "recycle" || verdict.channel === "general_waste";
+  const [atBin, setAtBin] = useState(false);
+  if (atBin) return <AtBinScreen verdict={verdict} onBack={() => setAtBin(false)} />;
   return (
     <section aria-labelledby="verdict-title" className="space-y-5">
       <BinCard verdict={verdict} />
@@ -254,7 +260,55 @@ function VerdictScreen({
           {abstain ? "Check this item on NEA Check My Item" : "NEA guidance"}
         </a>
       </p>
-      <Button onClick={onRestart}>Scan another item</Button>
+      <div className="flex flex-col gap-3">
+        {hasDemoBin && <Button onClick={() => setAtBin(true)}>I&apos;m at the bin</Button>}
+        <Button variant={hasDemoBin ? "secondary" : "primary"} onClick={onRestart}>
+          Scan another item
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function AtBinScreen({ verdict, onBack }: { verdict: VerdictResult; onBack: () => void }) {
+  const [bin, setBin] = useState<BinQrPayload | null>(null);
+  if (!bin) {
+    return (
+      <section aria-labelledby="at-bin-title" className="space-y-4">
+        <h1 id="at-bin-title" className="font-heading text-2xl font-bold">
+          Scan the QR code on the bin
+        </h1>
+        <p className="text-muted">Point your camera at the Bin Buddy sticker on the bin.</p>
+        <QrScanner onBin={setBin} />
+        <Button variant="secondary" onClick={onBack}>
+          Back to the verdict
+        </Button>
+      </section>
+    );
+  }
+  const check = checkBin(verdict, DEFAULT_SITE_POLICY, bin);
+  const match = check.kind === "match";
+  const message = {
+    match: "This is the bin Bin Buddy recommended.",
+    wrong_bin: `Bin Buddy recommended the ${verdict.bin_label}. Please find that bin instead.`,
+    other_site:
+      "This bin follows a different site's sorting rules. Please find your nearest " +
+      `${verdict.bin_label}.`,
+    no_bin: "Bin Buddy did not recommend a bin for this item.",
+  }[check.kind];
+  return (
+    <section aria-labelledby="at-bin-title" aria-live="polite" className="space-y-4">
+      <p className="text-sm text-muted">Bin identified: {bin.location_label}</p>
+      <h1 id="at-bin-title" className="font-heading text-2xl font-bold">
+        {match ? "Right bin" : "Not this bin"}
+      </h1>
+      <p>{message}</p>
+      <div className="flex flex-col gap-3">
+        {!match && <Button onClick={() => setBin(null)}>Scan another bin</Button>}
+        <Button variant={match ? "primary" : "secondary"} onClick={onBack}>
+          Back to the verdict
+        </Button>
+      </div>
     </section>
   );
 }
