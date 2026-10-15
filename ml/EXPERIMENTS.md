@@ -144,7 +144,7 @@ correction gets its own entry. Numbers come from the saved result files named in
   costly-error: 0.102 vs 0.176 → ConvNeXt-T). It is a CNN, so Grad-CAM and notebooks 03–04 work
   without changes. Run 3 decides the final model.
 
-## Run 3 · planned · anti-overfitting settings
+## Run 3 · 15 Oct · anti-overfitting settings (notebook 02, data v2, code `b0dd8a6`)
 
 - **Design:** data v2, E2 only, settings `experiments.PROTOCOL_RUN3`, 6 models: CLIP ViT-B/16
   probe, **CLIP ViT-B/16 partial fine-tune (new)**, ConvNeXt-T, Swin-T, EfficientNet-B0,
@@ -160,6 +160,37 @@ correction gets its own entry. Numbers come from the saved result files named in
 | Selection score = mean of local-val and public-val macro-F1 | `selection="mean_local_public_val"` | Selecting on ~50 local val photos alone was noisy from epoch to epoch |
 | CLIP partial fine-tune (last 2 blocks, lr 1e-5) | model `clip_b16_ft` | The frozen CLIP probe won Run 1; this tests whether gently adapting its top layers helps |
 | Dropped models: MobileNetV3-L, ResNet-50, DeiT-S, CLIP zero-shot | | Lowest E2 Singapore scores in Run 1; saves ~half the GPU time |
+
+- **Ran:** T4, 14:19–15:32. Results file: `results/run3/comparison_results.json`; 395 Singapore test photos.
+
+| Model | Singapore macro-F1 [95% CI] | accuracy | top-2 | costly-error | ECE | public macro-F1 | CPU ms |
+|---|---|---|---|---|---|---|---|
+| ConvNeXt-T | **0.799** [0.735, 0.841] | 0.818 | 0.927 | **0.139** | 0.076 | 0.725 | 123 |
+| Swin-T | 0.797 [0.738, 0.848] | **0.841** | 0.932 | 0.157 | 0.125 | **0.739** | 159 |
+| CLIP ViT-B/16 probe | 0.756 [0.705, 0.805] | 0.770 | 0.922 | 0.148 | **0.031** | 0.688 | 387 |
+| DINOv2-S probe | 0.746 [0.688, 0.795] | 0.775 | 0.947 | 0.157 | 0.066 | 0.683 | 161 |
+| CLIP ViT-B/16 partial fine-tune | 0.743 [0.704, 0.776] | 0.800 | **0.952** | 0.148 | 0.163 | 0.642 | 442 |
+| EfficientNet-B0 | 0.690 [0.626, 0.743] | 0.732 | 0.851 | 0.167 | 0.104 | 0.646 | **37** |
+
+- **Learned:**
+  1. **The overfitting gap shrank, the score barely moved.** ConvNeXt-T training accuracy (on
+     augmented photos) 0.94 vs 0.995 in Run 2; local-val macro-F1 ~0.80 vs 0.76. On the 395 test photos
+     ConvNeXt-T 0.791 → 0.799, McNemar 36 vs 32 (p = 0.72): not a significant change. EfficientNet-B0
+     0.663 → 0.690 (39 vs 33, p = 0.56); CLIP probe 0.754 → 0.756 (13 vs 5, p = 0.10).
+  2. **Calibration improved a lot:** ConvNeXt-T ECE 0.156 → 0.076 (label smoothing was already on;
+     dropout, drop path and harder augmentation made it less over-confident). The confidence gate
+     depends on this.
+  3. **Styrofoam improved** (ConvNeXt-T F1 0.46 → 0.62) but **costly errors rose** 11 → 15 of 108
+     non-recyclable test items (0.102 → 0.139), mostly general-waste packaging → plastic (5) and
+     styrofoam → plastic (4); in exchange, recyclables classed as a recyclable material rose 268 → 282 of 287.
+  4. **Swin-T caught up with ConvNeXt-T** (0.797; highest accuracy 0.841); the two are not
+     significantly different (11 vs 20, p = 0.15).
+  5. **The CLIP partial fine-tune under-fitted** (training accuracy only 0.64; styrofoam F1 0.00):
+     two unfrozen blocks at lr 1e-5 plus strong augmentation and dropout were too restrictive. Its
+     probe sibling remained better calibrated and as accurate.
+  6. ConvNeXt-T vs CLIP probe: 56 vs 37 (p = 0.061), weaker than in Run 2 (p = 0.030).
+- **Rule outcome:** ConvNeXt-T (highest macro-F1; CIs overlap with Swin-T, CLIP probe, DINOv2 probe and
+  CLIP fine-tune → lowest costly-error among them, 0.139). Latency 123 ms on CPU; Grad-CAM direct.
 
 - **New logging in every run from now on:** `run_info.json` (run, data, code commit, GPU,
   settings, image counts, start and finish), the full settings in every result row, training
