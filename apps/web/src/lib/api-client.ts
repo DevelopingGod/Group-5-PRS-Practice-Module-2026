@@ -6,6 +6,7 @@ import type {
   PredictRequest,
   PredictResponse,
 } from "@/lib/contracts";
+import type { VerifyRouteRequest, VerifyRouteResponse } from "@/lib/verify-record";
 
 export type ApiResult<T> = { ok: true; data: T } | { ok: false; error: ErrorResponse };
 
@@ -33,3 +34,4 @@ async function post<T>(path: string, body: unknown): Promise<ApiResult<T>> {
 
 export const predict = (body: PredictRequest) => post<PredictResponse>("/api/predict", body);
 export const answer = (body: AnswerRequest) => post<AnswerResponse>("/api/answer", body);
+export const verify = (body: VerifyRouteRequest) => post<VerifyRouteResponse>("/api/verify", body);
