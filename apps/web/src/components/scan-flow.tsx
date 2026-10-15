@@ -3,13 +3,18 @@
 // Capture -> reading -> (retake | questions) -> verdict, as in context.md Section 19.
 import { useEffect, useRef, useState } from "react";
 
-import { DEFAULT_SITE_POLICY } from "@/contracts/constants";
+import {
+  DAILY_POINTS_CAP,
+  DEFAULT_SITE_POLICY,
+  VERIFY_TIME_WINDOW_MINUTES,
+} from "@/contracts/constants";
 import * as api from "@/lib/api-client";
 import type { BinQrPayload, VerdictResult } from "@/lib/contracts";
 import { fileToBase64Jpeg } from "@/lib/image";
 import { checkBin } from "@/lib/qr";
 import { QrScanner } from "@/components/qr-scanner";
 import { ensureSignedIn } from "@/lib/supabase/browser";
+import { checkRows, type VerifyRouteResponse } from "@/lib/verify-record";
 import {
   NEA_CHECK_MY_ITEM,
   answerLabel,
@@ -243,7 +248,15 @@ function VerdictScreen({
   // Demonstration bins exist only for blue-bin and general-waste verdicts.
   const hasDemoBin = verdict.channel === "recycle" || verdict.channel === "general_waste";
   const [atBin, setAtBin] = useState(false);
-  if (atBin) return <AtBinScreen verdict={verdict} onBack={() => setAtBin(false)} />;
+  if (atBin)
+    return (
+      <AtBinScreen
+        scanId={state.scanId}
+        verdict={verdict}
+        onBack={() => setAtBin(false)}
+        onDone={onRestart}
+      />
+    );
   return (
     <section aria-labelledby="verdict-title" className="space-y-5">
       <BinCard verdict={verdict} />
@@ -276,7 +289,17 @@ function VerdictScreen({
   );
 }
 
-function AtBinScreen({ verdict, onBack }: { verdict: VerdictResult; onBack: () => void }) {
+function AtBinScreen({
+  scanId,
+  verdict,
+  onBack,
+  onDone,
+}: {
+  scanId: string;
+  verdict: VerdictResult;
+  onBack: () => void;
+  onDone: () => void;
+}) {
   const [bin, setBin] = useState<BinQrPayload | null>(null);
   if (!bin) {
     return (
@@ -302,16 +325,122 @@ function AtBinScreen({ verdict, onBack }: { verdict: VerdictResult; onBack: () =
       `${verdict.bin_label}.`,
     no_bin: "Bin Buddy did not recommend a bin for this item.",
   }[check.kind];
+  if (match) return <VerifyScreen scanId={scanId} bin={bin} onBack={onBack} onDone={onDone} />;
   return (
     <section aria-labelledby="at-bin-title" aria-live="polite" className="space-y-4">
       <p className="text-sm text-muted">Bin identified: {bin.location_label}</p>
       <h1 id="at-bin-title" className="font-heading text-2xl font-bold">
-        {match ? "Right bin" : "Not this bin"}
+        Not this bin
       </h1>
       <p>{message}</p>
       <div className="flex flex-col gap-3">
-        {!match && <Button onClick={() => setBin(null)}>Scan another bin</Button>}
-        <Button variant={match ? "primary" : "secondary"} onClick={onBack}>
+        <Button onClick={() => setBin(null)}>Scan another bin</Button>
+        <Button variant="secondary" onClick={onBack}>
+          Back to the verdict
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+type VerifyPhase =
+  | { kind: "ready" }
+  | { kind: "checking" }
+  | { kind: "done"; result: VerifyRouteResponse }
+  | { kind: "error"; message: string };
+
+function VerifyScreen({
+  scanId,
+  bin,
+  onBack,
+  onDone,
+}: {
+  scanId: string;
+  bin: BinQrPayload;
+  onBack: () => void;
+  onDone: () => void;
+}) {
+  const [phase, setPhase] = useState<VerifyPhase>({ kind: "ready" });
+
+  async function onPhoto(file: File) {
+    setPhase({ kind: "checking" });
+    try {
+      const image = await fileToBase64Jpeg(file);
+      const res = await api.verify({ scan_id: scanId, image_base64: image, qr: bin });
+      setPhase(
+        res.ok ? { kind: "done", result: res.data } : { kind: "error", message: res.error.message },
+      );
+    } catch {
+      setPhase({ kind: "error", message: "We could not read that photo. Try again." });
+    }
+  }
+
+  if (phase.kind === "checking") {
+    return (
+      <section aria-live="polite" aria-busy="true" className="space-y-4">
+        <p className="font-heading text-xl font-bold">Checking your disposal…</p>
+      </section>
+    );
+  }
+
+  if (phase.kind === "done") {
+    const { result } = phase;
+    const rows = checkRows(result, VERIFY_TIME_WINDOW_MINUTES);
+    return (
+      <section aria-labelledby="verify-title" aria-live="polite" className="space-y-5">
+        <h1 id="verify-title" className="font-heading text-3xl font-bold">
+          {result.passed ? "Verified" : "Not verified this time"}
+        </h1>
+        {result.passed && (
+          <p className="rounded-lg bg-sticker p-4 font-bold text-ink">
+            {result.points_awarded > 0
+              ? `+${result.points_awarded} point${result.points_awarded === 1 ? "" : "s"}`
+              : `Thanks! You have reached today's limit of ${DAILY_POINTS_CAP} points.`}
+          </p>
+        )}
+        <ul className="space-y-2 rounded-2xl bg-white p-4">
+          {rows.map((row) => (
+            <li key={row.key} className="flex gap-3">
+              <span aria-hidden className="font-bold">
+                {row.passed ? "✓" : "✗"}
+              </span>
+              <span>
+                {row.label}: <strong>{row.passed ? "passed" : "not passed"}</strong>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="text-sm text-muted">
+          The photo is deleted now. Only a fingerprint of it is kept, to stop reuse.
+        </p>
+        <div className="flex flex-col gap-3">
+          {!result.passed && <CaptureButton label="Try another photo" onPhoto={onPhoto} />}
+          <Button variant={result.passed ? "primary" : "secondary"} onClick={onDone}>
+            Scan another item
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section aria-labelledby="verify-title" className="space-y-4">
+      <p className="text-sm text-muted">Bin identified: {bin.location_label}</p>
+      <h1 id="verify-title" className="font-heading text-2xl font-bold">
+        Right bin. Photograph the item here
+      </h1>
+      <p>
+        Take a new photo of the item at the bin, before you drop it in. Keep people out of the
+        picture.
+      </p>
+      {phase.kind === "error" && (
+        <p role="alert" className="rounded-lg bg-sticker p-3 text-ink">
+          {phase.message}
+        </p>
+      )}
+      <div className="flex flex-col gap-3">
+        <CaptureButton label="Take the photo" onPhoto={onPhoto} />
+        <Button variant="secondary" onClick={onBack}>
           Back to the verdict
         </Button>
       </div>

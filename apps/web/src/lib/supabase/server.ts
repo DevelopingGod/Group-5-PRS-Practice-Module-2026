@@ -34,7 +34,7 @@ export async function currentUserId(): Promise<string | null> {
   return error ? null : (data.user?.id ?? null);
 }
 
-function admin(): SupabaseClient {
+export function adminClient(): SupabaseClient {
   return createClient(url()!, serviceKey()!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -60,7 +60,7 @@ async function ensureProfile(db: SupabaseClient, userId: string): Promise<void> 
 }
 
 export async function saveScan(row: ScanRow): Promise<void> {
-  const db = admin();
+  const db = adminClient();
   await ensureProfile(db, row.user_id);
   const { error } = await db.from("scans").insert(row);
   if (error) throw new Error(`scan insert failed: ${error.message}`);
@@ -72,7 +72,7 @@ export async function saveVerdict(
   scanId: string,
   verdict: VerdictResult,
 ): Promise<void> {
-  const { error } = await admin()
+  const { error } = await adminClient()
     .from("scans")
     .update(verdictUpdate(verdict))
     .eq("id", scanId)
