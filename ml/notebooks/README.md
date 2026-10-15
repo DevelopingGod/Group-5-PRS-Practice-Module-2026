@@ -19,7 +19,17 @@ datasets is in [`ml/binbuddy_ml/public_data.py`](../binbuddy_ml/public_data.py).
 
 Each notebook's setup cell has `DATA_VERSION` (v1, v2, …) and `RUN_ID` (run1, run2, …). Every
 data version and run writes its own files, so nothing is overwritten; data v2 onwards reuses the
-public images of v1. Every run is recorded in [`ml/EXPERIMENTS.md`](../EXPERIMENTS.md).
+public images of v1 and keeps every earlier team photo in its earlier split. The settings of each
+run (protocol, models, experiments, data version) are defined in `RUNS` in
+[`ml/binbuddy_ml/experiments.py`](../binbuddy_ml/experiments.py); notebook 02 refuses to run a
+`RUN_ID` on the wrong data version. Every run is recorded in [`ml/EXPERIMENTS.md`](../EXPERIMENTS.md)
+before it starts.
+
+| Run | Data | What it changes |
+|---|---|---|
+| run1 | v1 | 9 models, E1 and E2 (the comparison) |
+| run2 | v2 | only the data (Run 1 settings, 3 models) |
+| run3 | v2 | only the training (dropout, drop path, oversampling, stronger augmentation, new selection score; 6 models incl. a CLIP partial fine-tune) |
 
 ## Drive layout
 

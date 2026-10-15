@@ -61,3 +61,17 @@ def test_model_registry() -> None:
 
 def test_zero_shot_prompts_cover_every_material() -> None:
     assert set(experiments.ZERO_SHOT_PROMPTS) == {m.value for m in Material}
+
+
+def test_run_configs_are_reproducible() -> None:
+    run1 = experiments.run_config("run1")
+    assert run1.protocol == experiments.PROTOCOL  # Run 1 settings never change
+    assert "clip_b16_ft" not in run1.models  # added later, so not part of Run 1
+    assert experiments.run_config("run2").protocol == experiments.PROTOCOL
+    run3 = experiments.run_config("run3").protocol
+    assert run3.drop_rate > 0 and run3.local_share > 0 and run3.strong_augment
+    for cfg in experiments.RUNS.values():
+        for key in cfg.models:
+            experiments.model(key)  # every listed model exists
+    with pytest.raises(KeyError, match="RUNS"):
+        experiments.run_config("run99")

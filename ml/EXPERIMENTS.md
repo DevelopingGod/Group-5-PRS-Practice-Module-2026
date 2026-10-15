@@ -81,7 +81,41 @@ correction gets its own entry. Numbers come from the saved result files named in
 
 - Public images and their splits reused unchanged from v1 (`REUSE_PUBLIC_FROM = "v1"`), so runs
   on v1 and v2 differ only in the team photos.
+- **Added 15 Oct (before building v2):** the 207 v1 team photos also keep their v1 split,
+  matched by original file name. New photos of the same item join that item's group and split;
+  if a group mixes splits, test wins. Reason: otherwise some of Run 1's test photos could move
+  into v2's training set, and Run 1 could not be compared with later runs on the same photos.
+  Notebook 01 stops if any v1 test photo leaves the test set.
+- The team's final batch is the last data change: after v2, only training settings change.
 
-## Run 2 · planned
+## Run 2 · planned · effect of the new photos alone
 
-- To be recorded here before the run: the training changes and the reason for each.
+- **Design:** Run 1's exact settings on data v2, E2 only, 3 models (CLIP ViT-B/16 probe,
+  ConvNeXt-T, EfficientNet-B0: the top two of Run 1 plus the fastest). Settings in
+  `experiments.RUNS["run2"]`.
+- **Why a separate run:** if I changed data and training together, I could not tell which one
+  caused an improvement. Run 2 isolates the photos; Run 3 then isolates the training changes.
+- **Compared on:** (a) v2's local test set, and (b) the 64 v1 local test photos, scored for every
+  run (notebook 02, section 6.8), which is the fair before/after comparison with Run 1.
+
+## Run 3 · planned · anti-overfitting settings
+
+- **Design:** data v2, E2 only, settings `experiments.PROTOCOL_RUN3`, 6 models: CLIP ViT-B/16
+  probe, **CLIP ViT-B/16 partial fine-tune (new)**, ConvNeXt-T, Swin-T, EfficientNet-B0,
+  DINOv2-S probe. Same pre-registered selection rule as Run 1.
+- **Changes and the Run 1 evidence behind each:**
+
+| Change | Value | Reason (from Run 1) |
+|---|---|---|
+| Team photos ≥ 25% of each epoch (weighted sampling; probes: sample weights) | `local_share=0.25` | Adding only 91 team photos (~1.5% of training images) raised every model's Singapore score the most; they are the only demo-like photos |
+| Dropout before the classifier | `drop_rate=0.3` | Fine-tuned models scored 0.62–0.74 on public test but much lower on Singapore photos: they fit dataset-specific cues |
+| Stochastic depth | `drop_path_rate=0.1` | Same reason; standard regulariser for ConvNeXt, Swin and ViTs |
+| Stronger augmentation (crop 0.4–1, perspective, ±25°, colour 0.4, blur, random erasing) | `strong_augment=True` | Demo photos are hand-held, tilted, sometimes blurry, partly covered by fingers |
+| Selection score = mean of local-val and public-val macro-F1 | `selection="mean_local_public_val"` | Selecting on ~50 local val photos alone was noisy from epoch to epoch |
+| CLIP partial fine-tune (last 2 blocks, lr 1e-5) | model `clip_b16_ft` | The frozen CLIP probe won Run 1; this tests whether gently adapting its top layers helps |
+| Dropped models: MobileNetV3-L, ResNet-50, DeiT-S, CLIP zero-shot | | Lowest E2 Singapore scores in Run 1; saves ~half the GPU time |
+
+- **New logging in every run from now on:** `run_info.json` (run, data, code commit, GPU,
+  settings, image counts, start and finish), the full settings in every result row, training
+  accuracy per epoch next to the validation scores (to see overfitting), and the fitted probe
+  classifiers saved next to the fine-tuned weights.

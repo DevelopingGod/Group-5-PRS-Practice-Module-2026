@@ -9,7 +9,7 @@ Model ids are timm Hub ids (verified on the Hugging Face Hub, 13 Oct 2026).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from enum import StrEnum
 
 
@@ -35,9 +35,25 @@ class Protocol:
     class_weight_power: float = 0.5  # loss weight = (1 / class frequency) ** power
     seed: int = 42
     mixed_precision: bool = True
+    # Added for Run 3 (defaults reproduce Runs 1 and 2 exactly).
+    local_share: float = 0.0  # >0: team photos make up at least this share of each epoch
+    drop_rate: float = 0.0  # dropout before the classifier
+    drop_path_rate: float = 0.0  # stochastic depth: randomly skip residual blocks in training
+    strong_augment: bool = False  # perspective, blur and occlusion on top of the basic set
+    selection: str = "local_val"  # or "mean_local_public_val" (average of the two macro-F1s)
 
 
 PROTOCOL = Protocol()
+
+# Run 3: the anti-overfitting changes, each with its reason in ml/EXPERIMENTS.md.
+PROTOCOL_RUN3 = replace(
+    PROTOCOL,
+    local_share=0.25,
+    drop_rate=0.3,
+    drop_path_rate=0.1,
+    strong_augment=True,
+    selection="mean_local_public_val",
+)
 
 
 @dataclass(frozen=True)
@@ -52,6 +68,7 @@ class ModelSpec:
     why: str  # why it is in this comparison
     batch_size: int = PROTOCOL.batch_size
     timm_kwargs: tuple[tuple[str, object], ...] = ()
+    trainable_blocks: int | None = None  # fine-tune only the last N transformer blocks
 
 
 MODELS: tuple[ModelSpec, ...] = (
@@ -154,6 +171,19 @@ MODELS: tuple[ModelSpec, ...] = (
         "ImageNet features; pairs with the zero-shot run below.",
     ),
     ModelSpec(
+        key="clip_b16_ft",
+        timm_id="vit_base_patch16_clip_224.openai",
+        family="Language-supervised foundation model",
+        mode=Mode.FINE_TUNE,
+        params_m=86.0,
+        backbone_lr=1e-5,
+        what="The CLIP ViT-B/16 image encoder with a new 10-class head; only the last two "
+        "transformer blocks are unfrozen, with a very small learning rate.",
+        why="Added in Run 3: the CLIP probe won Run 1, so this tests whether gently adapting "
+        "its top layers to our photos beats keeping it frozen, without forgetting the rest.",
+        trainable_blocks=2,
+    ),
+    ModelSpec(
         key="clip_b16_zeroshot",
         timm_id="ViT-B-16/openai (open_clip)",
         family="Language-supervised foundation model",
@@ -185,6 +215,66 @@ PROMPT_TEMPLATES: tuple[str, ...] = (
     "a photo of {} to throw away.",
     "a close-up photo of {}.",
 )
+
+
+@dataclass(frozen=True)
+class RunConfig:
+    """One training run: which protocol, which models, which experiments, and why."""
+
+    data_version: str  # the notebook refuses to run on any other data version
+    protocol: Protocol
+    models: tuple[str, ...]
+    experiments: tuple[str, ...]  # prefixes: "E1" public only, "E2" public + team photos
+    purpose: str
+
+
+RUN1_MODELS = (
+    "mobilenetv3_l",
+    "efficientnet_b0",
+    "resnet50",
+    "convnext_t",
+    "swin_t",
+    "deit_s",
+    "dinov2_s_probe",
+    "clip_b16_probe",
+    "clip_b16_zeroshot",
+)
+RUNS: dict[str, RunConfig] = {
+    "run1": RunConfig(
+        "v1",
+        PROTOCOL,
+        RUN1_MODELS,
+        ("E1", "E2"),
+        "Compare 9 models on data v1 (public + 207 photos).",
+    ),
+    "run2": RunConfig(
+        "v2",
+        PROTOCOL,
+        ("clip_b16_probe", "convnext_t", "efficientnet_b0"),
+        ("E2",),
+        "Effect of the final team photos alone: Run 1 settings on data v2.",
+    ),
+    "run3": RunConfig(
+        "v2",
+        PROTOCOL_RUN3,
+        (
+            "clip_b16_probe",
+            "clip_b16_ft",
+            "convnext_t",
+            "swin_t",
+            "efficientnet_b0",
+            "dinov2_s_probe",
+        ),
+        ("E2",),
+        "Effect of the anti-overfitting changes: Run 3 settings on data v2.",
+    ),
+}
+
+
+def run_config(run_id: str) -> RunConfig:
+    if run_id not in RUNS:
+        raise KeyError(f"{run_id} is not defined in experiments.RUNS; add it there first")
+    return RUNS[run_id]
 
 
 def model(key: str) -> ModelSpec:
