@@ -1,6 +1,7 @@
 "use client";
 
 // Capture -> reading -> (retake | questions) -> verdict, as in context.md Section 19.
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -361,6 +362,7 @@ function VerifyScreen({
   onDone: () => void;
 }) {
   const [phase, setPhase] = useState<VerifyPhase>({ kind: "ready" });
+  const router = useRouter();
 
   async function onPhoto(file: File) {
     setPhase({ kind: "checking" });
@@ -370,6 +372,8 @@ function VerifyScreen({
       setPhase(
         res.ok ? { kind: "done", result: res.data } : { kind: "error", message: res.error.message },
       );
+      // Re-render the server header so the new points show; client state is kept.
+      if (res.ok && res.data.points_awarded > 0) router.refresh();
     } catch {
       setPhase({ kind: "error", message: "We could not read that photo. Try again." });
     }
