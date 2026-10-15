@@ -114,15 +114,35 @@ correction gets its own entry. Numbers come from the saved result files named in
   gap to the demo); styrofoam has only 2 team training photos (groups were split by item), so its
   score will rest mainly on TACO crops; plastic dominates the team photos (33%).
 
-## Run 2 · planned · effect of the new photos alone
+## Run 2 · 15 Oct · effect of the new photos alone (notebook 02, data v2, code `197cf5d`)
 
 - **Design:** Run 1's exact settings on data v2, E2 only, 3 models (CLIP ViT-B/16 probe,
-  ConvNeXt-T, EfficientNet-B0: the top two of Run 1 plus the fastest). Settings in
-  `experiments.RUNS["run2"]`.
-- **Why a separate run:** if I changed data and training together, I could not tell which one
-  caused an improvement. Run 2 isolates the photos; Run 3 then isolates the training changes.
-- **Compared on:** (a) v2's local test set, and (b) the 64 v1 local test photos, scored for every
-  run (notebook 02, section 6.8), which is the fair before/after comparison with Run 1.
+  ConvNeXt-T, EfficientNet-B0). Settings in `experiments.RUNS["run2"]`. T4, 13:35–14:01.
+- **Results file:** `results/run2/comparison_results.json`; Singapore test = **395** team photos.
+
+| Model | Singapore macro-F1 [95% CI] | accuracy | top-2 | costly-error | ECE | public macro-F1 | CPU ms |
+|---|---|---|---|---|---|---|---|
+| ConvNeXt-T | **0.791** [0.736, 0.835] | **0.808** | 0.929 | **0.102** | 0.156 | **0.726** | 122 |
+| CLIP ViT-B/16 probe | 0.754 [0.698, 0.800] | 0.749 | 0.904 | 0.176 | **0.060** | 0.688 | 389 |
+| EfficientNet-B0 | 0.663 [0.596, 0.711] | 0.716 | 0.823 | 0.167 | 0.132 | 0.644 | **35** |
+
+- **Same 64 v1 test photos, Run 1 → Run 2 (the fair before/after):** CLIP probe 0.658 → 0.747;
+  ConvNeXt-T 0.565 → 0.674; EfficientNet-B0 0.531 → 0.500 (64 photos: differences of a few photos).
+- **Learned:**
+  1. **The new photos were the big lever.** On 395 Singapore photos ConvNeXt-T reaches 80.8% accuracy
+     (macro-F1 0.791), from 67% in Run 1; confidence intervals are now ~0.10 wide instead of ~0.30.
+  2. **With enough local photos, fine-tuning overtakes the frozen probe.** ConvNeXt-T vs CLIP probe:
+     McNemar 63 vs 40, p = 0.030 (the first statistically significant difference in this project);
+     vs EfficientNet-B0: 67 vs 31, p < 0.001. In Run 1 (91 local training photos) the probe led.
+  3. **Overfitting is visible:** ConvNeXt-T training accuracy 0.995 vs best validation score 0.756;
+     EfficientNet-B0 0.99 vs 0.673. This is the gap Run 3 targets.
+  4. **Weak classes (ConvNeXt-T):** styrofoam F1 0.46 (only 2 team training photos; 5 of 8 test photos
+     predicted plastic), metal 0.56 (8 plastic photos predicted metal: shiny / metallised packaging),
+     glass → plastic 13 times. **5 of the 11 costly errors are styrofoam → plastic.**
+  5. ConvNeXt-T is over-confident (ECE 0.156): temperature scaling in notebook 04 is needed.
+- **Rule outcome:** ConvNeXt-T (highest macro-F1; CIs overlap with the CLIP probe, so tie-break on
+  costly-error: 0.102 vs 0.176 → ConvNeXt-T). It is a CNN, so Grad-CAM and notebooks 03–04 work
+  without changes. Run 3 decides the final model.
 
 ## Run 3 · planned · anti-overfitting settings
 
