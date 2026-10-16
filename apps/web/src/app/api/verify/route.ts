@@ -19,6 +19,9 @@ import {
   type VerifyRouteResponse,
 } from "@/lib/verify-record";
 
+// Longer than MODEL_TIMEOUT_MS so the platform does not cut off a cold start.
+export const maxDuration = 120;
+
 // Verified disposal (context.md Section 5.5): loads the original scan from Supabase, asks the
 // model API to compare the new photo, and records the reward. The photo is never stored: it is
 // passed straight to the model and dropped, and only its perceptual hash is kept.

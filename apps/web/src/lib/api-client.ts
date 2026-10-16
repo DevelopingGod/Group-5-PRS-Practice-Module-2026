@@ -1,4 +1,4 @@
-// Browser-side calls to our own route handlers (never to the Space directly).
+// Browser-side calls to our own route handlers (never to the model API directly).
 import type {
   AnswerRequest,
   AnswerResponse,
