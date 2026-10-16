@@ -23,7 +23,7 @@ cd services/inference && uv run uvicorn app.main:app --reload --port 7860
 
 | Name | Meaning |
 |---|---|
-| `MODEL_REVISION` | `stub` (default, fake model) or a Hub tag such as `v0.1-baseline` |
+| `MODEL_REVISION` | `stub` (default, fake model) or a Hub tag; the current model is `v0.2-local-data` |
 | `MODEL_REPO` | Hub repo with the export (default `sankalp-indish/bin-buddy-vision`, private) |
 | `HF_TOKEN` | Read token, only needed because the Hub repo is private |
 | `MODEL_DIR` | Folder with `config.json`, `model.onnx`, `head.npz`; overrides the Hub (offline, free local setup) |

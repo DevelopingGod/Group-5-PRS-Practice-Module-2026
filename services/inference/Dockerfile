@@ -1,4 +1,6 @@
 # Model API image for the Hugging Face Docker Space. Build context: the repository root.
+# HF_HOME is under /tmp: free Spaces have no persistent /data disk, and the Space runs as a
+# non-root user who can always write to /tmp. The model is downloaded on the first photo.
 #   docker build -f services/inference/Dockerfile -t binbuddy-api .
 FROM python:3.11-slim
 
@@ -14,7 +16,7 @@ COPY services/inference ./services/inference
 
 ENV PATH="/app/.venv/bin:$PATH" \
     POLICY_DIR=/app/policies \
-    HF_HOME=/data/.huggingface
+    HF_HOME=/tmp/huggingface
 
 WORKDIR /app/services/inference
 EXPOSE 7860
