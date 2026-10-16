@@ -1,6 +1,9 @@
-// Server-side client for the model API on the Hugging Face Space.
-// The HF token must never reach the browser: only import this from route handlers.
+// Server-side client for the model API (Render free web service; laptop tunnel as backup).
+// Only import this from route handlers: the optional HF token must never reach the browser.
 import type { ErrorResponse } from "@/lib/contracts";
+
+// Render's free plan sleeps after 15 minutes idle and takes about 50 s to wake.
+export const MODEL_TIMEOUT_MS = 90_000;
 
 export type ModelApiConfig = {
   baseUrl: string;
@@ -15,10 +18,10 @@ export type ModelResult<T> =
 export function configFromEnv(): ModelApiConfig {
   const baseUrl = process.env.HF_SPACE_URL;
   if (!baseUrl) throw new Error("HF_SPACE_URL is not set");
-  return { baseUrl, token: process.env.HF_TOKEN, timeoutMs: 60_000 };
+  return { baseUrl, token: process.env.HF_TOKEN, timeoutMs: MODEL_TIMEOUT_MS };
 }
 
-/** POST or GET a model API route. Free Spaces can take tens of seconds to wake up. */
+/** POST or GET a model API route. A sleeping free-plan API can take up to a minute to wake. */
 export async function callModel<T>(
   config: ModelApiConfig,
   path: "/health" | "/version" | "/predict" | "/answer" | "/verify",
@@ -26,7 +29,7 @@ export async function callModel<T>(
 ): Promise<ModelResult<T>> {
   const fetchImpl = config.fetchImpl ?? fetch;
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? 60_000);
+  const timer = setTimeout(() => controller.abort(), config.timeoutMs ?? MODEL_TIMEOUT_MS);
   try {
     const res = await fetchImpl(new URL(path, config.baseUrl), {
       method: body === undefined ? "GET" : "POST",

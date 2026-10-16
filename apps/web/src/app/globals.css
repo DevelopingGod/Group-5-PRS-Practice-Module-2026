@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Bin Buddy brand (context.md Section 20). */
+@theme {
+  --color-bin-blue: #1f5fd1;
+  --color-ink: #10233f;
+  --color-paper: #eef3f1;
+  --color-sticker: #f2c230;
+  --color-general: #4f5b66;
+  --color-muted: #44546a;
+  --color-light: #f4f7fb;
+  --font-heading: var(--font-bricolage), system-ui, sans-serif;
+  --font-body: var(--font-atkinson), system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-bin-blue);
+  outline-offset: 2px;
 }
