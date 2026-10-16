@@ -12,6 +12,8 @@ Copilot loads `.github/copilot-instructions.md`, which points here.
    decisions. The PDF itself is not in the repository because it contains student IDs.
 2. The workstream plan for the area you are touching: [`docs/workstreams/`](docs/workstreams/).
 3. [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+4. Building on the trained vision model (WS2/WS3/WS4)? Start with the WS1 handoff:
+   [`docs/handoff/`](docs/handoff/README.md) (results, shared files, what to do first).
 
 If the proposal, `context.md` and the code disagree: the proposal wins on scope, objectives,
 metrics and ethics; `contracts/binbuddy_contracts/` wins on data shapes.

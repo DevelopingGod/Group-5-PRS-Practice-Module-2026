@@ -77,7 +77,7 @@ correction gets its own entry. Numbers come from the saved result files named in
   general-waste packaging, cartons, paper, e-waste, and the missing textile / food waste /
   styrofoam), freeze it as **data v2**, then concentrate on training for robustness.
 
-## Data v2 · planned · final team photo batch
+## Data v2 · 15 Oct · final team photo batch
 
 - Public images and their splits reused unchanged from v1 (`REUSE_PUBLIC_FROM = "v1"`), so runs
   on v1 and v2 differ only in the team photos.
