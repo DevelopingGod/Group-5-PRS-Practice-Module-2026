@@ -3,7 +3,10 @@ import type { PredictRequest, PredictResponse } from "@/lib/contracts";
 import { scanRowFromPredict } from "@/lib/scan-record";
 import { currentUserId, saveScan } from "@/lib/supabase/server";
 
-// Proxies to the model API so the HF token stays on the server, then saves the scan.
+// Longer than MODEL_TIMEOUT_MS so the platform does not cut off a cold start.
+export const maxDuration = 120;
+
+// Proxies to the model API so its URL and any token stay on the server, then saves the scan.
 // The insert is awaited so the row exists before /answer updates it; a failure is logged
 // and never blocks the verdict.
 export async function POST(request: Request) {
