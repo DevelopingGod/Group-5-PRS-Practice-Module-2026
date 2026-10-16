@@ -18,6 +18,10 @@ ENV PATH="/app/.venv/bin:$PATH" \
     POLICY_DIR=/app/policies \
     HF_HOME=/tmp/huggingface
 
+# Run as an unprivileged user: a compromised process cannot modify the image or the host.
+RUN useradd --create-home --uid 1000 app
+USER app
+
 WORKDIR /app/services/inference
 EXPOSE 7860
 # Render sets PORT (default 10000); everywhere else (local, tunnel) the API uses 7860.
