@@ -275,7 +275,7 @@ Next.js web app (TypeScript, App Router, Tailwind) ── hosted on Vercel
    │      hold the HF token; proxy calls to the model API; write results to Supabase
    │        │
    │        ▼
-   │   Model API (Python FastAPI in a Hugging Face Docker Space)
+   │   Model API (Python FastAPI, Docker; on Render's free plan, see Model hosting)
    │      quality check, CNN + feature model, ensemble, OOD, Grad-CAM,
    │      adaptive questions, policy engine, embeddings, perceptual hash
    │        ▲
@@ -289,9 +289,9 @@ Next.js web app (TypeScript, App Router, Tailwind) ── hosted on Vercel
 
 - **Frontend:** Next.js 16 (TypeScript strict, App Router), Tailwind CSS 4, on Vercel (Root Directory `apps/web`). Mobile-first. Node **22** (Node 20 reached end of life in April 2026; current Vitest needs 22.12+). pnpm 9.
 - **Camera and QR in the browser:** `getUserMedia`; a JS QR library (e.g. `html5-qrcode` or `@zxing/browser`); `qrcode` (npm) to generate bin codes. Do not rely on `BarcodeDetector` alone (Safari lacks it).
-- **Model hosting:** Hugging Face **Docker Space** running FastAPI (port 7860, uvicorn on `0.0.0.0`). Fast `/health`; lazy model loading; cache under `HF_HOME=/data/.huggingface`. **Free CPU Spaces sleep after about 48 hours without traffic**; wake the Space before every demo (call `/api/model-health`).
-- **Model versioning:** fine-tune in Colab, push to a **Hub model repo** with a tag per release (`v0.1-baseline`, `v0.2-local-data`). The Space loads `MODEL_REVISION`, so releases roll forward or back without code changes and every result traces to a model version.
-- **Calling the model:** the browser never calls the Space directly. Route handlers call it with `Authorization: Bearer <HF_TOKEN>` (Vercel env var and Space secret). Show a "waking up the model" state on timeouts.
+- **Model hosting (changed 16 Oct 2026):** the plan was a Hugging Face Docker Space, but Hugging Face now requires a paid PRO plan for CPU Docker Spaces. The FastAPI image therefore runs as a **Render free web service** (`render.yaml`; live at https://bin-buddy-api.onrender.com), with a laptop + Cloudflare Quick Tunnel as the demo-day backup. Fast `/health`; lazy model loading; cache under `HF_HOME=/tmp/huggingface`. **Render's free plan sleeps after 15 minutes without traffic and takes about 50 seconds to wake**; wake it before every demo (call `/api/model-health`). Weights stay on the Hugging Face **Hub** (below), which is still free.
+- **Model versioning:** fine-tune in Colab, push to a **Hub model repo** with a tag per release (`v0.1-baseline`, `v0.2-local-data`). The API loads `MODEL_REVISION`, so releases roll forward or back without code changes and every result traces to a model version.
+- **Calling the model:** the browser never calls the model API directly. Route handlers call the URL in `HF_SPACE_URL` (name kept from the Space plan); the Render API is public, so no token is needed. Show a "waking up the model" state on timeouts (allow 60-90 s).
 - **Endpoints:** `GET /health`, `GET /version`, `POST /predict`, `POST /answer`, `POST /verify` (shapes in Section 15).
 - **Training (offline):** Python, PyTorch, Colab GPU; scikit-learn, XGBoost, OpenCV, scikit-image; UMAP, HDBSCAN; pytorch-grad-cam; SHAP for the feature model.
 
@@ -352,7 +352,7 @@ Enums `material`, `condition`, `channel` (identical to the contracts). Tables: `
 bin-buddy/
 ├── context.md, AGENTS.md, CLAUDE.md (@context.md @AGENTS.md), README.md, CONTRIBUTING.md
 ├── contracts/            # binbuddy_contracts package, generated/ artefacts, tests, CHANGELOG.md
-├── services/inference/   # FastAPI model API (HF Docker Space): app/{main,quality,vision,decision,verify}.py
+├── services/inference/   # FastAPI model API (Docker, on Render): app/{main,quality,vision,decision,verify}.py
 ├── ml/                   # binbuddy_ml helpers (Drive paths, validated labels), notebooks/
 ├── policies/             # hdb_default.yaml, campus_example.yaml
 ├── supabase/migrations/  # schema, pgvector, leaderboard view, RLS

@@ -3,9 +3,10 @@ import { describe, expect, it } from "vitest";
 import type { DecisionState, PredictResponse, VerdictResult } from "@/lib/contracts";
 import {
   binColour,
-  confidenceLine,
+  contrast,
   fromAnswer,
   fromPredict,
+  questionsLine,
   textOn,
   topMaterial,
   type ScanState,
@@ -95,15 +96,12 @@ describe("fromAnswer", () => {
 });
 
 describe("display helpers", () => {
-  it("states confidence and question count", () => {
-    expect(confidenceLine(verdict)).toBe("94% sure, no questions needed");
-    const asked = [
-      { question_id: "q1_recycling_symbol" as const, answer: "yes" },
-      { question_id: "q2_cleaned" as const, answer: "no" },
-    ];
-    expect(confidenceLine({ ...verdict, confidence: 0.91, questions_asked: asked })).toBe(
-      "91% sure after 2 questions",
-    );
+  it("states the question count", () => {
+    expect(questionsLine(verdict)).toBe("No questions needed");
+    const one = [{ question_id: "q1_recycling_symbol" as const, answer: "yes" }];
+    expect(questionsLine({ ...verdict, questions_asked: one })).toBe("After 1 question");
+    const two = [...one, { question_id: "q2_cleaned" as const, answer: "no" }];
+    expect(questionsLine({ ...verdict, questions_asked: two })).toBe("After 2 questions");
   });
 
   it("picks the most likely material", () => {
@@ -127,5 +125,12 @@ describe("display helpers", () => {
     expect(binColour({ ...verdict, channel: "general_waste", bin_colour: null })).toBe("#4F5B66");
     expect(textOn("#1F5FD1")).toBe("#F4F7FB");
     expect(textOn("#F2C230")).toBe("#10233F");
+    // Mid-tone orange (campus plastic bin): ink is far more readable than light text.
+    expect(textOn("#F5821F")).toBe("#10233F");
+  });
+
+  it("measures contrast like WCAG", () => {
+    expect(contrast("#000000", "#FFFFFF")).toBeCloseTo(21, 5);
+    expect(contrast("#10233F", "#EEF3F1")).toBeGreaterThan(4.5);
   });
 });

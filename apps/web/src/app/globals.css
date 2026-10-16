@@ -1,20 +1,136 @@
 @import "tailwindcss";
 
-/* Bin Buddy brand (context.md Section 20). */
+/* Bin Buddy design system. Brand colours and typefaces: context.md Section 20.
+   Motion language ("living bin"): things drop in and settle like an item landing in a bin;
+   the confidence meter fills as evidence arrives. Motion only ever marks a change of state. */
 @theme {
   --color-bin-blue: #1f5fd1;
+  --color-bin-blue-deep: #174aa6;
   --color-ink: #10233f;
   --color-paper: #eef3f1;
   --color-sticker: #f2c230;
   --color-general: #4f5b66;
   --color-muted: #44546a;
   --color-light: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-line: #d5dfdb;
+
   --font-heading: var(--font-bricolage), system-ui, sans-serif;
   --font-body: var(--font-atkinson), system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(16 35 63 / 0.06), 0 8px 24px -12px rgb(16 35 63 / 0.18);
+  --shadow-lift: 0 2px 4px rgb(16 35 63 / 0.08), 0 18px 40px -16px rgb(16 35 63 / 0.35);
+
+  --ease-settle: cubic-bezier(0.34, 1.4, 0.64, 1); /* small overshoot, then rest */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-rise: rise 420ms var(--ease-out) both;
+  --animate-drop: drop 620ms var(--ease-settle) both;
+  --animate-lid: lid 900ms var(--ease-out) both;
+  --animate-pop: pop 520ms var(--ease-settle);
+  --animate-sweep: sweep 1100ms var(--ease-out) 250ms both;
+  --animate-scanline: scanline 2.4s ease-in-out infinite;
+  --animate-breathe: breathe 2.8s ease-in-out infinite;
+  --animate-grow: grow 800ms var(--ease-out) both;
+  --animate-spin: spin 900ms linear infinite;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.98);
+  }
+}
+
+/* The bin card's lid lifts and closes again as the verdict lands. */
+@keyframes lid {
+  0% {
+    transform: translateY(0) rotate(0);
+  }
+  35% {
+    transform: translateY(-7px) rotate(-6deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Reveals the Grad-CAM highlight from left to right over the photo. */
+@keyframes sweep {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Moves a full-height layer whose top edge is the scan line: transform only, so the
+   compositor animates it without layout or repaint. */
+@keyframes scanline {
+  0%,
+  100% {
+    transform: translateY(6%);
+  }
+  50% {
+    transform: translateY(92%);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.015);
+  }
+}
+
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Confidence meter: fills from the previous value (--from) to the new width. */
+@keyframes fill {
+  from {
+    width: var(--from, 0%);
+  }
+}
+
+.meter-fill {
+  animation: fill 900ms var(--ease-out) 150ms both;
 }
 
 body {
-  background: var(--color-paper);
+  /* Calm atmosphere: a faint daylight wash at the top of the paper background. */
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgb(31 95 209 / 0.09), transparent 60%),
+    var(--color-paper);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-body);
 }
@@ -22,4 +138,155 @@ body {
 :focus-visible {
   outline: 3px solid var(--color-bin-blue);
   outline-offset: 2px;
+}
+
+/* Screen headings take focus only so screen readers announce the new step; they are not
+   controls (tabindex -1, not in the tab order), so they show no focus ring. */
+[data-screen-heading]:focus {
+  outline: none;
+}
+
+@layer components {
+  .card {
+    border-radius: 1.25rem;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Staggered entrance: set --i on each child (0, 1, 2 ...). */
+  .stagger > * {
+    animation: var(--animate-rise);
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+
+  .btn {
+    display: inline-flex;
+    min-height: 3rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.9rem;
+    padding: 0.75rem 1.1rem;
+    font-weight: 700;
+    transition:
+      transform 160ms var(--ease-out),
+      box-shadow 160ms var(--ease-out),
+      background-color 160ms var(--ease-out);
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .btn-primary {
+    background: var(--color-bin-blue);
+    color: var(--color-light);
+    box-shadow: 0 6px 16px -8px rgb(31 95 209 / 0.7);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-bin-blue-deep);
+  }
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    box-shadow: inset 0 0 0 2px var(--color-ink);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--color-light);
+  }
+
+  /* Answer options on the question screen: large, tactile choices. */
+  .choice {
+    display: flex;
+    min-height: 3.5rem;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-radius: 1rem;
+    background: var(--color-surface);
+    padding: 0.9rem 1.1rem;
+    text-align: left;
+    font-weight: 700;
+    box-shadow:
+      inset 0 0 0 2px var(--color-line),
+      var(--shadow-card);
+    transition:
+      transform 160ms var(--ease-out),
+      box-shadow 160ms var(--ease-out);
+  }
+  .choice:hover:not(:disabled) {
+    box-shadow:
+      inset 0 0 0 2px var(--color-bin-blue),
+      var(--shadow-lift);
+    transform: translateY(-1px);
+  }
+  .choice:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .choice[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 3px var(--color-bin-blue);
+  }
+  .choice:disabled {
+    cursor: wait;
+  }
+
+  /* Viewfinder corner brackets (capture screen and QR scanner). */
+  .viewfinder::before,
+  .viewfinder::after,
+  .viewfinder > .corners::before,
+  .viewfinder > .corners::after {
+    content: "";
+    position: absolute;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-color: currentColor;
+    border-style: solid;
+    border-width: 0;
+    pointer-events: none;
+  }
+  .viewfinder::before {
+    top: 0.9rem;
+    left: 0.9rem;
+    border-top-width: 4px;
+    border-left-width: 4px;
+    border-top-left-radius: 0.9rem;
+  }
+  .viewfinder::after {
+    top: 0.9rem;
+    right: 0.9rem;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-top-right-radius: 0.9rem;
+  }
+  .viewfinder > .corners::before {
+    bottom: 0.9rem;
+    left: 0.9rem;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+    border-bottom-left-radius: 0.9rem;
+  }
+  .viewfinder > .corners::after {
+    bottom: 0.9rem;
+    right: 0.9rem;
+    border-bottom-width: 4px;
+    border-right-width: 4px;
+    border-bottom-right-radius: 0.9rem;
+  }
+}
+
+/* Motion is decoration on top of a complete, static interface: switch it off on request. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }

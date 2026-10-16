@@ -1,13 +1,57 @@
-# Notebooks
+# Notebooks (WS1 vision)
 
-Colab notebooks for training and experiments. Clear outputs before committing (large outputs and embedded images bloat the repo, and images are blocked by the hygiene check).
+Run on Google Colab, in order. Each notebook clones this repository (branch `ws1/vision-model`)
+and imports `ml/binbuddy_ml/` and `contracts/`, so shared code is never copy-pasted. Clear outputs
+before committing (large outputs and embedded images bloat the repo; images are blocked by CI).
 
-Start every notebook with:
+| # | Notebook | Runtime | What it produces (in Google Drive `BinBuddy_Data/`) |
+|---|---|---|---|
+| 01 | `01_data_and_eda.ipynb` | CPU, ~20-40 min | `prepared_<v>.tar`, `manifests/vision_manifest[_<v>].csv`, `eda_summary[_<v>].json`, EDA charts |
+| 02 | `02_model_comparison.ipynb` | T4 GPU, 30 min (run2) to ~2 h (run1) | `results/<run>/`: `comparison_results.json`, `run_info.json`, `pred_*.csv` (test sets), `chosen_model.json`; `models/<run>/` weights and probe classifiers |
+| 03 | `03_explainability.ipynb` | T4 GPU, ~15-25 min | charts and tables only: 5 CAM methods, faithfulness and sanity checks |
+| 04 | `04_final_model_export.ipynb` | CPU or GPU, ~10-60 min | calibrated ONNX export + 256-d embedding + model card, uploaded to the Hub with a tag |
 
-```python
-from google.colab import drive
-drive.mount("/content/drive")
-!git clone https://github.com/DevelopingGod/Group-5-PRS-Practice-Module-2026.git bin-buddy && cd bin-buddy && pip install -e contracts
-import sys; sys.path.append("/content/bin-buddy/ml")
-from binbuddy_ml.labels import load_labels
+**Final state (16 Oct):** data **v2**, Run 3, **ConvNeXt-T**, Hub tag `v0.2-local-data`. The setup
+cell defaults to `DATA_VERSION="v2"` and `RUN_ID="run3"`, so notebooks 03 and 04 explain and export
+exactly that model. To score any images with the exported model (all splits, not just test), use
+[`scripts/predict_with_model.py`](../../scripts/predict_with_model.py).
+
+The models compared and their hyperparameters are defined once in
+[`ml/binbuddy_ml/experiments.py`](../binbuddy_ml/experiments.py); the class mapping of the public
+datasets is in [`ml/binbuddy_ml/public_data.py`](../binbuddy_ml/public_data.py).
+
+## Experiment tracking
+
+Each notebook's setup cell has `DATA_VERSION` (v1, v2, …) and `RUN_ID` (run1, run2, …). Every
+data version and run writes its own files, so nothing is overwritten; data v2 onwards reuses the
+public images of v1 and keeps every earlier team photo in its earlier split. The settings of each
+run (protocol, models, experiments, data version) are defined in `RUNS` in
+[`ml/binbuddy_ml/experiments.py`](../binbuddy_ml/experiments.py); notebook 02 refuses to run a
+`RUN_ID` on the wrong data version. Every run is recorded in [`ml/EXPERIMENTS.md`](../EXPERIMENTS.md)
+before it starts.
+
+| Run | Data | What it changes |
+|---|---|---|
+| run1 | v1 | 9 models, E1 and E2 (the comparison) |
+| run2 | v2 | only the data (Run 1 settings, 3 models) |
+| run3 | v2 | only the training (dropout, drop path, oversampling, stronger augmentation, new selection score; 6 models incl. a CLIP partial fine-tune) |
+
+## Drive layout
+
 ```
+BinBuddy_Data/
+  local_by_material/<material>/*.jpg   team photos, one folder per material (you create this)
+  prepared_v1.tar, prepared_v2.tar     written by 01 (one per data version)
+  manifests/                           vision_manifest[_v2].csv, eda_summary[_v2].json
+  results/  models/                    Run 1 at the top level; results/run2/, results/run3/ (+ models/)
+  models/v0.2-local-data/              the exported model (config.json, model.onnx, head.npz)
+  results/v0.2-local-data/             predictions.csv + embeddings.npy for all 9,785 images
+```
+
+Material folder names: `paper, plastic, glass, metal, beverage_carton, styrofoam, e_waste,
+textile, food_waste, other_general`.
+
+## Secrets
+
+Notebook 04 reads a Hugging Face **write** token from Colab Secrets (`HF_TOKEN`). Never paste a
+token into a cell.
