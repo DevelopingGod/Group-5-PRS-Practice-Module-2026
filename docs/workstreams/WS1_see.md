@@ -26,7 +26,7 @@
 
 ## Still open
 - [ ] Integrate WS2's ensemble and OOD (`is_ood`) into `/predict` when ready
-- [ ] After the PR to `main`: switch `render.yaml` to `branch: main`
+- [x] After the PR to `main`: `render.yaml` deploys from `main`
 
 ## Definition of done
 - `uv run pytest` passes, including `tests/test_contract.py`
