@@ -211,3 +211,31 @@ correction gets its own entry. Numbers come from the saved result files named in
   (max difference 0.0000); same class as the Colab Run 3 predictions on 40/40 team test photos;
   API heatmap = Grad-CAM by definition at 7×7 (Pearson r = 1.000000, max difference 4.4e-7).
   Notebook 04 repeats this check on the exported files and stops if it fails.
+
+## Explainability · 16 Oct · notebook 03 on the Run 3 ConvNeXt-T (code `e369036`, T4)
+
+40 team test photos; deletion AUC lower = better, insertion AUC higher = better; sanity = Spearman
+correlation with the map after randomising the classifier (near 0 = the map depends on the model).
+
+| Method | Deletion AUC | Insertion AUC | Sanity (vs randomised) |
+|---|---|---|---|
+| **Grad-CAM** | **0.482** | **0.721** | 0.032 (pass) |
+| LayerCAM | 0.491 | 0.714 | -0.007 (pass) |
+| Grad-CAM++ | 0.546 | 0.697 | -0.152 (pass) |
+| Score-CAM | 0.548 | 0.661 | 0.260 (weaker) |
+| EigenCAM | 0.566 | 0.617 | **1.000 (fails, as expected: ignores the classifier)** |
+
+- Grad-CAM is the most faithful method on both curves and passes the sanity check, so it is the one
+  the app shows. Notebook formula vs Grad-CAM library on ConvNeXt-T: r = 1.0000.
+- Note: standard deviations are large (~0.15–0.25), so differences between Grad-CAM, LayerCAM and
+  Grad-CAM++ are small; EigenCAM's sanity failure is the clear finding.
+
+## Export · 16 Oct · notebook 04 → Hugging Face `v0.2-local-data` (code `e369036`, CPU)
+
+- Temperature T = 0.770 fitted on 247 team validation photos: ECE 0.079 → 0.046 (T < 1: after Run 3's
+  regularisation the model was slightly *under*-confident on team photos, so scores are sharpened).
+- Embedding: PCA 768 → 256 keeps 91.4% of the variance; same-item photo pairs median cosine 0.90,
+  different items 95th percentile 0.55 (WS4's VERIFY_MIN_SIMILARITY 0.85 sits between them).
+- ONNX vs PyTorch max relative difference 7.5e-6; the API's own code on the export vs PyTorch:
+  probability difference 0.0000, heatmap r = 1.000.
+- Uploaded (private): https://huggingface.co/sankalp-indish/bin-buddy-vision/tree/v0.2-local-data
