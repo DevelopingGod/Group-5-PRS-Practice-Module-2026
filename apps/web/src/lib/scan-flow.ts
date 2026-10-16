@@ -126,8 +126,17 @@ export function topMaterial(analysis: VisionAnalysis | null): string | null {
   return best ? MATERIAL_LABELS[best] : null;
 }
 
+/**
+ * The condition the photo showed, or null when the model did not judge it. The vision model
+ * sends equal condition scores by design (cleanliness is decided by Q2 and Q3), and picking
+ * the first of equal scores would wrongly show "Clean".
+ */
 export function topCondition(analysis: VisionAnalysis | null): string | null {
-  const best = top(analysis?.condition_scores);
+  const scores = analysis?.condition_scores;
+  if (!scores || scores.length === 0) return null;
+  const probabilities = scores.map((s) => s.probability);
+  if (Math.max(...probabilities) - Math.min(...probabilities) < 0.01) return null;
+  const best = top(scores);
   return best ? CONDITION_LABELS[best] : null;
 }
 
