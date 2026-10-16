@@ -27,4 +27,4 @@ Prioritise, in this order:
    (`.github/CODEOWNERS`), say which owner should also review.
 
 Training code in `ml/` may use PyTorch and scikit-learn; runtime code in `services/inference/`
-must stay light enough for a free CPU Hugging Face Space.
+must stay light enough for a free CPU host (Render free plan; the API uses about 240 MB).

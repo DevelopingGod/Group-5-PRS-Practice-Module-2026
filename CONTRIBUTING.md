@@ -32,4 +32,4 @@ Anything in `contracts/binbuddy_contracts/` is shared by several workstreams. To
 
 - Python 3.11, formatted by ruff, fully typed (mypy strict). Use the contract models; never pass raw dicts across a boundary.
 - TypeScript strict. Import API types from `@/lib/contracts`; never hand-write an API shape.
-- Secrets live only in `.env.local`, Vercel settings and Hugging Face Space secrets.
+- Secrets live only in `.env.local`, Vercel settings and the Render service's environment settings.

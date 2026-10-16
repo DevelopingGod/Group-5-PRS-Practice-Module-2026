@@ -10,7 +10,7 @@
 **Until 6 Oct**
 - [ ] Create the GitHub repo, add everyone, fill in `CODEOWNERS`, set the `main` ruleset (README)
 - [ ] Vercel project (root `apps/web`) and Supabase project; run the migration; enable anonymous sign-in
-- [ ] Capture → result flow in the web app against the stub API on the Space (or dummy responses)
+- [ ] Capture → result flow in the web app against the model API (stub locally, or the live Render URL)
 
 **7–17 Oct**
 - [ ] Route handlers write scans to Supabase after `/predict`

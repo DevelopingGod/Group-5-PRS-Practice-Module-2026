@@ -1,4 +1,4 @@
-"""Bin Buddy model API (deployed as a Hugging Face Docker Space).
+"""Bin Buddy model API (deployed on Render from render.yaml; runs anywhere Docker runs).
 
 Routes and models come from the contracts package; tests/test_contract.py fails if this
 service drifts from contracts/generated/openapi.json.
@@ -12,6 +12,7 @@ from functools import lru_cache
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from PIL import Image
 
 from app import decision, vision
 from app.quality import InvalidImageError, check_quality, decode_image
@@ -28,6 +29,7 @@ from binbuddy_contracts.api import (
     VerifyRequest,
     VerifyResponse,
     VersionResponse,
+    VisionAnalysis,
 )
 from binbuddy_contracts.constants import CONTRACTS_VERSION, EMBEDDING_DIM
 from binbuddy_contracts.enums import ErrorCode, ResponseStatus
@@ -78,9 +80,16 @@ async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResp
     return JSONResponse(status_code=422, content=body.model_dump(mode="json"))
 
 
+def _analyse(img: Image.Image) -> VisionAnalysis:
+    try:
+        return vision.analyse(img, settings())
+    except vision.ModelUnavailableError as exc:
+        raise ApiError(503, ErrorCode.MODEL_UNAVAILABLE, str(exc)) from exc
+
+
 @app.get("/health", response_model=HealthResponse, responses=ERRORS)
 def health() -> HealthResponse:
-    return HealthResponse(status="ok", model_loaded=True)
+    return HealthResponse(status="ok", model_loaded=vision.is_loaded(settings()))
 
 
 @app.get("/version", response_model=VersionResponse, responses=ERRORS)
@@ -108,7 +117,7 @@ def predict(body: PredictRequest) -> PredictResponse:
         return PredictResponse(
             scan_id=scan_id, model_revision=revision, status=ResponseStatus.RETAKE, quality=quality
         )
-    analysis = vision.analyse(img)
+    analysis = _analyse(img)
     if analysis.is_ood:
         return PredictResponse(
             scan_id=scan_id,
@@ -154,5 +163,5 @@ def verify(body: VerifyRequest) -> VerifyResponse:
         img = decode_image(body.image_base64)
     except InvalidImageError as exc:
         raise ApiError(400, ErrorCode.INVALID_IMAGE, str(exc)) from exc
-    analysis = vision.analyse(img)
+    analysis = _analyse(img)
     return run_verify(body, analysis.embedding, analysis.phash)

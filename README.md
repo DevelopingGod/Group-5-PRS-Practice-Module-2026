@@ -19,7 +19,7 @@ Frontend, backend and AI are separate folders that only talk through the shared 
 
 ```
 apps/web/              FRONTEND   Next.js + TypeScript on Vercel (camera, questions, verdict, QR, leaderboard)
-services/inference/    BACKEND    FastAPI model API on a Hugging Face Docker Space (/predict /answer /verify)
+services/inference/    BACKEND    FastAPI model API on Render, free plan (/predict /answer /verify)
 ml/                    AI / ML    Offline training in Colab: CNN, features, ensemble, clustering, OOD
 contracts/             SHARED     Pydantic models → JSON Schema / OpenAPI → generated TypeScript types
 policies/                         Site policies (HDB default, campus example) in YAML
@@ -114,7 +114,9 @@ owner has it, the ruleset below requests Copilot on every PR. Teammates with Cop
    - Block force pushes; restrict deletions
 3. Vercel: import the repo, set **Root Directory** to `apps/web`, add the variables from
    `apps/web/.env.example`.
-4. Hugging Face: create the model repo and the Docker Space (see `services/inference/README.md`).
+4. Hugging Face Hub: model repo `sankalp-indish/bin-buddy-vision` (private, tag `v0.2-local-data`).
+   Render: **New → Blueprint** with this repo's `render.yaml` (see `services/inference/README.md`).
+   Live API: https://bin-buddy-api.onrender.com (`/docs`, `/health`).
 5. Supabase: create the project, run `supabase/migrations/`, enable anonymous sign-ins.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the everyday branch → PR → review flow.

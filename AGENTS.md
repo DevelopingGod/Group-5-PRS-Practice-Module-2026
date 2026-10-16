@@ -12,6 +12,8 @@ Copilot loads `.github/copilot-instructions.md`, which points here.
    decisions. The PDF itself is not in the repository because it contains student IDs.
 2. The workstream plan for the area you are touching: [`docs/workstreams/`](docs/workstreams/).
 3. [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request.
+4. Building on the trained vision model (WS2/WS3/WS4)? Start with the WS1 handoff:
+   [`docs/handoff/`](docs/handoff/README.md) (results, shared files, what to do first).
 
 If the proposal, `context.md` and the code disagree: the proposal wins on scope, objectives,
 metrics and ethics; `contracts/binbuddy_contracts/` wins on data shapes.
@@ -21,7 +23,7 @@ metrics and ethics; `contracts/binbuddy_contracts/` wins on data shapes.
 | Layer | Path | Language | Deployed to | Owner |
 |---|---|---|---|---|
 | Frontend | `apps/web/` | Next.js + TypeScript | Vercel | WS4 (WS3 builds the question-flow screens) |
-| Backend (model API) | `services/inference/` | Python, FastAPI | Hugging Face Docker Space | WS1 (WS3 `app/decision.py`, WS4 `app/verify.py`) |
+| Backend (model API) | `services/inference/` | Python, FastAPI | Render free web service (`render.yaml`); laptop + Cloudflare tunnel as demo backup | WS1 (WS3 `app/decision.py`, WS4 `app/verify.py`) |
 | AI / ML (offline training) | `ml/` | Python, PyTorch, scikit-learn (Colab GPU) | Hugging Face Hub model repo (weights) | WS1, WS2 |
 | Shared contracts | `contracts/` | Python (Pydantic), generates JSON Schema + TS types | n/a | Everyone |
 | Site policies | `policies/` | YAML | bundled into the model API | WS3 |
@@ -42,7 +44,7 @@ imports Python, `services/inference` never imports `ml/` training code or PyTorc
   `@/lib/contracts`.
 - **Never commit** photos, model weights, `.env` files, files over 5 MB, or NUS student IDs. Photos
   live on Google Drive (`BinBuddy_Data/`), weights on the Hugging Face Hub. CI rejects them.
-- **Secrets** only in `.env.local`, Vercel settings and Hugging Face Space secrets. The browser never
+- **Secrets** only in `.env.local`, Vercel settings and the Render service's environment settings. The browser never
   sees the HF token or the Supabase service-role key.
 - **Privacy:** item-only photos, verification photos deleted after `/verify`, pseudonyms only.
 - **Safe advice:** abstain on out-of-distribution items; when still uncertain, recommend general waste.
