@@ -140,12 +140,11 @@ export function percent(confidence: number): number {
   return Math.round(Math.min(1, Math.max(0, confidence)) * 100);
 }
 
-/** "94% sure, no questions needed" / "91% sure after 2 questions". */
-export function confidenceLine(verdict: VerdictResult): string {
+/** "No questions needed" / "After 2 questions", shown next to the "94% sure" figure. */
+export function questionsLine(verdict: VerdictResult): string {
   const n = verdict.questions_asked?.length ?? 0;
-  const sure = `${percent(verdict.confidence)}% sure`;
-  if (n === 0) return `${sure}, no questions needed`;
-  return `${sure} after ${n} question${n === 1 ? "" : "s"}`;
+  if (n === 0) return "No questions needed";
+  return `After ${n} question${n === 1 ? "" : "s"}`;
 }
 
 const ISSUE_TEXT: Record<QualityIssue, string> = {
@@ -172,14 +171,24 @@ export function binColour(verdict: VerdictResult): string {
   return c && /^#[0-9a-f]{6}$/i.test(c) ? c : CHANNEL_COLOURS[verdict.channel];
 }
 
-/** Ink or light text, whichever contrasts better with a #rrggbb background. */
-export function textOn(hex: string): "#10233F" | "#F4F7FB" {
+/** WCAG relative luminance of a #rrggbb colour. */
+function luminance(hex: string): number {
   const [r, g, b] = [1, 3, 5].map((i) => {
     const v = parseInt(hex.slice(i, i + 2), 16) / 255;
     return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   });
-  const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  return lum > 0.4 ? "#10233F" : "#F4F7FB";
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/** WCAG contrast ratio between two #rrggbb colours (1 to 21). */
+export function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+/** Ink or light text, whichever contrasts better with a #rrggbb background. */
+export function textOn(hex: string): "#10233F" | "#F4F7FB" {
+  return contrast(hex, "#10233F") >= contrast(hex, "#F4F7FB") ? "#10233F" : "#F4F7FB";
 }
 
 export const NEA_CHECK_MY_ITEM = "https://www.cgs.gov.sg/recycleright/check-my-item/";

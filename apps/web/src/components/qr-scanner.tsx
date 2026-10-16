@@ -5,6 +5,7 @@
 import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser";
 import { useEffect, useRef, useState } from "react";
 
+import { ScanLine } from "@/components/ui";
 import type { BinQrPayload } from "@/lib/contracts";
 import { parseBinQr } from "@/lib/qr";
 
@@ -61,13 +62,17 @@ export function QrScanner({ onBin }: { onBin: (bin: BinQrPayload) => void }) {
 
   return (
     <div className="space-y-3">
-      <video
-        ref={video}
-        muted
-        playsInline
-        aria-label="Camera view for scanning the bin's QR code"
-        className="aspect-square w-full rounded-2xl bg-ink object-cover"
-      />
+      <div className="viewfinder relative overflow-hidden rounded-[1.75rem] bg-ink text-sticker shadow-[var(--shadow-lift)]">
+        <video
+          ref={video}
+          muted
+          playsInline
+          aria-label="Camera view for scanning the bin's QR code"
+          className="aspect-square w-full object-cover"
+        />
+        <span aria-hidden className="corners" />
+        <ScanLine inset="inset-x-8" />
+      </div>
       {problem && (
         <p role="alert" className="rounded-lg bg-sticker p-3 text-ink">
           {problem}
