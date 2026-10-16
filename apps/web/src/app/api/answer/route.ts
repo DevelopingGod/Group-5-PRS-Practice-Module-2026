@@ -4,6 +4,9 @@ import { callModel, configFromEnv } from "@/lib/model-api";
 import type { AnswerRequest, AnswerResponse } from "@/lib/contracts";
 import { currentUserId, saveVerdict } from "@/lib/supabase/server";
 
+// Longer than MODEL_TIMEOUT_MS so the platform does not cut off a cold start.
+export const maxDuration = 120;
+
 // Proxies to the model API; once the questions end in a verdict, records it on the scan.
 // The scan id comes from the HMAC-signed decision state, which the model API has checked.
 export async function POST(request: Request) {
