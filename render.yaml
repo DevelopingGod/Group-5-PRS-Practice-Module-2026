@@ -6,7 +6,7 @@ services:
     name: bin-buddy-api
     runtime: docker
     plan: free
-    branch: ws1/vision-model
+    branch: main
     dockerfilePath: ./services/inference/Dockerfile
     dockerContext: .
     healthCheckPath: /health

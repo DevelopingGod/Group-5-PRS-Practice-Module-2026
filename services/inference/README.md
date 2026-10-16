@@ -66,5 +66,4 @@ HTTP 402), so the API runs on:
 Measured on 16 Oct: on Render's free plan the first photo after a restart takes about 25 s (model
 download), then about 4-5 s per photo, plus about 50 s to wake after 15 minutes idle. Laptop +
 tunnel: 0.2-1 s per photo. The API needs about 240 MB of memory with the model loaded. Render
-redeploys on every push to the branch in `render.yaml` (`ws1/vision-model`; switch to `main`
-after the merge).
+redeploys on every push to the branch in `render.yaml` (`main`).
