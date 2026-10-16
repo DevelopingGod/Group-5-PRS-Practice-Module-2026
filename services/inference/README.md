@@ -1,4 +1,4 @@
-# Model API (FastAPI on a Hugging Face Docker Space)
+# Model API (FastAPI, Docker)
 
 Owner: WS1 (service and vision), with WS3 (`app/decision.py`) and WS4 (`app/verify.py`).
 
@@ -42,3 +42,23 @@ The model loads on the first photo (`/health` reports `model_loaded`), then stay
 ## Deploy
 
 Create a Docker Space (port 7860), then upload the files the image needs (`Dockerfile` at the Space root, plus `pyproject.toml`, `uv.lock`, `contracts/`, `policies/`, `services/inference/`). Automating this with a GitHub Action on merges to `main` is a WS1 task. Free CPU Spaces sleep after about 48 hours without traffic: call `/api/model-health` on the web app before any demo.
+
+## Deploy (free)
+
+Hugging Face stopped offering free CPU Docker Spaces in 2026 (PRO only), so the API runs on:
+
+1. **Render free web service** (online URL for the app). The repository's
+   [`render.yaml`](../../render.yaml) defines it: Render dashboard → **New → Blueprint** → this
+   repository → enter `HF_TOKEN` (a Hugging Face **read** token). It builds this Dockerfile, listens
+   on Render's `PORT`, and checks `/health`. Free services sleep after 15 minutes without traffic
+   and take about a minute to wake: open `/health` before a demo.
+2. **Backup for demos: your laptop + a Cloudflare Quick Tunnel** (no account needed; the URL
+   changes on every start). From the repository root, with the model folder downloaded:
+
+   ```bash
+   docker build -f services/inference/Dockerfile -t binbuddy-api .
+   docker run -d --name binbuddy-api -p 7860:7860 -e MODEL_DIR=/model -e MODEL_REVISION=v0.2-local-data -v <model folder>:/model:ro binbuddy-api
+   cloudflared tunnel --url http://localhost:7860
+   ```
+
+   `cloudflared` prints a `https://<random>.trycloudflare.com` URL; use it as `HF_SPACE_URL`.

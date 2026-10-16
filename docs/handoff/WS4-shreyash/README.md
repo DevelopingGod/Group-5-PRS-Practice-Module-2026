@@ -15,8 +15,10 @@ embedding, and you can test the app against it locally today.
 3. Open http://localhost:7860/docs and try `POST /predict` with a photo. Without `MODEL_DIR` the API
    keeps the deterministic stub, so nothing breaks for anyone.
 
-The Hugging Face Space will use `MODEL_REVISION=v0.2-local-data` and an `HF_TOKEN` secret (the model
-repository is private because RealWaste is non-commercial). WS1 sets that up.
+**Online API:** Hugging Face no longer offers free Docker Spaces, so the API runs as a free Render
+web service (WS1 sends you the URL), with a laptop + Cloudflare tunnel as the demo-day backup. Set
+`HF_SPACE_URL` to whichever URL is live; no token is needed to call it. Deploy notes:
+[services/inference/README.md](../../../services/inference/README.md).
 
 ## What changed for the app
 - `analysis.heatmap_png_base64` is now **always** filled: a 224 x 224 PNG of the centre crop with the

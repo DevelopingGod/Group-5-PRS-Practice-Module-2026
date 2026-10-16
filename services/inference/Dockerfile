@@ -1,5 +1,5 @@
-# Model API image for the Hugging Face Docker Space. Build context: the repository root.
-# HF_HOME is under /tmp: free Spaces have no persistent /data disk, and the Space runs as a
+# Model API image (Render free web service; also runs locally). Build context: the repository root.
+# HF_HOME is under /tmp: free hosts have no persistent disk, and the container may run as a
 # non-root user who can always write to /tmp. The model is downloaded on the first photo.
 #   docker build -f services/inference/Dockerfile -t binbuddy-api .
 FROM python:3.11-slim
@@ -20,4 +20,5 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 WORKDIR /app/services/inference
 EXPOSE 7860
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+# Render sets PORT (default 10000); everywhere else (local, tunnel) the API uses 7860.
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}"]
