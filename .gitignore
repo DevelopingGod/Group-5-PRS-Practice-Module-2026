@@ -39,3 +39,6 @@ data/local/
 .DS_Store
 .idea/
 .vscode/
+
+# Evaluation outputs (scripts/evaluate_baselines.py)
+results/

@@ -32,8 +32,8 @@ members = ["contracts"]
 binbuddy-contracts = { workspace = true }
 
 [tool.pytest.ini_options]
-pythonpath = ["services/inference", "ml"]
-testpaths = ["contracts/tests", "services/inference/tests", "ml/tests"]
+pythonpath = ["services/inference", "ml", "scripts"]
+testpaths = ["contracts/tests", "services/inference/tests", "ml/tests", "scripts"]
 addopts = "-q"
 filterwarnings = ["ignore::DeprecationWarning:fastapi.testclient", "ignore:Using `httpx`"]
 
