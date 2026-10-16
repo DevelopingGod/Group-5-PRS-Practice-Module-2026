@@ -77,12 +77,15 @@ def main() -> None:
     ap.add_argument("--out", type=Path, default=None, help="where to build (default: temp folder)")
     args = ap.parse_args()
 
-    commit = subprocess.run(
-        ["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout.strip()
+    try:  # the commit only labels the Space; deploying must not depend on git being installed
+        commit = subprocess.run(
+            ["git", "-C", str(ROOT), "rev-parse", "--short", "HEAD"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        commit = "unknown"
     out = args.out or Path(tempfile.mkdtemp(prefix="binbuddy_space_"))
     build(out, commit, args.model_repo, args.model_revision)
     files = sorted(p.relative_to(out).as_posix() for p in out.rglob("*") if p.is_file())
