@@ -76,7 +76,6 @@ def _write_model(folder: Path, **config_overrides: object) -> Path:
         "std": [1.0, 1.0, 1.0],
         "temperature": 2.0,
         "embedding_dim": EMBEDDING_DIM,
-        "gradcam_from_weights": True,
         **config_overrides,
     }
     (folder / "config.json").write_text(json.dumps(config))
@@ -138,6 +137,27 @@ def test_heatmap_points_at_the_coloured_block(real_settings: Settings) -> None:
     fmap = np.stack([x[0, c].reshape(7, 32, 7, 32).mean(axis=(1, 3)) for c in range(3)])
     cam = vision.class_activation_map(fmap, W[METAL])
     assert np.unravel_index(cam.argmax(), cam.shape)[1] < 3  # left side, where the red block is
+
+
+def test_head_gradient_through_layernorm_matches_finite_differences() -> None:
+    """ConvNeXt-style head: y = w . (gamma * (p - mean) / s + beta). Check d y / d p numerically."""
+    rng = np.random.default_rng(1)
+    k, eps = 16, 1e-6
+    p, w, gamma, beta = (rng.normal(size=k) for _ in range(4))
+
+    def score(q: np.ndarray) -> float:
+        x = (q - q.mean()) / np.sqrt(q.var() + eps)
+        return float(w @ (gamma * x + beta))
+
+    h = 1e-5
+    numeric = np.array([(score(p + h * e) - score(p - h * e)) / (2 * h) for e in np.eye(k)])
+    f32 = np.float32
+    got = vision.head_gradient(p.astype(f32), w.astype(f32), gamma.astype(f32), eps)
+    np.testing.assert_allclose(got, numeric, rtol=1e-3, atol=1e-4)
+    # Linear head: the gradient is the class weight vector itself.
+    np.testing.assert_array_equal(
+        vision.head_gradient(p.astype(f32), w.astype(f32), None, eps), w.astype(f32)
+    )
 
 
 def test_preprocess_matches_resize_then_centre_crop(real_settings: Settings) -> None:

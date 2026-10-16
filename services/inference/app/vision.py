@@ -4,7 +4,8 @@ Runs the export written by ml/notebooks/04_final_model_export.ipynb with ONNX Ru
 (no PyTorch in the API):
 
     model.onnx   image -> (logits, pooled features, last feature map)
-    head.npz     classifier weights (for the heatmap) and the PCA projection (for the embedding)
+    head.npz     classifier weights, the optional LayerNorm before them (both for the heatmap)
+                 and the PCA projection (for the embedding)
     config.json  class order, preprocessing, temperature, embedding size
 
 The files come from MODEL_DIR (local disk, for the free offline setup) or from the Hugging Face
@@ -58,7 +59,8 @@ class VisionModel:
     classifier_weight: Array  # classes x K
     pca_components: Array  # EMBEDDING_DIM x K
     pca_mean: Array  # K
-    cam_from_weights: bool  # True when the head is linear on pooled features (notebook 03 s5)
+    norm_weight: Array | None  # K; set when the head is pool -> LayerNorm -> linear (ConvNeXt)
+    norm_eps: float
 
     @classmethod
     def load(cls, folder: Path) -> VisionModel:
@@ -88,7 +90,8 @@ class VisionModel:
             classifier_weight=head["classifier_weight"].astype(np.float32),
             pca_components=head["pca_components"].astype(np.float32),
             pca_mean=head["pca_mean"].astype(np.float32),
-            cam_from_weights=bool(cfg["gradcam_from_weights"]),
+            norm_weight=head["norm_weight"].astype(np.float32) if "norm_weight" in head else None,
+            norm_eps=float(cfg.get("head_norm_eps") or 1e-6),
         )
 
     def preprocess(self, img: Image.Image) -> tuple[Array, Image.Image]:
@@ -112,9 +115,14 @@ class VisionModel:
         logits, pooled, fmap = self.session.run(None, {"image": x})
         probs = softmax(np.asarray(logits[0], dtype=np.float32) / self.temperature)
         top = int(probs.argmax())
-        heatmap = None
-        if self.cam_from_weights:
-            heatmap = heatmap_png_base64(np.asarray(fmap[0]), self.classifier_weight[top], crop)
+        feature_map = np.asarray(fmap[0], dtype=np.float32)
+        grad = head_gradient(
+            feature_map.mean(axis=(1, 2)),
+            self.classifier_weight[top],
+            self.norm_weight,
+            self.norm_eps,
+        )
+        heatmap = heatmap_png_base64(feature_map, grad, crop)
         return VisionAnalysis(
             material_scores=[
                 MaterialScore(label=m, probability=float(p))
@@ -144,8 +152,27 @@ def uniform_condition_scores() -> list[ConditionScore]:
     return [ConditionScore(label=c, probability=p) for c in Condition]
 
 
+def head_gradient(pooled: Array, weight: Array, norm_weight: Array | None, eps: float) -> Array:
+    """d(class score) / d(pooled features): the per-channel Grad-CAM weights, up to 1/Z.
+
+    The head is global average pooling -> [LayerNorm] -> linear. Every pixel of feature map k
+    feeds the score only through the pooled value p_k, so Grad-CAM's channel weight is this
+    gradient (notebook 03, section 5). Linear head: the gradient is just the class weights w.
+    LayerNorm first (ConvNeXt), with x = (p - mean) / s and v = gamma * w:
+        dy/dp = (v - mean(v) - x * mean(v * x)) / s
+    """
+    if norm_weight is None:
+        return weight
+    p = pooled.astype(np.float64)
+    s = np.sqrt(p.var() + eps)
+    x = (p - p.mean()) / s
+    v = norm_weight.astype(np.float64) * weight
+    grad: Array = ((v - v.mean() - x * (v * x).mean()) / s).astype(np.float32)
+    return grad
+
+
 def class_activation_map(fmap: Array, weight: Array) -> Array:
-    """CAM = ReLU(sum_k w_k A_k), scaled to [0, 1]. Equals Grad-CAM for a linear head on GAP."""
+    """ReLU(sum_k w_k A_k), scaled to [0, 1]. With w = head_gradient(...) this is Grad-CAM."""
     cam = np.maximum(np.tensordot(weight, fmap, axes=1), 0.0)
     cam -= cam.min()
     peak = cam.max()

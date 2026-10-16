@@ -196,3 +196,18 @@ correction gets its own entry. Numbers come from the saved result files named in
   settings, image counts, start and finish), the full settings in every result row, training
   accuracy per epoch next to the validation scores (to see overfitting), and the fitted probe
   classifiers saved next to the fine-tuned weights.
+
+## Model choice · 16 Oct · Run 3 ConvNeXt-T goes into the app
+
+- **Decision (owner):** ConvNeXt-T from Run 3 (`models/run3/E2_public_plus_local_convnext_t.pt`),
+  chosen over Run 2's ConvNeXt-T: same macro-F1 (0.799 vs 0.791, p = 0.72) but calibration error
+  halved (ECE 0.076 vs 0.156) and trained on demo-like augmentation; accepted cost: 4 more costly
+  errors of 108, mitigated by always asking Q2 for recyclable materials (D-003).
+- **Serving fix found while preparing the export:** ConvNeXt's head is pool → LayerNorm → linear,
+  so the classifier-weight heatmap the API used is *not* Grad-CAM for it. The API now computes the
+  exact Grad-CAM channel weights through the LayerNorm in NumPy (`head_gradient` in
+  `services/inference/app/vision.py`; formula in notebook 03, section 5).
+- **Verified on the real Run 3 weights (CPU, before any Colab run):** API probabilities = PyTorch
+  (max difference 0.0000); same class as the Colab Run 3 predictions on 40/40 team test photos;
+  API heatmap = Grad-CAM by definition at 7×7 (Pearson r = 1.000000, max difference 4.4e-7).
+  Notebook 04 repeats this check on the exported files and stops if it fails.
