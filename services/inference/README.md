@@ -39,13 +39,13 @@ docker run -p 7860:7860 -v /path/to/export:/model -e MODEL_DIR=/model -e MODEL_R
 
 The model loads on the first photo (`/health` reports `model_loaded`), then stays in memory.
 
-## Deploy
-
-Create a Docker Space (port 7860), then upload the files the image needs (`Dockerfile` at the Space root, plus `pyproject.toml`, `uv.lock`, `contracts/`, `policies/`, `services/inference/`). Automating this with a GitHub Action on merges to `main` is a WS1 task. Free CPU Spaces sleep after about 48 hours without traffic: call `/api/model-health` on the web app before any demo.
-
 ## Deploy (free)
 
-Hugging Face stopped offering free CPU Docker Spaces in 2026 (PRO only), so the API runs on:
+Live: **https://bin-buddy-api.onrender.com** (`/docs`, `/health`). The web app reads this URL from
+`HF_SPACE_URL` (the name is historical; any model API URL works) and needs no token.
+
+Hugging Face stopped offering free CPU Docker Spaces in 2026 (PRO only; creating one returns
+HTTP 402), so the API runs on:
 
 1. **Render free web service** (online URL for the app). The repository's
    [`render.yaml`](../../render.yaml) defines it: Render dashboard → **New → Blueprint** → this
@@ -62,3 +62,9 @@ Hugging Face stopped offering free CPU Docker Spaces in 2026 (PRO only), so the 
    ```
 
    `cloudflared` prints a `https://<random>.trycloudflare.com` URL; use it as `HF_SPACE_URL`.
+
+Measured on 16 Oct: on Render's free plan the first photo after a restart takes about 25 s (model
+download), then about 4-5 s per photo, plus about 50 s to wake after 15 minutes idle. Laptop +
+tunnel: 0.2-1 s per photo. The API needs about 240 MB of memory with the model loaded. Render
+redeploys on every push to the branch in `render.yaml` (`ws1/vision-model`; switch to `main`
+after the merge).

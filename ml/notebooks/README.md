@@ -6,10 +6,15 @@ before committing (large outputs and embedded images bloat the repo; images are 
 
 | # | Notebook | Runtime | What it produces (in Google Drive `BinBuddy_Data/`) |
 |---|---|---|---|
-| 01 | `01_data_and_eda.ipynb` | CPU | `prepared_v1.tar`, `manifests/vision_manifest.csv`, EDA |
-| 02 | `02_model_comparison.ipynb` | T4 GPU, ~2 h | `results/comparison_results.json`, per-image predictions, `models/*.pt`, `results/chosen_model.json` |
-| 03 | `03_explainability.ipynb` | T4 GPU | Grad-CAM vs Grad-CAM++ / Score-CAM / LayerCAM / EigenCAM, faithfulness and sanity checks |
-| 04 | `04_final_model_export.ipynb` | T4 GPU | ONNX model, calibration, 256-d embedding, model card; upload to the Hugging Face Hub |
+| 01 | `01_data_and_eda.ipynb` | CPU, ~20-40 min | `prepared_<v>.tar`, `manifests/vision_manifest[_<v>].csv`, `eda_summary[_<v>].json`, EDA charts |
+| 02 | `02_model_comparison.ipynb` | T4 GPU, 30 min (run2) to ~2 h (run1) | `results/<run>/`: `comparison_results.json`, `run_info.json`, `pred_*.csv` (test sets), `chosen_model.json`; `models/<run>/` weights and probe classifiers |
+| 03 | `03_explainability.ipynb` | T4 GPU, ~15-25 min | charts and tables only: 5 CAM methods, faithfulness and sanity checks |
+| 04 | `04_final_model_export.ipynb` | CPU or GPU, ~10-60 min | calibrated ONNX export + 256-d embedding + model card, uploaded to the Hub with a tag |
+
+**Final state (16 Oct):** data **v2**, Run 3, **ConvNeXt-T**, Hub tag `v0.2-local-data`. The setup
+cell defaults to `DATA_VERSION="v2"` and `RUN_ID="run3"`, so notebooks 03 and 04 explain and export
+exactly that model. To score any images with the exported model (all splits, not just test), use
+[`scripts/predict_with_model.py`](../../scripts/predict_with_model.py).
 
 The models compared and their hyperparameters are defined once in
 [`ml/binbuddy_ml/experiments.py`](../binbuddy_ml/experiments.py); the class mapping of the public
@@ -38,7 +43,9 @@ BinBuddy_Data/
   local_by_material/<material>/*.jpg   team photos, one folder per material (you create this)
   prepared_v1.tar, prepared_v2.tar     written by 01 (one per data version)
   manifests/                           vision_manifest[_v2].csv, eda_summary[_v2].json
-  results/  models/                    Run 1 at the top level; results/run2/, models/run2/ …
+  results/  models/                    Run 1 at the top level; results/run2/, results/run3/ (+ models/)
+  models/v0.2-local-data/              the exported model (config.json, model.onnx, head.npz)
+  results/v0.2-local-data/             predictions.csv + embeddings.npy for all 9,785 images
 ```
 
 Material folder names: `paper, plastic, glass, metal, beverage_carton, styrofoam, e_waste,

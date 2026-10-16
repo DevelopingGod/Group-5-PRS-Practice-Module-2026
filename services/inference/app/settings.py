@@ -1,4 +1,4 @@
-"""Runtime settings from environment variables (set as Hugging Face Space secrets/variables)."""
+"""Runtime settings from environment variables (set in the Render service settings or locally)."""
 
 from __future__ import annotations
 

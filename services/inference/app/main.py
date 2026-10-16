@@ -1,4 +1,4 @@
-"""Bin Buddy model API (deployed as a Hugging Face Docker Space).
+"""Bin Buddy model API (deployed on Render from render.yaml; runs anywhere Docker runs).
 
 Routes and models come from the contracts package; tests/test_contract.py fails if this
 service drifts from contracts/generated/openapi.json.
