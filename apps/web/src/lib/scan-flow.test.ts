@@ -8,6 +8,7 @@ import {
   fromPredict,
   questionsLine,
   textOn,
+  topCondition,
   topMaterial,
   type ScanState,
 } from "@/lib/scan-flow";
@@ -118,6 +119,29 @@ describe("display helpers", () => {
     };
     expect(topMaterial(analysis)).toBe("Metal");
     expect(topMaterial(null)).toBeNull();
+  });
+
+  it("shows a condition only when the model judged one", () => {
+    const base = {
+      material_scores: [],
+      confidence: 0.7,
+      is_ood: false,
+      embedding: [],
+      phash: "0",
+    };
+    const scores = (clean: number, residue: number, liquid: number, inside: number) => [
+      { label: "clean" as const, probability: clean },
+      { label: "food_residue" as const, probability: residue },
+      { label: "leftover_liquid" as const, probability: liquid },
+      { label: "item_inside" as const, probability: inside },
+    ];
+    // The vision model sends equal scores: cleanliness is left to the questions, not "Clean".
+    expect(topCondition({ ...base, condition_scores: scores(0.25, 0.25, 0.25, 0.25) })).toBeNull();
+    expect(topCondition({ ...base, condition_scores: scores(0.1, 0.7, 0.1, 0.1) })).toBe(
+      "Food residue",
+    );
+    expect(topCondition({ ...base, condition_scores: [] })).toBeNull();
+    expect(topCondition(null)).toBeNull();
   });
 
   it("falls back to the channel colour and keeps text readable", () => {
