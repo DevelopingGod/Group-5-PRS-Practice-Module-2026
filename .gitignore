@@ -42,3 +42,4 @@ data/local/
 
 # Evaluation outputs (scripts/evaluate_baselines.py)
 results/
+/data/ws2/
