@@ -5,12 +5,14 @@ from evaluate_baselines import (
     Post,
     Prediction,
     Record,
+    condition_from_rule,
     evaluate,
     material_macro_f1,
     parse_vlm_reply,
     recorded_answer,
     run_cnn,
     run_full,
+    run_static,
     run_vlm,
     summarise,
 )
@@ -71,7 +73,7 @@ def test_cnn_and_full_run_against_the_stub_api(stub_post: Post, hdb: SitePolicy)
     def load(r: LabelRow) -> str:
         return image_b64(int(r.item_id[-4:]))
 
-    for run in (run_cnn, run_full):
+    for run in (run_cnn, run_full, run_static):
 
         def system(img: str, r: LabelRow, run: Any = run) -> Prediction:
             pred: Prediction = run(stub_post, img, r, hdb)
@@ -153,3 +155,16 @@ def test_run_vlm_sends_the_photo_and_allowed_labels(hdb: SitePolicy) -> None:
     assert sent[0]["path"] == "/chat/completions" and sent[0]["model"] == "some-vlm"
     assert content[1]["image_url"]["url"] == "data:image/jpeg;base64,QUJD"
     assert "e_waste_point" in content[0]["text"] and "beverage_carton" in content[0]["text"]
+
+
+def test_static_always_asks_all_three(stub_post: Post, hdb: SitePolicy) -> None:
+    for n in range(1, 6):
+        pred = run_static(stub_post, image_b64(n), row(n), hdb)
+        assert pred.note == "ood" or pred.questions == 3
+
+
+def test_condition_comes_from_the_rule_applied(hdb: SitePolicy) -> None:
+    assert condition_from_rule(hdb, "clean_recyclables") is Condition.CLEAN
+    assert condition_from_rule(hdb, "container_food_residue") is Condition.FOOD_RESIDUE
+    assert condition_from_rule(hdb, "uncertain_fallback") is Condition.FOOD_RESIDUE
+    assert condition_from_rule(hdb, "styrofoam") is None

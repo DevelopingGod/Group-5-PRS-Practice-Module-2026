@@ -436,3 +436,19 @@ def decide_offline(
         qa = QuestionAnswer(question_id=qid, answer=answers[qid])
         state = _update_belief(state, qa, policy)
     return verdict_for(state, policy, uncertain=not is_settled(state, policy, gate))
+
+
+def decide_static(
+    state: DecisionState,
+    policy: SitePolicy,
+    answers: Mapping[QuestionId, str],
+    gate: Gate = DEFAULT_GATE,
+) -> VerdictResult:
+    """Baseline 2 (proposal Section 9): all three questions every time, then the rules.
+
+    Same belief update, policy and uncertain fallback as the adaptive flow, so the comparison
+    isolates adaptive question selection.
+    """
+    for qid in QUESTION_BANK:
+        state = _update_belief(state, QuestionAnswer(question_id=qid, answer=answers[qid]), policy)
+    return verdict_for(state, policy, uncertain=not is_settled(state, policy, gate))

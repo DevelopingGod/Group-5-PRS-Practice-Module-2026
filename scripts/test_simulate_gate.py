@@ -55,12 +55,15 @@ def test_sweep_reports_every_setting(tmp_path: Path) -> None:
     write_predictions(tmp_path / "p.csv")
     cases = make_cases(load_items(tmp_path / "p.csv", "val"), 10, 0.5, 0)
     results = sweep(cases, HDB, [0.6, 0.8])
-    assert [(r.threshold, r.e_waste_rule) for r in results] == [
-        (0.6, True),
-        (0.6, False),
-        (0.8, True),
-        (0.8, False),
+    assert [(r.system, r.threshold, r.e_waste_rule) for r in results] == [
+        ("adaptive", 0.6, True),
+        ("adaptive", 0.6, False),
+        ("static", 0.6, True),
+        ("adaptive", 0.8, True),
+        ("adaptive", 0.8, False),
+        ("static", 0.8, True),
     ]
+    assert all(r.avg_questions == 3.0 for r in results if r.system == "static")
     for r in results:
         assert r.runs == 40
         assert 0.0 <= r.avg_questions <= 3.0
@@ -82,4 +85,4 @@ def test_main_writes_json(tmp_path: Path) -> None:
     assert (
         main(["--predictions", str(tmp_path / "p.csv"), "--repeats", "2", "--out", str(out)]) == 0
     )
-    assert len(json.loads(out.read_text())["results"]) == 8
+    assert len(json.loads(out.read_text())["results"]) == 12

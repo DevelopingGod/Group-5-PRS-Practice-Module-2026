@@ -2,7 +2,8 @@
 
 Reads predictions.csv (team Drive: BinBuddy_Data/results/v0.2-local-data/predictions.csv; columns
 split, material and p_<material> for every material) and runs the decision flow in-process for
-every row of one split, once per gate setting: each threshold with and without the e-waste rule.
+every row of one split, once per gate setting: each threshold with and without the e-waste rule,
+plus baseline 2, the static questionnaire (all three questions every time, then the rules).
 
 The vision model never judges cleanliness and the photos have no recorded Q1-Q3 answers, so both
 are simulated: each run draws a true condition (clean with --clean-share, otherwise one of the
@@ -60,6 +61,7 @@ class Case:
 
 @dataclass
 class GateResult:
+    system: str  # "adaptive" or "static"
     threshold: float
     e_waste_rule: bool
     runs: int
@@ -131,12 +133,13 @@ def _state(item: Item, site: str) -> DecisionState:
     )
 
 
-def run_gate(cases: Sequence[Case], policy: SitePolicy, gate: decision.Gate) -> GateResult:
+def run_gate(
+    cases: Sequence[Case], policy: SitePolicy, gate: decision.Gate, static: bool = False
+) -> GateResult:
+    run = decision.decide_static if static else decision.decide_offline
     questions = no_questions = correct = costly = fallback = 0
     for case in cases:
-        verdict = decision.decide_offline(
-            _state(case.item, policy.site), policy, case.answers, gate
-        )
+        verdict = run(_state(case.item, policy.site), policy, case.answers, gate)
         true_bin = policy.first_match(case.item.material, case.condition).then
         asked = len(verdict.questions_asked)
         questions += asked
@@ -146,6 +149,7 @@ def run_gate(cases: Sequence[Case], policy: SitePolicy, gate: decision.Gate) -> 
         fallback += verdict.rule_id == "uncertain_fallback"
     n = max(1, len(cases))
     return GateResult(
+        system="static" if static else "adaptive",
         threshold=gate.threshold,
         e_waste_rule=gate.e_waste_alert is not None,
         runs=len(cases),
@@ -165,16 +169,18 @@ def sweep(
         for alert in (decision.E_WASTE_ALERT, None):
             gate = decision.Gate(threshold=threshold, e_waste_alert=alert)
             results.append(run_gate(cases, policy, gate))
+        results.append(run_gate(cases, policy, decision.Gate(threshold=threshold), static=True))
     return results
 
 
 def format_table(results: Sequence[GateResult]) -> str:
     lines = [
-        "gate  e-waste rule  avg questions  no questions  accuracy  costly errors  fallback",
+        "system    gate  e-waste rule  avg questions  no questions  accuracy  costly errors"
+        "  fallback",
     ]
     for r in results:
         lines.append(
-            f"{r.threshold:4.2f}  {'on ' if r.e_waste_rule else 'off'}"
+            f"{r.system:8s}  {r.threshold:4.2f}  {'on ' if r.e_waste_rule else 'off'}"
             f"           {r.avg_questions:5.2f}          {r.no_question_share:6.1%}"
             f"       {r.verdict_accuracy:6.1%}    {r.costly_error_rate:6.1%}"
             f"         {r.fallback_rate:6.1%}"
