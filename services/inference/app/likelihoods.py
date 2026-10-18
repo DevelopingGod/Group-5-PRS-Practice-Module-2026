@@ -3,8 +3,9 @@
 PROVISIONAL, HAND-SET. The local photos were collected without Q1-Q3 answers, so these tables
 are set by domain judgement, not counted from data/labels.csv. Every row sums to 1 and no cell is
 below LIKELIHOOD_FLOOR, so one unexpected answer can never rule a class out completely. When
-recorded answers exist, replace a row by counting with Laplace smoothing:
-P(answer | class) = (count + 1) / (rows of that class + number of answers).
+recorded answers exist, scripts/estimate_likelihoods.py counts them with Laplace smoothing,
+P(answer | class) = (count + 1) / (rows of that class + number of answers),
+and writes likelihoods_counted.json next to this file; its rows replace the hand-set ones at import.
 
 Which class each question informs (naive-Bayes evidence fusion, proposal 1.2):
   Q1 recycling symbol -> material   (a symbol is evidence for packaging, never a verdict)
@@ -14,7 +15,9 @@ Which class each question informs (naive-Bayes evidence fusion, proposal 1.2):
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Final
 
 from binbuddy_contracts.enums import Condition, Material, QuestionId, SittingTime, YesNoUnsure
@@ -57,9 +60,9 @@ Q1_GIVEN_MATERIAL: Final[dict[Material, Row]] = {
 _Q2_CONTAMINATED: Final[Row] = _yes_no(0.05, 0.75, 0.20)
 Q2_GIVEN_CONDITION: Final[dict[Condition, Row]] = {
     Condition.CLEAN: _yes_no(0.82, 0.03, 0.15),
-    Condition.FOOD_RESIDUE: _Q2_CONTAMINATED,
-    Condition.LEFTOVER_LIQUID: _Q2_CONTAMINATED,
-    Condition.ITEM_INSIDE: _Q2_CONTAMINATED,
+    Condition.FOOD_RESIDUE: dict(_Q2_CONTAMINATED),
+    Condition.LEFTOVER_LIQUID: dict(_Q2_CONTAMINATED),
+    Condition.ITEM_INSIDE: dict(_Q2_CONTAMINATED),
 }
 
 # Q3 "How long has it been sitting (with food or drink in it)?" given the condition.
@@ -118,3 +121,37 @@ def all_rows() -> dict[str, Row]:
         "q3/residue_dry": Q3_GIVEN_RESIDUE_DRY,
     }
     return rows
+
+
+COUNTED_PATH: Final = Path(__file__).with_name("likelihoods_counted.json")
+
+
+def check_row(name: str, row: Mapping[str, float], options: Mapping[str, float]) -> None:
+    if set(row) != set(options):
+        raise ValueError(f"{name}: answers must be {sorted(options)}, got {sorted(row)}")
+    if abs(sum(row.values()) - 1.0) > 1e-6:
+        raise ValueError(f"{name}: probabilities must sum to 1")
+    if min(row.values()) < LIKELIHOOD_FLOOR - 1e-9:
+        raise ValueError(f"{name}: no probability may be below {LIKELIHOOD_FLOOR}")
+
+
+def load_counted(path: Path = COUNTED_PATH, rows: Mapping[str, Row] | None = None) -> list[str]:
+    """Replace hand-set rows with counted ones from `path`, if it exists. Returns the row names.
+
+    `rows` defaults to the live tables; tests pass copies.
+    """
+    if not path.exists():
+        return []
+    targets = all_rows() if rows is None else rows
+    counted: dict[str, dict[str, float]] = json.loads(path.read_text(encoding="utf-8"))["rows"]
+    for name, row in counted.items():
+        if name not in targets:
+            raise ValueError(f"{path.name}: unknown row '{name}'")
+        check_row(name, row, targets[name])
+    for name, row in counted.items():
+        targets[name].clear()
+        targets[name].update(row)
+    return sorted(counted)
+
+
+COUNTED_ROWS: Final = load_counted()
