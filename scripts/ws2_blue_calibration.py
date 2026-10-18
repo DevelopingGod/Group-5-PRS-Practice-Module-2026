@@ -219,8 +219,8 @@ def main() -> None:
             sampled = rng.choice(unique, size=len(unique), replace=True)
             ids = np.concatenate([group_indices[g] for g in sampled])
             truth = np.isin(y[ids], BLUE_IDS).astype(int)
-            pb = base[ids, BLUE_IDS].sum(axis=1)
-            pc = candidate[ids, BLUE_IDS].sum(axis=1)
+            pb = base[ids][:, BLUE_IDS].sum(axis=1)
+            pc = candidate[ids][:, BLUE_IDS].sum(axis=1)
             differences.append(float(brier_score_loss(truth, pc) - brier_score_loss(truth, pb)))
         lo, hi = np.percentile(differences, [2.5, 97.5])
         return {"metric": "candidate_minus_convnext_brier", "ci95": [float(lo), float(hi)],
