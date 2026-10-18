@@ -41,7 +41,7 @@ def make_state(
             site_policy=site,
             material_scores=[MaterialScore(label=m, probability=p) for m, p in mp.items()],
             condition_scores=[ConditionScore(label=c, probability=p) for c, p in cp.items()],
-            confidence=max(mp.values()),
+            confidence=decision.bin_confidence(mp, cp, POLICIES[site]),
             signature="",
         ),
         SECRET,
@@ -96,7 +96,7 @@ def test_q3_is_stronger_evidence_for_perishable_contents() -> None:
 def test_update_keeps_distributions_valid() -> None:
     state = make_state({Material.PLASTIC: 0.6})
     for qid, ans in ((Q1, "yes"), (Q2, "no"), (Q3, "same_day")):
-        state = decision._update_belief(state, QuestionAnswer(question_id=qid, answer=ans))
+        state = decision._update_belief(state, QuestionAnswer(question_id=qid, answer=ans), HDB)
         assert sum(s.probability for s in state.material_scores) == pytest.approx(1.0)
         assert sum(s.probability for s in state.condition_scores) == pytest.approx(1.0)
     assert [a.question_id for a in state.asked] == [Q1, Q2, Q3]
@@ -104,7 +104,7 @@ def test_update_keeps_distributions_valid() -> None:
 
 def test_corroborating_answer_raises_confidence() -> None:
     state = make_state({Material.PLASTIC: 0.6, Material.TEXTILE: 0.3})
-    after = decision._update_belief(state, QuestionAnswer(question_id=Q1, answer="yes"))
+    after = decision._update_belief(state, QuestionAnswer(question_id=Q1, answer="yes"), HDB)
     assert after.confidence > state.confidence
     materials, _ = decision.beliefs(after)
     assert materials[Material.TEXTILE] < 0.3
@@ -112,8 +112,8 @@ def test_corroborating_answer_raises_confidence() -> None:
 
 def test_q2_moves_the_condition_belief() -> None:
     state = make_state({Material.PLASTIC: 0.9})
-    yes = decision._update_belief(state, QuestionAnswer(question_id=Q2, answer="yes"))
-    no = decision._update_belief(state, QuestionAnswer(question_id=Q2, answer="no"))
+    yes = decision._update_belief(state, QuestionAnswer(question_id=Q2, answer="yes"), HDB)
+    no = decision._update_belief(state, QuestionAnswer(question_id=Q2, answer="no"), HDB)
     assert decision.beliefs(yes)[1][Condition.CLEAN] > 0.5
     assert decision.beliefs(no)[1][Condition.CLEAN] < 0.05
 
@@ -195,7 +195,13 @@ def test_unrinsed_container_is_general_waste_with_a_tip() -> None:
     _, verdict = run(make_state({Material.PLASTIC: 0.95}), {Q1: "yes", Q2: "no", Q3: "x"})
     assert verdict.bin_key == "general_waste"
     assert verdict.tip is not None
-    assert "q2_cleaned=no" in verdict.rule_trace
+    assert verdict.rule_trace == [
+        "Looks like plastic (98% sure)",
+        "Probably not clean (99% likely)",
+        "You see a recycling symbol",
+        "Not rinsed",
+        "Container food residue rule, so: General waste",
+    ]
 
 
 def test_styrofoam_needs_no_questions_and_is_general_waste() -> None:
@@ -245,3 +251,20 @@ def test_campus_sends_clean_cans_to_the_cans_bin() -> None:
     state = make_state({Material.METAL: 0.95}, site="campus_example")
     _, verdict = run(state, {Q1: "yes", Q2: "yes", Q3: "under_1_hour"}, campus)
     assert verdict.bin_key == "cans_glass_bin"
+
+
+def test_unsure_condition_leans_to_general_waste() -> None:
+    """Condition unknown: the most likely bin is general waste, never a tie-break to clean."""
+    materials, conditions = decision.beliefs(make_state({Material.PLASTIC: 0.95}))
+    best = decision.decide(materials, conditions, HDB)
+    assert best.bin_key == "general_waste" and best.condition is not Condition.CLEAN
+
+
+def test_state_confidence_tracks_the_verdict_bin() -> None:
+    """The app's confidence meter reads state.confidence; it must move towards the verdict."""
+    state = make_state({Material.PLASTIC: 0.95})
+    for qid, ans in ((Q1, "yes"), (Q2, "yes")):
+        state = decision.answer(state, QuestionAnswer(question_id=qid, answer=ans), SECRET, HDB)
+    _, verdict = decision.step(state, HDB)
+    assert verdict is not None and verdict.bin_key == "blue_bin"
+    assert state.confidence == pytest.approx(verdict.confidence)

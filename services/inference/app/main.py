@@ -127,7 +127,7 @@ def predict(body: PredictRequest) -> PredictResponse:
             analysis=analysis,
             verdict=decision.abstain(site_policy, analysis.confidence),
         )
-    state = decision.new_state(scan_id, body.site_policy, analysis, settings().state_secret)
+    state = decision.new_state(scan_id, analysis, site_policy, settings().state_secret)
     question, verdict = decision.step(state, site_policy)
     return PredictResponse(
         scan_id=scan_id,

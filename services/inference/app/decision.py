@@ -3,13 +3,14 @@
 Belief. DecisionState keeps two distributions: material (calibrated, from the vision model) and
 condition (uniform from the vision model, which never judges cleanliness). Each answer updates
 one of them by naive-Bayes evidence fusion with the likelihoods in app/likelihoods.py:
-Q1 updates the material, Q2 and Q3 update the condition. `state.confidence` is the top material
-probability.
+Q1 updates the material, Q2 and Q3 update the condition.
 
 Confidence in a verdict is measured on the bin, not the material. Every (material, condition)
 pair maps to a bin through the site policy, so P(bin) is the sum of P(material) * P(condition)
-over the pairs that lead to it. The verdict follows the most likely pair, and its confidence is
-the probability of that pair's bin. A confident styrofoam is settled without questions (every
+over the pairs that lead to it. The verdict names the most likely bin, with the rule of the most
+likely pair inside that bin, and its confidence is that bin's probability (so an item that may or
+may not be clean leans to general waste). `state.confidence` carries the same number, so the app's
+confidence meter moves with each answer. A confident styrofoam is settled without questions (every
 condition leads to general waste); a confident plastic is not (its condition decides the bin).
 
 Gate (proposal 1.2 and the WS1 handoff):
@@ -20,6 +21,8 @@ Gate (proposal 1.2 and the WS1 handoff):
   - Q1 always opens; then the remaining question with the largest expected entropy reduction
     of the bin distribution; at most three questions;
   - still not settled when the bank is exhausted: general waste plus the NEA link.
+
+Every verdict carries a plain-English rule trace (shown in the app as "How Bin Buddy decided").
 """
 
 from __future__ import annotations
@@ -55,6 +58,31 @@ RECYCLABLE_MATERIALS: Final = frozenset(
 # items on the team test photos, with 6 false flags).
 E_WASTE_ALERT: Final = 0.20
 FOLLOW_UP_QUESTIONS: Final = (QuestionId.Q2_CLEANED, QuestionId.Q3_SITTING_TIME)
+
+# Rule-trace wording (user-facing: short, plain, never blaming the user).
+MATERIAL_WORDS: Final[dict[Material, str]] = {
+    Material.PAPER: "paper or cardboard",
+    Material.PLASTIC: "plastic",
+    Material.GLASS: "glass",
+    Material.METAL: "metal",
+    Material.BEVERAGE_CARTON: "a drink carton",
+    Material.STYROFOAM: "styrofoam",
+    Material.E_WASTE: "an electronic item",
+    Material.TEXTILE: "clothing or textile",
+    Material.FOOD_WASTE: "food waste",
+    Material.OTHER_GENERAL: "a general-waste item",
+}
+ANSWER_WORDS: Final[dict[tuple[QuestionId, str], str]] = {
+    (QuestionId.Q1_RECYCLING_SYMBOL, "yes"): "You see a recycling symbol",
+    (QuestionId.Q1_RECYCLING_SYMBOL, "no"): "No recycling symbol",
+    (QuestionId.Q1_RECYCLING_SYMBOL, "not_sure"): "Not sure about a recycling symbol",
+    (QuestionId.Q2_CLEANED, "yes"): "Rinsed",
+    (QuestionId.Q2_CLEANED, "no"): "Not rinsed",
+    (QuestionId.Q2_CLEANED, "not_sure"): "Not sure if it was rinsed",
+    (QuestionId.Q3_SITTING_TIME, "under_1_hour"): "Used less than an hour ago",
+    (QuestionId.Q3_SITTING_TIME, "same_day"): "Used earlier today",
+    (QuestionId.Q3_SITTING_TIME, "more_than_1_day"): "Left for more than a day",
+}
 
 K = TypeVar("K")
 Materials = dict[Material, float]
@@ -95,13 +123,17 @@ def verify_signature(state: DecisionState, secret: bytes) -> None:
         raise InvalidStateError("state signature is invalid (state was modified)")
 
 
-def new_state(scan_id: UUID, site: str, analysis: VisionAnalysis, secret: bytes) -> DecisionState:
+def new_state(
+    scan_id: UUID, analysis: VisionAnalysis, policy: SitePolicy, secret: bytes
+) -> DecisionState:
+    materials = {s.label: s.probability for s in analysis.material_scores}
+    conditions = {s.label: s.probability for s in analysis.condition_scores}
     unsigned = DecisionState(
         scan_id=scan_id,
-        site_policy=site,
+        site_policy=policy.site,
         material_scores=analysis.material_scores,
         condition_scores=analysis.condition_scores,
-        confidence=analysis.confidence,
+        confidence=bin_confidence(materials, conditions, policy),
         signature="",
     )
     return sign(unsigned, secret)
@@ -148,7 +180,7 @@ def _answer_probability(
     return sum(p * lik[c] for c, p in conditions.items())
 
 
-def _update_belief(state: DecisionState, qa: QuestionAnswer) -> DecisionState:
+def _update_belief(state: DecisionState, qa: QuestionAnswer, policy: SitePolicy) -> DecisionState:
     materials, conditions = _posterior(*beliefs(state), qa.question_id, qa.answer)
     return state.model_copy(
         update={
@@ -160,7 +192,7 @@ def _update_belief(state: DecisionState, qa: QuestionAnswer) -> DecisionState:
                 ConditionScore(label=s.label, probability=conditions[s.label])
                 for s in state.condition_scores
             ],
-            "confidence": max(materials.values()),
+            "confidence": bin_confidence(materials, conditions, policy),
             "asked": [*state.asked, qa],
         }
     )
@@ -195,15 +227,28 @@ def bin_distribution(
     return dist
 
 
-def most_likely_pair(materials: Materials, conditions: Conditions) -> tuple[Material, Condition]:
-    return max(materials, key=materials.__getitem__), max(conditions, key=conditions.__getitem__)
+@dataclass(frozen=True)
+class Decision:
+    bin_key: str
+    confidence: float  # P(bin_key)
+    material: Material  # the most likely (material, condition) pair leading to bin_key
+    condition: Condition
+
+
+def decide(materials: Materials, conditions: Conditions, policy: SitePolicy) -> Decision:
+    """The most likely bin, and the most likely pair that leads to it (whose rule is shown)."""
+    dist = bin_distribution(materials, conditions, policy)
+    key = max(dist, key=dist.__getitem__)
+    table = _bin_table(policy)
+    material, condition = max(
+        ((m, c) for m in materials for c in conditions if table[m, c] == key),
+        key=lambda mc: materials[mc[0]] * conditions[mc[1]],
+    )
+    return Decision(key, min(1.0, dist[key]), material, condition)
 
 
 def bin_confidence(materials: Materials, conditions: Conditions, policy: SitePolicy) -> float:
-    """Probability of the bin the verdict would name (the most likely pair's bin)."""
-    material, condition = most_likely_pair(materials, conditions)
-    key = _bin_table(policy)[material, condition]
-    return min(1.0, bin_distribution(materials, conditions, policy)[key])
+    return decide(materials, conditions, policy).confidence
 
 
 def _expected_information_gain(
@@ -278,11 +323,31 @@ def _next_question(
 # ------------------------------------------------------------------------------ verdict
 
 
+def _evidence_trace(
+    materials: Materials,
+    conditions: Conditions,
+    material: Material,
+    condition: Condition,
+    asked: list[QuestionAnswer],
+    policy: SitePolicy,
+) -> list[str]:
+    """What the photo showed and what the user said, in plain words."""
+    trace = [f"Looks like {MATERIAL_WORDS[material]} ({materials[material]:.0%} sure)"]
+    if len({_bin_table(policy)[material, c] for c in Condition}) == 1:
+        trace.append("Clean or not, it goes in the same bin")
+    elif condition is Condition.CLEAN:
+        trace.append(f"Probably clean ({conditions[Condition.CLEAN]:.0%} likely)")
+    else:
+        trace.append(f"Probably not clean ({1.0 - conditions[Condition.CLEAN]:.0%} likely)")
+    trace += [ANSWER_WORDS[a.question_id, a.answer] for a in asked]
+    return trace
+
+
 def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) -> VerdictResult:
     materials, conditions = beliefs(state)
-    material, condition = most_likely_pair(materials, conditions)
-    confidence = bin_confidence(materials, conditions, policy)
-    answers = [f"{a.question_id.value}={a.answer}" for a in state.asked]
+    best = decide(materials, conditions, policy)
+    material, condition, confidence = best.material, best.condition, best.confidence
+    evidence = _evidence_trace(materials, conditions, material, condition, state.asked, policy)
     if uncertain:
         spec = policy.bin(policy.uncertain_fallback)
         return VerdictResult(
@@ -290,16 +355,13 @@ def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) ->
             bin_key=spec.key,
             bin_label=spec.label,
             bin_colour=spec.colour,
-            reason="Still uncertain after all questions; general waste avoids contaminating "
-            "the blue bin.",
+            reason="Still not sure after all the questions. General waste avoids contaminating "
+            "the recycling.",
             rule_id="uncertain_fallback",
             rule_trace=[
-                f"material={material.value} ({materials[material]:.2f})",
-                f"condition={condition.value} ({conditions[condition]:.2f})",
-                *answers,
-                f"confidence={confidence:.2f}",
-                "bank exhausted",
-                "fallback",
+                *evidence,
+                f"Only {confidence:.0%} sure after {len(state.asked)} questions",
+                f"When unsure, so: {spec.label}",
             ],
             source_url=policy.abstain_source_url,
             confidence=confidence,
@@ -307,6 +369,7 @@ def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) ->
         )
     rule = policy.first_match(material, condition)
     spec = policy.bin(rule.then)
+    rule_name = rule.id.replace("_", " ").capitalize()
     return VerdictResult(
         channel=spec.channel,
         bin_key=spec.key,
@@ -315,12 +378,7 @@ def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) ->
         reason=rule.reason,
         tip=rule.tip,
         rule_id=rule.id,
-        rule_trace=[
-            f"material={material.value} ({materials[material]:.2f})",
-            f"condition={condition.value} ({conditions[condition]:.2f})",
-            *answers,
-            f"rule={rule.id}",
-        ],
+        rule_trace=[*evidence, f"{rule_name} rule, so: {spec.label}"],
         source_url=rule.source_url,
         confidence=confidence,
         questions_asked=state.asked,
@@ -361,7 +419,7 @@ def answer(
     expected = _next_question(state, policy, gate)
     if qa.question_id != expected:
         raise InvalidStateError(f"expected an answer to {expected}, got {qa.question_id}")
-    return sign(_update_belief(state, qa), secret)
+    return sign(_update_belief(state, qa, policy), secret)
 
 
 def decide_offline(
@@ -375,5 +433,6 @@ def decide_offline(
     `answers` holds the answer the user would give to each question that gets asked.
     """
     while (qid := _next_question(state, policy, gate)) is not None:
-        state = _update_belief(state, QuestionAnswer(question_id=qid, answer=answers[qid]))
+        qa = QuestionAnswer(question_id=qid, answer=answers[qid])
+        state = _update_belief(state, qa, policy)
     return verdict_for(state, policy, uncertain=not is_settled(state, policy, gate))
