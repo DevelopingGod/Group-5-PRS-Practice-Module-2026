@@ -98,7 +98,7 @@ def main() -> None:
     scores = []
     for w in weights:
         mixed = w * pc + (1 - w) * ps
-        scores.append((w, metrics(y[meta & local], mixed)))
+        scores.append((w, metrics(y[meta & local], mixed[meta & local])))
     selected = max(scores, key=lambda item: (item[1]["macro_f1"], -item[1]["costly_error_count"]))[0]
     methods = {
         "convnext": pc,
