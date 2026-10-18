@@ -23,11 +23,14 @@ def write_predictions(path: Path) -> None:
     ]
     with path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.writer(fh)
-        writer.writerow(["path", "split", "material", *(f"p_{m.value}" for m in Material)])
+        writer.writerow(
+            ["path", "source", "split", "material", *(f"p_{m.value}" for m in Material)]
+        )
         for i, (split, true, top, p) in enumerate(rows):
             rest = (1.0 - p) / (len(Material) - 1)
             probs = [p if m is top else rest for m in Material]
-            writer.writerow([f"img{i}.jpg", split, true.value, *probs])
+            source = "local" if i % 2 == 0 else "trashnet"
+            writer.writerow([f"img{i}.jpg", source, split, true.value, *probs])
 
 
 def test_load_items_keeps_one_split(tmp_path: Path) -> None:
@@ -86,3 +89,9 @@ def test_main_writes_json(tmp_path: Path) -> None:
         main(["--predictions", str(tmp_path / "p.csv"), "--repeats", "2", "--out", str(out)]) == 0
     )
     assert len(json.loads(out.read_text())["results"]) == 12
+
+
+def test_source_filter(tmp_path: Path) -> None:
+    write_predictions(tmp_path / "p.csv")
+    local = load_items(tmp_path / "p.csv", "val", "local")
+    assert [i.material for i in local] == [Material.PLASTIC, Material.E_WASTE]

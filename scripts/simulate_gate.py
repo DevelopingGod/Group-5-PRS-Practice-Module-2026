@@ -72,12 +72,14 @@ class GateResult:
     fallback_rate: float
 
 
-def load_items(path: Path, split: str) -> list[Item]:
+def load_items(path: Path, split: str, source: str | None = None) -> list[Item]:
     items: list[Item] = []
     known = {m.value for m in Material}
     with path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
             if row["split"] != split or row["material"] not in known:
+                continue
+            if source is not None and row.get("source") != source:
                 continue
             probs = {m: max(0.0, float(row[f"p_{m.value}"])) for m in Material}
             total = sum(probs.values())
@@ -192,6 +194,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--predictions", type=Path, required=True)
     ap.add_argument("--split", default="val", help="tune on validation rows, never on test")
+    ap.add_argument("--source", help="only rows from this source, e.g. local (team photos)")
     ap.add_argument("--policy", default=DEFAULT_SITE_POLICY)
     ap.add_argument("--thresholds", type=float, nargs="+", default=[0.6, 0.7, 0.8, 0.9])
     ap.add_argument("--repeats", type=int, default=4, help="simulated users per photo")
@@ -201,13 +204,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     policy = load_policies(REPO_ROOT / "policies")[args.policy]
-    items = load_items(args.predictions, args.split)
+    items = load_items(args.predictions, args.split, args.source)
     if not items:
         print(f"no rows in split '{args.split}' of {args.predictions}")
         return 1
     cases = make_cases(items, args.repeats, args.clean_share, args.seed)
     results = sweep(cases, policy, args.thresholds)
-    print(f"{len(items)} photos x {args.repeats} simulated users, policy {policy.site}")
+    where = f"source {args.source}" if args.source else "all sources"
+    print(
+        f"{len(items)} {args.split} photos ({where}) x {args.repeats} simulated users,"
+        f" {policy.site}"
+    )
     print(format_table(results))
     if args.out:
         meta = {k: str(v) for k, v in vars(args).items()}
