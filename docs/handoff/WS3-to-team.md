@@ -1,7 +1,7 @@
 # WS3 report to the team: adaptive questions and policy
 
 **From:** Baral Diwash (WS3 Ask and Decide) · **Date:** 19 Oct 2026 · **Branch:** `ws3/adaptive-decision-flow`
-(local, PR to follow) · Full design notes: [`docs/workstreams/WS3_ask_decide.md`](../workstreams/WS3_ask_decide.md)
+([PR #13](https://github.com/DevelopingGod/Group-5-PRS-Practice-Module-2026/pull/13)) · Full design notes: [`docs/workstreams/WS3_ask_decide.md`](../workstreams/WS3_ask_decide.md)
 
 ## Status
 
