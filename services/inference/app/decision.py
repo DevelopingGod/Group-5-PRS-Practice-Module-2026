@@ -350,6 +350,11 @@ def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) ->
     evidence = _evidence_trace(materials, conditions, material, condition, state.asked, policy)
     if uncertain:
         spec = policy.bin(policy.uncertain_fallback)
+        # The confidence shown is for the bin recommended, not for the best guess that fell short.
+        doubt = f"Only {confidence:.0%} sure after {len(state.asked)} questions"
+        if best.bin_key != spec.key:
+            doubt = f"Best guess {policy.bin(best.bin_key).label}, only {confidence:.0%} sure"
+            confidence = bin_distribution(materials, conditions, policy).get(spec.key, 0.0)
         return VerdictResult(
             channel=spec.channel,
             bin_key=spec.key,
@@ -360,7 +365,7 @@ def verdict_for(state: DecisionState, policy: SitePolicy, *, uncertain: bool) ->
             rule_id="uncertain_fallback",
             rule_trace=[
                 *evidence,
-                f"Only {confidence:.0%} sure after {len(state.asked)} questions",
+                doubt,
                 f"When unsure, so: {spec.label}",
             ],
             source_url=policy.abstain_source_url,

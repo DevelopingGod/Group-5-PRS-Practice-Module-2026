@@ -236,6 +236,15 @@ def test_still_uncertain_falls_back_to_general_waste_with_nea_link() -> None:
     assert verdict.source_url == HDB.abstain_source_url
 
 
+def test_fallback_confidence_is_for_the_bin_recommended() -> None:
+    # Rinsed but left since earlier today: the blue bin is the best guess, yet not sure enough.
+    state = make_state({Material.PLASTIC: 0.6})
+    _, verdict = run(state, {Q1: "yes", Q2: "yes", Q3: "same_day"})
+    assert verdict.rule_id == "uncertain_fallback"
+    assert verdict.rule_trace[-2] == "Best guess Blue recycling bin, only 77% sure"
+    assert verdict.confidence == pytest.approx(0.21, abs=0.01)
+
+
 @pytest.mark.parametrize("site", sorted(POLICIES))
 def test_engine_matches_first_match_for_every_pair(site: str) -> None:
     policy = POLICIES[site]
