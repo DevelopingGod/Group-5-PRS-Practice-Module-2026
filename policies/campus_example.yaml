@@ -1,7 +1,10 @@
 # EXAMPLE multi-stream site (proposal 1.3: colour-coded bins). Owner: WS3.
-# Illustrates the configurable-policy mechanism; bin colours are placeholders.
+# Demonstrates the configurable-policy mechanism: the same edge cases as hdb_default.yaml, but clean
+# recyclables are split across paper, plastic and cans/glass bins. Bin colours are placeholders
+# until the demonstration bins are set up.
+# Rules are checked top to bottom; the first match wins. Every material/condition pair must be covered.
 site: campus_example
-version: 0.1.0
+version: 0.2.0
 description: Example campus with colour-coded paper, plastic and cans/glass bins.
 uncertain_fallback: general_waste
 abstain_source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
@@ -34,29 +37,81 @@ rules:
   - id: e_waste_items
     when: { materials: [e_waste] }
     then: e_waste_point
-    reason: Electronics go to e-waste collection.
+    reason: Small electronic appliances and light bulbs are commonly misclassified; they are recyclable through e-waste collection, not the recycling bins.
+    source_url: https://asianews.network/unsure-if-you-can-recycle-a-frying-pan-ask-neas-new-ai-chatbot/
+
   - id: textiles
     when: { materials: [textile] }
     then: donation
-    reason: Donate clothing or use another channel.
-  - id: not_recyclable_materials
-    when: { materials: [styrofoam, food_waste, other_general] }
+    reason: Old clothing does not go in the recycling bins; donate it or use another channel.
+    source_url: https://asianews.network/unsure-if-you-can-recycle-a-frying-pan-ask-neas-new-ai-chatbot/
+
+  - id: styrofoam
+    when: { materials: [styrofoam] }
     then: general_waste
-    reason: This item is not recyclable here.
-  - id: contaminated
-    when: { conditions: [food_residue, leftover_liquid, item_inside] }
+    reason: Styrofoam is not accepted in the recycling bins, even with a recycling symbol.
+    source_url: https://www.c3a.org.sg/node/26053
+
+  - id: food_waste
+    when: { materials: [food_waste] }
     then: general_waste
-    reason: Contaminated items go to general waste.
-    tip: Empty and rinse containers to recycle them.
+    reason: Food is not recyclable and contaminates the recycling bins.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: other_general
+    when: { materials: [other_general] }
+    then: general_waste
+    reason: This item is not accepted in the recycling bins.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: stained_paper
+    when: { materials: [paper], conditions: [food_residue] }
+    then: general_waste
+    reason: Oil- or food-stained paper cannot be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: wet_or_filled_paper
+    when: { materials: [paper], conditions: [leftover_liquid, item_inside] }
+    then: general_waste
+    reason: Wet or filled paper contaminates other recyclables.
+    tip: Empty it first; clean, dry paper can go in the paper bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_item_inside
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [item_inside] }
+    then: general_waste
+    reason: Food or items left inside contaminate the recycling bins.
+    tip: Empty and rinse it, and the container can be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_leftover_liquid
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [leftover_liquid] }
+    then: general_waste
+    reason: Liquid contaminates other recyclables.
+    tip: Empty and rinse it first.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
+  - id: container_food_residue
+    when: { materials: [plastic, glass, metal, beverage_carton], conditions: [food_residue] }
+    then: general_waste
+    reason: Food residue contaminates the recycling bins.
+    tip: Rinse it clean, and the container can be recycled.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
   - id: clean_paper
     when: { materials: [paper, beverage_carton], conditions: [clean] }
     then: paper_bin
-    reason: Clean paper and cartons go in the paper bin.
+    reason: Clean paper and drink cartons go in the paper bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
   - id: clean_plastic
     when: { materials: [plastic], conditions: [clean] }
     then: plastic_bin
     reason: Clean plastic goes in the plastic bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/
+
   - id: clean_cans_glass
     when: { materials: [metal, glass], conditions: [clean] }
     then: cans_glass_bin
     reason: Clean cans and glass go in the cans and glass bin.
+    source_url: https://www.cgs.gov.sg/recycleright/check-my-item/

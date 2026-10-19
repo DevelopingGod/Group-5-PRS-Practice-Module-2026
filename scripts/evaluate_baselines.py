@@ -5,6 +5,8 @@ Systems (pick with --system):
         the top material and condition and applies the HDB policy (the first matching rule).
   full  Bin Buddy end to end: /predict, then /answer with the collector's recorded Q1-Q3
         answers from data/labels.csv, until a verdict.
+  static Baseline 2: /predict, then all three recorded answers every time and the rules
+        (app/decision.py decide_static, run in-process), to compare against adaptive questions.
   vlm   Baseline 3: a general-purpose vision-language model given the same photo, as a proxy for
         chatbot-style tools. Any OpenAI-compatible chat-completions server works (a local
         Ollama or LM Studio server, or a hosted API): --vlm-base-url and --vlm-model; the key,
@@ -40,9 +42,12 @@ from typing import Any
 
 from PIL import Image, ImageOps
 
-# The ml helpers are not installed as a package; put them on the path like the tests do.
+# The ml helpers and the model API are not installed as packages; put them on the path like the
+# tests do.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ml"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services" / "inference"))
 
+from app import decision
 from binbuddy_contracts.api import (
     AnswerResponse,
     DecisionState,
@@ -200,6 +205,24 @@ def _from_verdict(verdict: VerdictResult, questions: int) -> Prediction:
     return Prediction(bin_key=verdict.bin_key, questions=questions, note=verdict.rule_id)
 
 
+def condition_from_rule(policy: SitePolicy, rule_id: str) -> Condition | None:
+    """The condition the decision settled on, read from the rule it applied.
+
+    The vision model never judges cleanliness (its condition scores are uniform), so for the
+    systems that ask questions the condition comes from the verdict: a rule limited to clean
+    items means clean, a rule limited to contaminated conditions means contaminated, and the
+    uncertain fallback means "treated as contaminated". Rules that ignore the condition give None.
+    """
+    if rule_id == "uncertain_fallback":
+        return Condition.FOOD_RESIDUE
+    rule = next((r for r in policy.rules if r.id == rule_id), None)
+    if rule is None or rule.when.conditions is None:
+        return None
+    if Condition.CLEAN in rule.when.conditions:
+        return Condition.CLEAN if len(rule.when.conditions) == 1 else None
+    return rule.when.conditions[0]
+
+
 # ------------------------------------------------------------------------------ systems
 
 
@@ -258,7 +281,33 @@ def run_full(post: Post, image_b64: str, row: LabelRow, policy: SitePolicy) -> P
         asked += 1
     assert step.verdict is not None
     pred = _from_verdict(step.verdict, asked)
-    pred.material, pred.condition = material, condition
+    pred.material = material
+    pred.condition = condition_from_rule(policy, step.verdict.rule_id) or condition
+    return pred
+
+
+def run_static(post: Post, image_b64: str, row: LabelRow, policy: SitePolicy) -> Prediction:
+    res = PredictResponse.model_validate(
+        post("/predict", {"image_base64": image_b64, "site_policy": policy.site})
+    )
+    if res.status is ResponseStatus.RETAKE or res.analysis is None:
+        return Prediction(questions=0, note="retake")
+    material = _top(res.analysis.material_scores)
+    if res.analysis.is_ood:
+        return Prediction(material, None, None, 0, "ood")
+    state = DecisionState(
+        scan_id=res.scan_id,
+        site_policy=policy.site,
+        material_scores=res.analysis.material_scores,
+        condition_scores=res.analysis.condition_scores,
+        confidence=res.analysis.confidence,
+        signature="offline",
+    )
+    answers = {qid: recorded_answer(row, qid) for qid in QuestionId}
+    verdict = decision.decide_static(state, policy, answers)
+    pred = _from_verdict(verdict, len(verdict.questions_asked))
+    pred.material = material
+    pred.condition = condition_from_rule(policy, verdict.rule_id)
     return pred
 
 
@@ -370,11 +419,11 @@ def write_outputs(out: Path, records: Sequence[Record], summary: dict[str, Any])
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
-    ap.add_argument("--system", choices=["cnn", "full", "vlm"], required=True)
+    ap.add_argument("--system", choices=["cnn", "full", "static", "vlm"], required=True)
     ap.add_argument("--split", choices=[s.value for s in Split], default=Split.TEST.value)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--limit", type=int, default=None, help="only the first N photos")
-    ap.add_argument("--model-api", default="http://localhost:7860", help="for cnn and full")
+    ap.add_argument("--model-api", default="http://localhost:7860", help="for cnn, full and static")
     ap.add_argument("--vlm-base-url", help="OpenAI-compatible base URL, e.g. .../v1")
     ap.add_argument("--vlm-model", help="model name on that server")
     ap.add_argument("--timeout", type=float, default=120.0, help="seconds per call")
@@ -402,7 +451,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         api_post = http_post(args.model_api, args.timeout)
         meta["model_api"] = args.model_api
         meta["model_version"] = http_get_json(args.model_api.rstrip("/") + "/version", 120.0)
-        run = run_cnn if args.system == "cnn" else run_full
+        run = {"cnn": run_cnn, "full": run_full, "static": run_static}[args.system]
         system = lambda img, row: run(api_post, img, row, policy)  # noqa: E731
 
     records = evaluate(rows, lambda row: image_base64(photo_path(row.drive_path)), system)

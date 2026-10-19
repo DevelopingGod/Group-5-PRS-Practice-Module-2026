@@ -127,7 +127,7 @@ def predict(body: PredictRequest) -> PredictResponse:
             analysis=analysis,
             verdict=decision.abstain(site_policy, analysis.confidence),
         )
-    state = decision.new_state(scan_id, body.site_policy, analysis, settings().state_secret)
+    state = decision.new_state(scan_id, analysis, site_policy, settings().state_secret)
     question, verdict = decision.step(state, site_policy)
     return PredictResponse(
         scan_id=scan_id,
@@ -145,7 +145,7 @@ def predict(body: PredictRequest) -> PredictResponse:
 def answer(body: AnswerRequest) -> AnswerResponse:
     site_policy = policy(body.state.site_policy)
     try:
-        state = decision.answer(body.state, body.answer, settings().state_secret)
+        state = decision.answer(body.state, body.answer, settings().state_secret, site_policy)
     except decision.InvalidStateError as exc:
         raise ApiError(400, ErrorCode.INVALID_STATE, str(exc)) from exc
     question, verdict = decision.step(state, site_policy)
