@@ -283,19 +283,25 @@ def _must_ask_q2(state: DecisionState, materials: Materials) -> bool:
     return top in RECYCLABLE_MATERIALS and QuestionId.Q2_CLEANED not in _asked(state)
 
 
-def _possible_e_waste(materials: Materials, gate: Gate) -> bool:
-    """WS1 handoff: e-waste is a likely runner-up, so do not settle on another bin yet."""
-    if gate.e_waste_alert is None:
+def _possible_e_waste(
+    materials: Materials, conditions: Conditions, policy: SitePolicy, gate: Gate
+) -> bool:
+    """WS1 handoff: e-waste is a likely runner-up, so do not settle on another bin yet.
+
+    Only a winning e-waste bin is exempt. E-waste can be the top material while the other
+    materials together send the item to another bin (e.g. general waste).
+    """
+    if gate.e_waste_alert is None or materials[Material.E_WASTE] <= gate.e_waste_alert:
         return False
-    top = max(materials, key=materials.__getitem__)
-    return top is not Material.E_WASTE and materials[Material.E_WASTE] > gate.e_waste_alert
+    best = decide(materials, conditions, policy).bin_key
+    return policy.bin(best).channel is not Channel.E_WASTE
 
 
 def is_settled(state: DecisionState, policy: SitePolicy, gate: Gate = DEFAULT_GATE) -> bool:
     materials, conditions = beliefs(state)
     if _must_ask_q2(state, materials):
         return False
-    if _possible_e_waste(materials, gate):
+    if _possible_e_waste(materials, conditions, policy, gate):
         return False
     return bin_confidence(materials, conditions, policy) >= gate.threshold
 

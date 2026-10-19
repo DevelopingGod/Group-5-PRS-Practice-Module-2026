@@ -38,10 +38,13 @@ def test_observations_group_answers_by_row() -> None:
     assert "q3/residue_dry" not in seen
 
 
-def test_smoothing_never_rules_an_answer_out() -> None:
-    row_ = smoothed(["yes"] * 200, ["yes", "no", "not_sure"])
-    assert sum(row_.values()) == pytest.approx(1.0, abs=1e-3)
-    assert min(row_.values()) >= likelihoods.LIKELIHOOD_FLOOR - 1e-4
+@pytest.mark.parametrize("n", [5, 200, 10_000])
+def test_smoothing_never_rules_an_answer_out(n: int) -> None:
+    # Many identical answers leave the others below the floor before it is applied.
+    hand_set = likelihoods.all_rows()["q1/plastic"]
+    row_ = smoothed(["yes"] * n, list(hand_set))
+    likelihoods.check_row("q1/plastic", row_, hand_set)
+    assert row_["no"] == row_["not_sure"] >= likelihoods.LIKELIHOOD_FLOOR
 
 
 def test_rows_need_enough_answers() -> None:

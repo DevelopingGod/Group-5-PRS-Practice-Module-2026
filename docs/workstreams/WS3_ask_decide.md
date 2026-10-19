@@ -43,8 +43,9 @@ likely bin, with the rule of the most likely pair inside it. Consequences:
 **Gate.** Settled when P(verdict bin) ≥ `CONFIDENCE_THRESHOLD` (0.80), except:
 - **D-003:** a recyclable top material (paper, plastic, glass, metal, carton) is never settled before
   Q2, because the camera cannot see whether it is clean;
-- **e-waste rule** (WS1 handoff): not settled on another bin while P(e_waste) > 0.2. At a 0.80 gate this
-  is redundant (no other bin can then reach 80%); it matters if the gate is tuned lower.
+- **e-waste rule** (WS1 handoff): while P(e_waste) > 0.2, not settled unless the most likely bin is
+  the e-waste one (e-waste can be the top material while the rest adds up to general waste). At a
+  0.80 gate this is redundant (no other bin can then reach 80%); it matters if the gate is tuned lower.
 
 **Questions.** Q1 always opens. The follow-up is Q2 when D-003 applies, otherwise whichever of Q2/Q3
 has the larger expected entropy reduction of P(bin). At most three questions. Still not settled when
@@ -82,7 +83,9 @@ uv run python scripts/evaluate_baselines.py --system static --split test --out r
 ```
 
 `simulate_gate.py` simulates the condition and the answers from the likelihood tables, so it compares
-gate settings and adaptive vs static; it does not test the tables themselves.
+gate settings and adaptive vs static; it does not test the tables themselves. Its costly-error rate
+uses the same definition as `evaluate_baselines.py`: of the items whose true bin is not a recycling
+bin, the share sent to one.
 
 ## Definition of done
 - [x] Never more than three questions; a tampered state is rejected

@@ -52,25 +52,28 @@ def observations(rows: Iterable[LabelRow]) -> dict[str, list[str]]:
 
 
 def smoothed(answers: Sequence[str], options: Sequence[str]) -> dict[str, float]:
-    """Laplace-smoothed frequencies, floored at LIKELIHOOD_FLOOR and renormalised."""
+    """Laplace-smoothed frequencies, rounded, with every answer at least LIKELIHOOD_FLOOR.
+
+    Renormalising after flooring would push small answers back under the floor, so the most
+    common answer pays instead: it absorbs the amount added by flooring and the rounding remainder.
+    """
     n, k = len(answers), len(options)
-    row = {a: (answers.count(a) + 1) / (n + k) for a in options}
-    floored = {a: max(p, likelihoods.LIKELIHOOD_FLOOR) for a, p in row.items()}
-    total = sum(floored.values())
-    return {a: round(p / total, 4) for a, p in floored.items()}
+    row = {
+        a: max(round((answers.count(a) + 1) / (n + k), 4), likelihoods.LIKELIHOOD_FLOOR)
+        for a in options
+    }
+    top = max(row, key=row.__getitem__)
+    row[top] = round(row[top] + 1.0 - sum(row.values()), 4)
+    return row
 
 
 def estimate(rows: Iterable[LabelRow], min_count: int) -> dict[str, dict[str, float]]:
     hand_set = likelihoods.all_rows()
-    counted: dict[str, dict[str, float]] = {}
-    for name, answers in sorted(observations(rows).items()):
-        if len(answers) >= min_count:
-            row = smoothed(answers, list(hand_set[name]))
-            # Rounding can leave the sum a hair off 1; put the remainder on the largest answer.
-            top = max(row, key=row.__getitem__)
-            row[top] = round(row[top] + 1.0 - sum(row.values()), 4)
-            counted[name] = row
-    return counted
+    return {
+        name: smoothed(answers, list(hand_set[name]))
+        for name, answers in sorted(observations(rows).items())
+        if len(answers) >= min_count
+    }
 
 
 def report(counted: dict[str, dict[str, float]], seen: dict[str, list[str]]) -> str:

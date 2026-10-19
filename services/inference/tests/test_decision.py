@@ -228,6 +228,22 @@ def test_possible_e_waste_blocks_a_lower_gate() -> None:
     assert decision.is_settled(state, HDB, decision.Gate(threshold=0.6, e_waste_alert=None))
 
 
+def test_top_e_waste_material_does_not_bypass_the_e_waste_rule() -> None:
+    # E-waste is the top material, yet the rest adds up to general waste (0.65).
+    state = make_state(
+        {
+            Material.E_WASTE: 0.35,
+            Material.STYROFOAM: 0.30,
+            Material.FOOD_WASTE: 0.20,
+            Material.OTHER_GENERAL: 0.15,
+        }
+    )
+    low = decision.Gate(threshold=0.6)
+    assert decision.bin_confidence(*decision.beliefs(state), HDB) >= 0.6
+    assert not decision.is_settled(state, HDB, low)
+    assert decision.is_settled(state, HDB, decision.Gate(threshold=0.6, e_waste_alert=None))
+
+
 def test_still_uncertain_falls_back_to_general_waste_with_nea_link() -> None:
     state = make_state({Material.PLASTIC: 0.5})
     _, verdict = run(state, {Q1: "not_sure", Q2: "not_sure", Q3: "under_1_hour"})

@@ -70,7 +70,10 @@ def test_sweep_reports_every_setting(tmp_path: Path) -> None:
     for r in results:
         assert r.runs == 40
         assert 0.0 <= r.avg_questions <= 3.0
-        assert 0.0 <= r.costly_error_rate <= 1.0 - r.verdict_accuracy + 1e-9
+        assert 0.0 <= r.costly_error_rate <= 1.0
+        # Every costly error is also a wrong verdict.
+        costly_runs = r.costly_error_rate * r.costly_error_base
+        assert costly_runs <= (1.0 - r.verdict_accuracy) * r.runs + 1e-9
 
 
 def test_styrofoam_misread_as_plastic_is_not_sent_to_the_blue_bin(tmp_path: Path) -> None:
@@ -95,3 +98,13 @@ def test_source_filter(tmp_path: Path) -> None:
     write_predictions(tmp_path / "p.csv")
     local = load_items(tmp_path / "p.csv", "val", "local")
     assert [i.material for i in local] == [Material.PLASTIC, Material.E_WASTE]
+
+
+def test_costly_errors_use_the_evaluator_definition(tmp_path: Path) -> None:
+    # As in evaluate_baselines.py: only runs whose true bin is not a recycling bin count.
+    write_predictions(tmp_path / "p.csv")
+    plastic = [i for i in load_items(tmp_path / "p.csv", "val") if i.material is Material.PLASTIC]
+    clean = run_gate(make_cases(plastic, 20, 1.0, 0), HDB, decision.DEFAULT_GATE)
+    assert clean.costly_error_base == 0 and clean.costly_error_rate == 0.0
+    dirty = run_gate(make_cases(plastic, 20, 0.0, 0), HDB, decision.DEFAULT_GATE)
+    assert dirty.costly_error_base == dirty.runs

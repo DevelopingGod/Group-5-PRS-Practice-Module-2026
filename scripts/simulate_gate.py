@@ -15,8 +15,9 @@ tables the decision flow uses, this compares gate settings; it does not test the
         --predictions ~/BinBuddy_Data/results/v0.2-local-data/predictions.csv
 
 Report: average questions per item, share answered without questions, verdict accuracy (against
-the policy's bin for the true material and condition), costly-error rate (sent to a recycling bin
-when the true bin is another one), and the general-waste fallback rate. Keep outputs out of git.
+the policy's bin for the true material and condition), costly-error rate and the general-waste
+fallback rate. The costly-error rate is defined as in evaluate_baselines.py: of the runs whose true
+bin is not a recycling bin, the share sent to one. Keep outputs out of git.
 """
 
 from __future__ import annotations
@@ -69,6 +70,7 @@ class GateResult:
     no_question_share: float
     verdict_accuracy: float
     costly_error_rate: float
+    costly_error_base: int  # runs whose true bin is not a recycling bin
     fallback_rate: float
 
 
@@ -139,7 +141,7 @@ def run_gate(
     cases: Sequence[Case], policy: SitePolicy, gate: decision.Gate, static: bool = False
 ) -> GateResult:
     run = decision.decide_static if static else decision.decide_offline
-    questions = no_questions = correct = costly = fallback = 0
+    questions = no_questions = correct = costly = not_recycling = fallback = 0
     for case in cases:
         verdict = run(_state(case.item, policy.site), policy, case.answers, gate)
         true_bin = policy.first_match(case.item.material, case.condition).then
@@ -147,7 +149,9 @@ def run_gate(
         questions += asked
         no_questions += asked == 0
         correct += verdict.bin_key == true_bin
-        costly += verdict.channel is Channel.RECYCLE and verdict.bin_key != true_bin
+        if policy.bin(true_bin).channel is not Channel.RECYCLE:
+            not_recycling += 1
+            costly += verdict.channel is Channel.RECYCLE
         fallback += verdict.rule_id == "uncertain_fallback"
     n = max(1, len(cases))
     return GateResult(
@@ -158,7 +162,8 @@ def run_gate(
         avg_questions=questions / n,
         no_question_share=no_questions / n,
         verdict_accuracy=correct / n,
-        costly_error_rate=costly / n,
+        costly_error_rate=costly / max(1, not_recycling),
+        costly_error_base=not_recycling,
         fallback_rate=fallback / n,
     )
 
