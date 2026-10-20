@@ -33,7 +33,7 @@ import json
 import math
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Final, TypeVar
+from typing import Final, Literal, TypeVar
 from uuid import UUID
 
 from app import likelihoods
@@ -95,6 +95,10 @@ class Gate:
 
     threshold: float = CONFIDENCE_THRESHOLD
     e_waste_alert: float | None = E_WASTE_ALERT  # None switches the e-waste rule off
+    # Ablations only (scripts/analyse_decisions.py): D-003 on or off, and how the follow-up after
+    # Q1 is chosen ("entropy" as designed, or a fixed order).
+    require_q2: bool = True
+    follow_up: Literal["entropy", "q2_first", "q3_first"] = "entropy"
 
 
 DEFAULT_GATE: Final = Gate()
@@ -277,8 +281,10 @@ def _asked(state: DecisionState) -> set[QuestionId]:
     return {a.question_id for a in state.asked}
 
 
-def _must_ask_q2(state: DecisionState, materials: Materials) -> bool:
+def _must_ask_q2(state: DecisionState, materials: Materials, gate: Gate) -> bool:
     """D-003: the camera cannot see whether a recyclable item is clean, so ask."""
+    if not gate.require_q2:
+        return False
     top = max(materials, key=materials.__getitem__)
     return top in RECYCLABLE_MATERIALS and QuestionId.Q2_CLEANED not in _asked(state)
 
@@ -299,7 +305,7 @@ def _possible_e_waste(
 
 def is_settled(state: DecisionState, policy: SitePolicy, gate: Gate = DEFAULT_GATE) -> bool:
     materials, conditions = beliefs(state)
-    if _must_ask_q2(state, materials):
+    if _must_ask_q2(state, materials, gate):
         return False
     if _possible_e_waste(materials, conditions, policy, gate):
         return False
@@ -318,8 +324,12 @@ def _next_question(
     if not remaining:
         return None
     materials, conditions = beliefs(state)
-    if _must_ask_q2(state, materials):
+    if _must_ask_q2(state, materials, gate):
         return QuestionId.Q2_CLEANED
+    if gate.follow_up == "q2_first":
+        return remaining[0]
+    if gate.follow_up == "q3_first":
+        return remaining[-1]
     # max() keeps the first of equal gains, so ties go to Q2.
     return max(
         remaining, key=lambda q: _expected_information_gain(materials, conditions, policy, q)
