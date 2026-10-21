@@ -26,7 +26,13 @@ export async function currentUserId(): Promise<string | null> {
     cookies: {
       getAll: () => store.getAll(),
       setAll: (toSet) => {
-        for (const { name, value, options } of toSet) store.set(name, value, options);
+        // Server Components cannot set cookies. proxy.ts refreshes the session before pages
+        // render, so a refresh here only happens in route handlers, which can set them.
+        try {
+          for (const { name, value, options } of toSet) store.set(name, value, options);
+        } catch {
+          // rendering a Server Component: the proxy already wrote the fresh cookies
+        }
       },
     },
   });

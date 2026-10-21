@@ -1,7 +1,8 @@
 "use client";
 
 // Capture -> reading -> (retake | questions) -> verdict, as in context.md Section 19.
-// The state machine lives in lib/scan-flow.ts; this file is presentation only.
+// The state machine lives in lib/scan-flow.ts and the scan itself in ScanProvider (so it
+// survives a tab switch); this file is presentation only.
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
@@ -19,6 +20,7 @@ import {
 } from "@/components/icons";
 import { flyReward } from "@/components/points-pill";
 import { QrScanner } from "@/components/qr-scanner";
+import { useScan } from "@/components/scan-provider";
 import { Button, CaptureButton, Notice, PhotoInput, ScanLine, Screen, at } from "@/components/ui";
 import {
   DAILY_POINTS_CAP,
@@ -30,14 +32,11 @@ import * as api from "@/lib/api-client";
 import type { BinQrPayload, VerdictResult } from "@/lib/contracts";
 import { fileToBase64Jpeg } from "@/lib/image";
 import { checkBin } from "@/lib/qr";
-import { ensureSignedIn } from "@/lib/supabase/browser";
 import { checkRows, type VerifyRouteResponse } from "@/lib/verify-record";
 import {
   NEA_CHECK_MY_ITEM,
   answerLabel,
   binColour,
-  fromAnswer,
-  fromPredict,
   issueText,
   questionsLine,
   textOn,
@@ -46,6 +45,7 @@ import {
   type ScanState,
   type VisionAnalysis,
 } from "@/lib/scan-flow";
+import { progressText, progressView, type ReadingProgress } from "@/lib/scan-progress";
 
 const WAKING_AFTER_MS = 8_000;
 
@@ -56,78 +56,27 @@ const QUESTION_SHORT: Record<keyof typeof QUESTION_BANK, string> = {
 };
 
 export function ScanFlow() {
-  const [state, setState] = useState<ScanState>({ step: "capture" });
-  // Confidence before the latest answer, so the meter can fill from it.
-  const [previousConfidence, setPreviousConfidence] = useState(0);
-  // Focus moves to each new screen's heading, except on the very first page load.
-  const [started, setStarted] = useState(false);
+  const {
+    state,
+    previousConfidence,
+    started,
+    ready,
+    progress,
+    canRetry,
+    takePhoto: onPhoto,
+    retry,
+    answer: onAnswer,
+    restart,
+  } = useScan();
 
-  // Start the anonymous (pseudonymous) session early so the first scan can be saved.
-  useEffect(() => {
-    void ensureSignedIn();
-  }, []);
-  const [lastImage, setLastImage] = useState<string | null>(null);
-  const photoUrl = state.step === "capture" ? null : state.photoUrl;
-
-  // Free the object URL when the photo changes or the component unmounts.
-  useEffect(() => {
-    return () => {
-      if (photoUrl) URL.revokeObjectURL(photoUrl);
-    };
-  }, [photoUrl]);
-
-  async function runPredict(url: string, image: string) {
-    setPreviousConfidence(0);
-    setState({ step: "reading", photoUrl: url });
-    const res = await api.predict({ image_base64: image, site_policy: DEFAULT_SITE_POLICY });
-    setState(
-      res.ok ? fromPredict(url, res.data) : { step: "error", photoUrl: url, error: res.error },
-    );
-  }
-
-  async function onPhoto(file: File) {
-    setStarted(true);
-    const url = URL.createObjectURL(file);
-    try {
-      const [image] = await Promise.all([fileToBase64Jpeg(file), ensureSignedIn()]);
-      setLastImage(image);
-      await runPredict(url, image);
-    } catch {
-      setState({
-        step: "error",
-        photoUrl: url,
-        error: { code: "invalid_image", message: "We could not read that photo. Try another one." },
-      });
-    }
-  }
-
-  async function onAnswer(value: string) {
-    if (state.step !== "question" || state.submitting) return;
-    const current = { ...state, submitting: true };
-    setState(current);
-    const res = await api.answer({
-      state: current.decision,
-      answer: { question_id: current.question.id, answer: value },
-    });
-    setPreviousConfidence(current.decision.confidence);
-    setState(
-      res.ok
-        ? fromAnswer(current, res.data)
-        : { step: "error", photoUrl: current.photoUrl, error: res.error },
-    );
-  }
-
-  const restart = () => {
-    setLastImage(null);
-    setPreviousConfidence(0);
-    setState({ step: "capture" });
-  };
+  // Until a saved step has been read from sessionStorage, keep the space without a screen.
+  if (!ready) return <div aria-busy="true" className="min-h-96" />;
 
   switch (state.step) {
     case "capture":
       return <CaptureScreen onPhoto={onPhoto} focusOnMount={started} />;
     case "reading":
-      return <ReadingScreen photoUrl={state.photoUrl} />;
+      return <ReadingScreen photoUrl={state.photoUrl} progress={progress} />;
     case "retake":
       return (
         <Screen titleId="retake-title" title="Let’s try that photo again" eyebrow="Photo check">
@@ -159,10 +108,7 @@ export function ScanFlow() {
         />
       );
     case "error": {
-      const image = lastImage;
-      const url = state.photoUrl;
       const waking = state.error.code === "model_unavailable";
-      const canRetry = waking && image !== null && url !== null;
       return (
         <div role="alert">
           <Screen
@@ -177,7 +123,7 @@ export function ScanFlow() {
               <p className="self-center">{state.error.message}</p>
             </div>
             <div className="flex flex-col gap-3" style={at(2)}>
-              {canRetry && <Button onClick={() => void runPredict(url, image)}>Try again</Button>}
+              {canRetry && <Button onClick={retry}>Try again</Button>}
               <Button variant={canRetry ? "secondary" : "primary"} onClick={restart}>
                 Start again
               </Button>
@@ -255,27 +201,81 @@ function CaptureScreen({
   );
 }
 
-function ReadingScreen({ photoUrl }: { photoUrl: string }) {
-  const [waking, setWaking] = useState(false);
+/** The time now, updated every `intervalMs` while `intervalMs` is not null. */
+function useNow(intervalMs: number | null): number {
+  const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
-    const t = setTimeout(() => setWaking(true), WAKING_AFTER_MS);
-    return () => clearTimeout(t);
-  }, []);
+    if (intervalMs === null) return;
+    const t = setInterval(() => setNow(Date.now()), intervalMs);
+    return () => clearInterval(t);
+  }, [intervalMs]);
+  return now;
+}
+
+type RowStatus = "done" | "active" | "next";
+
+function ReadingScreen({
+  photoUrl,
+  progress,
+}: {
+  photoUrl: string;
+  progress: ReadingProgress | null;
+}) {
+  const now = useNow(progress && !progress.done ? 250 : null);
+  const view = progress ? progressView(progress, now, WAKING_AFTER_MS) : null;
+  const uploaded = progress?.uploadDoneAt != null;
+  const server: RowStatus = progress?.done ? "done" : uploaded ? "active" : "next";
+  // The upload is measured; the two server steps run inside one request, so they show together.
+  const rows: { line: string; status: RowStatus }[] = [
+    { line: "Uploading photo", status: uploaded ? "done" : "active" },
+    { line: "Checking it is sharp and well lit", status: server },
+    { line: "Identifying the material", status: server },
+  ];
   return (
     <div aria-busy="true">
-      <Screen titleId="reading-title" title="Reading your photo" eyebrow="One moment" live>
+      <Screen titleId="reading-title" title="Reading your photo" eyebrow="One moment">
         <ItemFrame url={photoUrl} style={at(1)} scanning />
-        <ul className="card divide-y divide-paper px-4" style={at(2)}>
-          {["Checking it is sharp and well lit", "Identifying material and condition"].map(
-            (line) => (
-              <li key={line} className="flex items-center gap-3 py-3">
-                <Spinner className="size-5 text-bin-blue" />
-                <span>{line}</span>
-              </li>
-            ),
-          )}
+        {view && (
+          <div className="card space-y-2 p-4" style={at(2)}>
+            <div className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="font-bold">{view.label}</span>
+              <span aria-hidden className="font-heading text-lg font-bold tabular-nums">
+                {view.percent}%
+              </span>
+            </div>
+            <div
+              role="progressbar"
+              aria-label="Reading your photo"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={view.percent}
+              aria-valuetext={progressText(view)}
+              className="h-3 overflow-hidden rounded-full bg-ink/10"
+            >
+              <div
+                className="h-full rounded-full bg-bin-blue transition-[width] duration-300 ease-linear"
+                style={{ width: `${view.percent}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted">
+              {view.estimated
+                ? "After the upload this is an estimate: the server only says when it is done."
+                : "Measured as your photo uploads."}
+            </p>
+          </div>
+        )}
+        <ul className="card divide-y divide-paper px-4" style={at(3)}>
+          {rows.map(({ line, status }) => (
+            <li key={line} className="flex items-center gap-3 py-3">
+              <RowIcon status={status} />
+              <span>{line}</span>
+              <span className="sr-only">
+                {status === "done" ? "(done)" : status === "active" ? "(in progress)" : "(next)"}
+              </span>
+            </li>
+          ))}
         </ul>
-        {waking && (
+        {view?.stage === "waking" && (
           <Notice role="status">
             Waking up the model. The first scan can take up to a minute.
           </Notice>
@@ -283,6 +283,17 @@ function ReadingScreen({ photoUrl }: { photoUrl: string }) {
       </Screen>
     </div>
   );
+}
+
+function RowIcon({ status }: { status: RowStatus }) {
+  if (status === "active") return <Spinner className="size-5 shrink-0 text-bin-blue" />;
+  if (status === "done")
+    return (
+      <span className="grid size-5 shrink-0 place-items-center rounded-full bg-bin-blue text-light">
+        <CheckIcon className="size-3" />
+      </span>
+    );
+  return <span aria-hidden className="size-5 shrink-0 rounded-full border-2 border-line" />;
 }
 
 function QuestionScreen({
@@ -403,7 +414,10 @@ function VerdictScreen({
           <p>{verdict.tip}</p>
         </div>
       )}
-      {!abstain && <HeatmapFigure url={state.photoUrl} analysis={analysis} style={at(2)} />}
+      {/* Restored after a reload without a thumbnail: the verdict, without the photo. */}
+      {!abstain && state.photoUrl && (
+        <HeatmapFigure url={state.photoUrl} analysis={analysis} style={at(2)} />
+      )}
       <DecisionTrace verdict={verdict} analysis={analysis} style={at(3)} />
       <a
         className="card flex min-h-12 items-center justify-between gap-3 px-4 py-3 font-bold text-bin-blue"
@@ -664,7 +678,7 @@ function BinCard({
   from,
 }: {
   verdict: VerdictResult;
-  photoUrl: string;
+  photoUrl: string | null;
   from: number;
 }) {
   const bg = binColour(verdict);
@@ -870,7 +884,8 @@ function ItemFrame({
   );
 }
 
-function ItemThumb({ url, className = "" }: { url: string; className?: string }) {
+function ItemThumb({ url, className = "" }: { url: string | null; className?: string }) {
+  if (!url) return null; // restored after a reload without a thumbnail
   return (
     // eslint-disable-next-line @next/next/no-img-element -- local blob URL
     <img
