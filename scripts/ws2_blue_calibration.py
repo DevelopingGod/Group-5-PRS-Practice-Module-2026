@@ -6,6 +6,7 @@ local examples, then evaluates on canonical diagnostic local and public test.
 
 uv run --with scikit-learn --with scipy python scripts/ws2_blue_calibration.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -15,11 +16,10 @@ from pathlib import Path
 
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import brier_score_loss, average_precision_score, roc_auc_score
+from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-
 from ws2_public_ensemble import CLASSES, ROOT, fit_temperature, read, temp_scale, vector
 
 BLUE_IDS = np.arange(5)
@@ -40,7 +40,9 @@ def gate_metrics(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, fl
         "nonblue_n": nonblue,
         "costly_error_rate": harmful / nonblue if nonblue else None,
         "blue_recall": int(np.sum(blue_decision & blue_truth)) / eligible if eligible else None,
-        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision)) if blue_decision.any() else None,
+        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision))
+        if blue_decision.any()
+        else None,
         "blue_recommendation_rate": float(np.mean(blue_decision)),
         "deferred_n": int(np.sum(~blue_decision)),
         "deferred_fraction": float(np.mean(~blue_decision)),
@@ -53,7 +55,11 @@ def main() -> None:
     ap.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     ap.add_argument("--manifest", type=Path, default=ROOT / "validation_partitions_v1.csv")
     ap.add_argument("--swin-val", type=Path, default=ROOT / "run3/swin_validation.csv")
-    ap.add_argument("--swin-public", type=Path, default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv")
+    ap.add_argument(
+        "--swin-public",
+        type=Path,
+        default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv",
+    )
     ap.add_argument("--output", type=Path, default=Path("results/ws2/blue_calibration_v1.json"))
     args = ap.parse_args()
 
@@ -62,15 +68,23 @@ def main() -> None:
     if len(set(r["path"] for r in rows)) != len(rows):
         raise ValueError("Duplicate CNN paths")
     cnn = {r["path"]: r for r in rows}
-    manifest, swin_val, swin_public = (read(p) for p in (args.manifest, args.swin_val, args.swin_public))
+    manifest, swin_val, swin_public = (
+        read(p) for p in (args.manifest, args.swin_val, args.swin_public)
+    )
     if len(manifest) != 1556 or set(manifest) != set(swin_val):
         raise ValueError("Validation manifest and Swin rows do not match")
     val_paths = sorted(manifest)
-    public_paths = sorted(r["path"] for r in rows if r["split"] == "test" and r["source"] != "local")
+    public_paths = sorted(
+        r["path"] for r in rows if r["split"] == "test" and r["source"] != "local"
+    )
     if set(public_paths) != set(swin_public):
         raise ValueError("Public test paths do not match")
     for path in val_paths:
-        if path not in cnn or any(manifest[path][k] != other[path][k] for other in (cnn, swin_val) for k in ("material", "source", "group")):
+        if path not in cnn or any(
+            manifest[path][k] != other[path][k]
+            for other in (cnn, swin_val)
+            for k in ("material", "source", "group")
+        ):
             raise ValueError(f"Validation mismatch: {path}")
     for path in public_paths:
         if cnn[path]["material"] != swin_public[path]["true"]:
@@ -107,8 +121,14 @@ def main() -> None:
     if tuple(int((local & mask).sum()) for mask in (cal, meta, diag)) != (99, 76, 72):
         raise ValueError("Canonical partition counts differ")
 
-    pcv, pcp = vector([cnn[p] for p in val_paths], True), vector([cnn[p] for p in public_paths], True)
-    psv, psp = vector([swin_val[p] for p in val_paths], True), vector([swin_public[p] for p in public_paths], False)
+    pcv, pcp = (
+        vector([cnn[p] for p in val_paths], True),
+        vector([cnn[p] for p in public_paths], True),
+    )
+    psv, psp = (
+        vector([swin_val[p] for p in val_paths], True),
+        vector([swin_public[p] for p in public_paths], False),
+    )
     pmv, pmp = svm_probs(val_paths), svm_probs(public_paths)
     ts, tm = fit_temperature(psv[cal], yv[cal]), fit_temperature(pmv[cal], yv[cal])
     psv, psp = temp_scale(psv, ts), temp_scale(psp, ts)
@@ -150,8 +170,14 @@ def main() -> None:
         ],
     }
     for name, (pv, pp) in models.items():
-        meta_trials = [gate_metrics(yv[meta & local], pv[meta & local], float(t)) for t in THRESHOLDS]
-        feasible = [r for r in meta_trials if r["blue_recall"] is not None and r["blue_recall"] >= min_blue_recall]
+        meta_trials = [
+            gate_metrics(yv[meta & local], pv[meta & local], float(t)) for t in THRESHOLDS
+        ]
+        feasible = [
+            r
+            for r in meta_trials
+            if r["blue_recall"] is not None and r["blue_recall"] >= min_blue_recall
+        ]
         if not feasible:
             raise ValueError(f"No threshold satisfies minimum blue recall for {name}")
         chosen = min(
@@ -169,6 +195,7 @@ def main() -> None:
             ],
             "public_risk_coverage_curve": [gate_metrics(yp, pp, float(t)) for t in THRESHOLDS],
         }
+
     # Diagnostic only: no calibration or threshold fitting on diagnostic/test labels.
     def calibration_report(y: np.ndarray, p: np.ndarray) -> dict[str, object]:
         truth = np.isin(y, BLUE_IDS).astype(int)
@@ -183,25 +210,35 @@ def main() -> None:
             mean_conf = float(prob[mask].mean())
             fraction = float(truth[mask].mean())
             ece += float(mask.mean()) * abs(mean_conf - fraction)
-            bins.append({"bin": j, "n": int(mask.sum()), "confidence": mean_conf, "frequency": fraction})
+            bins.append(
+                {"bin": j, "n": int(mask.sum()), "confidence": mean_conf, "frequency": fraction}
+            )
         curve = []
         for t in np.linspace(0, 1, 21):
             accepted = prob >= t
             nonblue = truth == 0
             blue = truth == 1
-            curve.append({
-                "threshold": float(t),
-                "costly_errors": int((accepted & nonblue).sum()),
-                "nonblue_n": int(nonblue.sum()),
-                "costly_error_rate": float((accepted & nonblue).sum() / nonblue.sum()) if nonblue.any() else None,
-                "blue_recall": float((accepted & blue).sum() / blue.sum()) if blue.any() else None,
-                "deferred_fraction": float((~accepted).mean()),
-            })
+            curve.append(
+                {
+                    "threshold": float(t),
+                    "costly_errors": int((accepted & nonblue).sum()),
+                    "nonblue_n": int(nonblue.sum()),
+                    "costly_error_rate": float((accepted & nonblue).sum() / nonblue.sum())
+                    if nonblue.any()
+                    else None,
+                    "blue_recall": float((accepted & blue).sum() / blue.sum())
+                    if blue.any()
+                    else None,
+                    "deferred_fraction": float((~accepted).mean()),
+                }
+            )
         return {
             "n": len(y),
             "brier": float(brier_score_loss(truth, prob)),
             "ece_10_bin": float(ece),
-            "average_precision": float(average_precision_score(truth, prob)) if len(set(truth)) > 1 else None,
+            "average_precision": float(average_precision_score(truth, prob))
+            if len(set(truth)) > 1
+            else None,
             "roc_auc": float(roc_auc_score(truth, prob)) if len(set(truth)) > 1 else None,
             "bins": bins,
             "risk_coverage": curve,
@@ -209,8 +246,13 @@ def main() -> None:
 
     # A fixed, group-aware paired bootstrap. Confidence intervals are descriptive,
     # not a license to select a new winner based on this diagnostic subset.
-    def paired_bootstrap(y: np.ndarray, base: np.ndarray, candidate: np.ndarray,
-                         group_keys: list[str], seed: int = 42) -> dict[str, object]:
+    def paired_bootstrap(
+        y: np.ndarray,
+        base: np.ndarray,
+        candidate: np.ndarray,
+        group_keys: list[str],
+        seed: int = 42,
+    ) -> dict[str, object]:
         unique = sorted(set(group_keys))
         group_indices = {g: np.flatnonzero(np.asarray(group_keys) == g) for g in unique}
         rng = np.random.default_rng(seed)
@@ -223,15 +265,20 @@ def main() -> None:
             pc = candidate[ids][:, BLUE_IDS].sum(axis=1)
             differences.append(float(brier_score_loss(truth, pc) - brier_score_loss(truth, pb)))
         lo, hi = np.percentile(differences, [2.5, 97.5])
-        return {"metric": "candidate_minus_convnext_brier", "ci95": [float(lo), float(hi)],
-                "n_groups": len(unique), "bootstrap_replicates": 1000}
+        return {
+            "metric": "candidate_minus_convnext_brier",
+            "ci95": [float(lo), float(hi)],
+            "n_groups": len(unique),
+            "bootstrap_replicates": 1000,
+        }
 
     # Include equal-weight hybrid, without altering any trained models.
     models["cnn_svm_equal"] = (0.5 * (pcv + pmv), 0.5 * (pcp + pmp))
     diagnostic_mask = diag & local
     diagnostic_groups = [
         manifest[path]["source"] + "::" + manifest[path]["group"]
-        for path, keep in zip(val_paths, diagnostic_mask) if keep
+        for path, keep in zip(val_paths, diagnostic_mask, strict=True)
+        if keep
     ]
     analysis = {
         "local_diagnostic": {},
@@ -246,7 +293,9 @@ def main() -> None:
         ],
     }
     for name, (pv, pp) in models.items():
-        analysis["local_diagnostic"][name] = calibration_report(yv[diagnostic_mask], pv[diagnostic_mask])
+        analysis["local_diagnostic"][name] = calibration_report(
+            yv[diagnostic_mask], pv[diagnostic_mask]
+        )
         analysis["public_test"][name] = calibration_report(yp, pp)
         if name != "convnext":
             analysis["paired_local_brier_difference"][name] = paired_bootstrap(
@@ -268,7 +317,9 @@ def main() -> None:
     for name in models:
         local_metrics = analysis["local_diagnostic"][name]
         public_metrics = analysis["public_test"][name]
-        print(f"{name:20s} local Brier={local_metrics['brier']:.4f} ECE={local_metrics['ece_10_bin']:.4f} AP={local_metrics['average_precision']:.4f} | public Brier={public_metrics['brier']:.4f} ECE={public_metrics['ece_10_bin']:.4f}")
+        print(
+            f"{name:20s} local Brier={local_metrics['brier']:.4f} ECE={local_metrics['ece_10_bin']:.4f} AP={local_metrics['average_precision']:.4f} | public Brier={public_metrics['brier']:.4f} ECE={public_metrics['ece_10_bin']:.4f}"
+        )
     print(f"Saved: {args.output}")
 
 

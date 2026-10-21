@@ -6,6 +6,7 @@ split into calibration and diagnostic partitions. No test rows are used.
 Run:
     uv run python scripts/ws2_ood_local_thresholds.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -52,9 +53,13 @@ def rejection(scores: np.ndarray, threshold: float) -> dict[str, float | int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
-    parser.add_argument("--output", type=Path, default=Path("results/ws2/ood/local_thresholds.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/ws2/ood/local_thresholds.json")
+    )
     parser.add_argument("--target-rejection", type=float, default=0.05)
     args = parser.parse_args()
     if not 0 < args.target_rejection < 1:

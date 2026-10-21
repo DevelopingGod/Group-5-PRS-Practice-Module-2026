@@ -5,6 +5,7 @@ and diagnostic for reporting. Never re-partitions images or touches test rows.
 
 uv run --with scikit-learn --with scipy python scripts/ws2_ensemble_v1.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,8 +17,18 @@ import numpy as np
 from scipy.optimize import minimize_scalar
 from sklearn.metrics import f1_score, log_loss
 
-CLASSES = ("paper", "plastic", "glass", "metal", "beverage_carton",
-           "styrofoam", "e_waste", "textile", "food_waste", "other_general")
+CLASSES = (
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
+)
 BLUE = set(CLASSES[:5])
 
 
@@ -48,8 +59,10 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float | int]:
     nonblue = np.array([CLASSES[int(i)] not in BLUE for i in y])
     blue = np.array([CLASSES[int(i)] in BLUE for i in pred])
     return {
-        "n": int(len(y)),
-        "macro_f1": float(f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)),
+        "n": len(y),
+        "macro_f1": float(
+            f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)
+        ),
         "accuracy": float(np.mean(pred == y)),
         "costly_error_count": int(np.sum(nonblue & blue)),
         "nonblue_count": int(np.sum(nonblue)),
@@ -60,7 +73,9 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float | int]:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--manifest", type=Path, default=Path("data/ws2/validation_partitions_v1.csv"))
-    ap.add_argument("--convnext", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv"))
+    ap.add_argument(
+        "--convnext", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv")
+    )
     ap.add_argument("--swin", type=Path, default=Path("data/ws2/run3/swin_validation.csv"))
     ap.add_argument("--output", type=Path, default=Path("results/ws2/ensemble_v1.json"))
     args = ap.parse_args()
@@ -84,12 +99,16 @@ def main() -> None:
     if len(set(paths)) != len(paths) or not all(mask.any() for mask in (cal, meta, diag)):
         raise ValueError("Invalid partitions")
     groups = [manifest[p]["source"] + "::" + manifest[p]["group"] for p in paths]
-    if any(len({partition[i] for i, g in enumerate(groups) if g == group}) != 1 for group in set(groups)):
+    if any(
+        len({partition[i] for i, g in enumerate(groups) if g == group}) != 1
+        for group in set(groups)
+    ):
         raise ValueError("Item group crosses partitions")
 
     opt = minimize_scalar(
         lambda z: log_loss(y[cal], scale(ps_raw[cal], float(np.exp(z))), labels=np.arange(10)),
-        bounds=(np.log(0.2), np.log(10)), method="bounded",
+        bounds=(np.log(0.2), np.log(10)),
+        method="bounded",
     )
     t = float(np.exp(opt.x))
     ps = scale(ps_raw, t)
@@ -99,7 +118,9 @@ def main() -> None:
     for w in weights:
         mixed = w * pc + (1 - w) * ps
         scores.append((w, metrics(y[meta & local], mixed[meta & local])))
-    selected = max(scores, key=lambda item: (item[1]["macro_f1"], -item[1]["costly_error_count"]))[0]
+    selected = max(scores, key=lambda item: (item[1]["macro_f1"], -item[1]["costly_error_count"]))[
+        0
+    ]
     methods = {
         "convnext": pc,
         "swin_calibrated": ps,
@@ -108,8 +129,10 @@ def main() -> None:
     }
     report = {
         "protocol": "ws2-v1-group-source-dominant-material",
-        "counts": {name: {"all": int(mask.sum()), "local": int((mask & local).sum())}
-                   for name, mask in (("calibration", cal), ("meta_train", meta), ("diagnostic", diag))},
+        "counts": {
+            name: {"all": int(mask.sum()), "local": int((mask & local).sum())}
+            for name, mask in (("calibration", cal), ("meta_train", meta), ("diagnostic", diag))
+        },
         "swin_temperature": t,
         "meta_selected_convnext_weight": selected,
         "meta_weight_trials": [{"convnext_weight": w, **m} for w, m in scores],
@@ -128,13 +151,20 @@ def main() -> None:
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({
-        "counts": report["counts"],
-        "swin_temperature": t,
-        "selected_weight": selected,
-        "local_diagnostic": {name: value["local"] for name, value in report["diagnostic"].items()},
-        "output": str(args.output),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "counts": report["counts"],
+                "swin_temperature": t,
+                "selected_weight": selected,
+                "local_diagnostic": {
+                    name: value["local"] for name, value in report["diagnostic"].items()
+                },
+                "output": str(args.output),
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

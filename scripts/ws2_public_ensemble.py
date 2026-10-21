@@ -7,6 +7,7 @@ validation meta_train partition. Evaluation: public test, never used for fitting
 Requires Run 3 Swin public test CSV in data/ws2/run3/.
 uv run --with scikit-learn --with scipy python scripts/ws2_public_ensemble.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -22,8 +23,18 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-CLASSES = ("paper", "plastic", "glass", "metal", "beverage_carton",
-           "styrofoam", "e_waste", "textile", "food_waste", "other_general")
+CLASSES = (
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
+)
 BLUE = set(CLASSES[:5])
 ROOT = Path("data/ws2")
 
@@ -56,7 +67,8 @@ def temp_scale(p: np.ndarray, t: float) -> np.ndarray:
 def fit_temperature(p: np.ndarray, y: np.ndarray) -> float:
     result = minimize_scalar(
         lambda z: log_loss(y, temp_scale(p, float(np.exp(z))), labels=np.arange(10)),
-        bounds=(np.log(0.2), np.log(10.0)), method="bounded",
+        bounds=(np.log(0.2), np.log(10.0)),
+        method="bounded",
     )
     return float(np.exp(result.x))
 
@@ -70,7 +82,9 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, object]:
     predblue = np.array([CLASSES[int(i)] in BLUE for i in pred])
     return {
         "n": len(y),
-        "macro_f1": float(f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)),
+        "macro_f1": float(
+            f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)
+        ),
         "accuracy": float(np.mean(y == pred)),
         "correct": int(np.sum(y == pred)),
         "costly_error_count": int(np.sum(nonblue & predblue)),
@@ -78,8 +92,12 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, object]:
         "costly_error_rate": float(predblue[nonblue].mean()) if nonblue.any() else None,
         "nll": float(log_loss(y, p, labels=np.arange(10))),
         "per_class": {
-            name: {"precision": float(precision[i]), "recall": float(recall[i]),
-                   "f1": float(f1[i]), "support": int(support[i])}
+            name: {
+                "precision": float(precision[i]),
+                "recall": float(recall[i]),
+                "f1": float(f1[i]),
+                "support": int(support[i]),
+            }
             for i, name in enumerate(CLASSES)
         },
     }
@@ -91,7 +109,11 @@ def main() -> None:
     ap.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     ap.add_argument("--manifest", type=Path, default=ROOT / "validation_partitions_v1.csv")
     ap.add_argument("--swin-val", type=Path, default=ROOT / "run3/swin_validation.csv")
-    ap.add_argument("--swin-public", type=Path, default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv")
+    ap.add_argument(
+        "--swin-public",
+        type=Path,
+        default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv",
+    )
     ap.add_argument("--output", type=Path, default=Path("results/ws2/public_ensemble_v1.json"))
     args = ap.parse_args()
 
@@ -104,7 +126,9 @@ def main() -> None:
     if emb.shape != (len(all_rows), 256):
         raise ValueError("Embedding/CSV row mismatch")
     idx = {r["path"]: i for i, r in enumerate(all_rows)}
-    manifest, swin_val, swin_public = (read(p) for p in (args.manifest, args.swin_val, args.swin_public))
+    manifest, swin_val, swin_public = (
+        read(p) for p in (args.manifest, args.swin_val, args.swin_public)
+    )
     if len(manifest) != 1556 or set(manifest) != set(swin_val):
         raise ValueError("Canonical validation and Swin predictions mismatch")
     val_paths = sorted(manifest)
@@ -121,7 +145,8 @@ def main() -> None:
     for path in val_paths:
         if path not in cnn or any(
             manifest[path][key] != other[path][key]
-            for other in (cnn, swin_val) for key in ("material", "source", "group")
+            for other in (cnn, swin_val)
+            for key in ("material", "source", "group")
         ):
             raise ValueError(f"Validation metadata mismatch: {path}")
     for path in public_paths:
@@ -132,7 +157,9 @@ def main() -> None:
     partition = np.array([manifest[p]["partition"] for p in val_paths])
     local = np.array([manifest[p]["source"] == "local" for p in val_paths])
     cal, meta = partition == "calibration", partition == "meta_train"
-    if tuple(int(np.sum(local & (partition == s))) for s in ("calibration", "meta_train", "diagnostic")) != (99, 76, 72):
+    if tuple(
+        int(np.sum(local & (partition == s))) for s in ("calibration", "meta_train", "diagnostic")
+    ) != (99, 76, 72):
         raise ValueError("Canonical local partition counts changed")
     train_ids = np.array([i for i, r in enumerate(all_rows) if r["split"] == "train"])
     train_groups = {(all_rows[int(i)]["source"], all_rows[int(i)]["group"]) for i in train_ids}
@@ -147,6 +174,7 @@ def main() -> None:
         SVC(kernel="linear", C=0.1, class_weight="balanced", probability=True, random_state=42),
     )
     svm.fit(emb[train_ids], train_y)
+
     def svm_proba(paths: list[str]) -> np.ndarray:
         result = np.zeros((len(paths), 10), dtype=np.float64)
         result[:, svm.named_steps["svc"].classes_.astype(int)] = svm.predict_proba(
@@ -183,14 +211,20 @@ def main() -> None:
             p = weight * pc_val + (1 - weight) * secondary_val
             m = metrics(val_y[meta & local], p[meta & local])
             trials.append((weight, m))
-        weight = max(trials, key=lambda item: (item[1]["macro_f1"], -item[1]["costly_error_count"]))[0]
+        weight = max(
+            trials, key=lambda item: (item[1]["macro_f1"], -item[1]["costly_error_count"])
+        )[0]
         selected[name] = weight
         methods[name + "_selected"] = weight * pc_test + (1 - weight) * secondary_test
 
     for name, x_val, x_test in (
         ("stack_cnn_swin", np.hstack((pc_val, ps_val)), np.hstack((pc_test, ps_test))),
         ("stack_cnn_svm", np.hstack((pc_val, pm_val)), np.hstack((pc_test, pm_test))),
-        ("stack_all_three", np.hstack((pc_val, ps_val, pm_val)), np.hstack((pc_test, ps_test, pm_test))),
+        (
+            "stack_all_three",
+            np.hstack((pc_val, ps_val, pm_val)),
+            np.hstack((pc_test, ps_test, pm_test)),
+        ),
     ):
         stacker = LogisticRegression(C=0.1, max_iter=2000, class_weight="balanced")
         stacker.fit(x_val[meta], val_y[meta])

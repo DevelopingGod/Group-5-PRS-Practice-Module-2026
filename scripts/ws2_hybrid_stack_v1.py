@@ -6,6 +6,7 @@ The embedding SVM uses only original TRAIN embeddings and labels.
 
 uv run --with scikit-learn --with scipy python scripts/ws2_hybrid_stack_v1.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -21,8 +22,18 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-CLASSES = ("paper", "plastic", "glass", "metal", "beverage_carton",
-           "styrofoam", "e_waste", "textile", "food_waste", "other_general")
+CLASSES = (
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
+)
 BLUE = set(CLASSES[:5])
 ROOT = Path("data/ws2")
 
@@ -52,7 +63,8 @@ def temperature(p: np.ndarray, t: float) -> np.ndarray:
 def fit_temperature(p: np.ndarray, y: np.ndarray) -> float:
     fit = minimize_scalar(
         lambda z: log_loss(y, temperature(p, float(np.exp(z))), labels=np.arange(10)),
-        bounds=(np.log(0.2), np.log(10)), method="bounded",
+        bounds=(np.log(0.2), np.log(10)),
+        method="bounded",
     )
     return float(np.exp(fit.x))
 
@@ -63,7 +75,9 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float | int]:
     predicted_blue = np.array([CLASSES[int(v)] in BLUE for v in pred])
     return {
         "n": len(y),
-        "macro_f1": float(f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)),
+        "macro_f1": float(
+            f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)
+        ),
         "accuracy": float(np.mean(pred == y)),
         "costly_errors": int(np.sum(nonblue & predicted_blue)),
         "nonblue_n": int(np.sum(nonblue)),
@@ -87,7 +101,8 @@ def main() -> None:
     for path in paths:
         if path not in cnn or any(
             manifest[path][key] != source[path][key]
-            for source in (cnn, swin) for key in ("source", "group", "material")
+            for source in (cnn, swin)
+            for key in ("source", "group", "material")
         ):
             raise ValueError(f"Metadata mismatch: {path}")
     rows = list(cnn.values())  # original CSV order for embeddings
@@ -154,8 +169,10 @@ def main() -> None:
 
     result = {
         "protocol": "ws2-v1-group-source-dominant-material",
-        "counts": {name: {"all": int(mask.sum()), "local": int(np.sum(mask & local))}
-                   for name, mask in (("calibration", cal), ("meta_train", meta), ("diagnostic", diag))},
+        "counts": {
+            name: {"all": int(mask.sum()), "local": int(np.sum(mask & local))}
+            for name, mask in (("calibration", cal), ("meta_train", meta), ("diagnostic", diag))
+        },
         "temperatures": {"swin": t_swin, "embedding_svm": t_svm},
         "selected_cnn_weights": selected,
         "diagnostic": {
@@ -181,7 +198,9 @@ def main() -> None:
     print("Local diagnostic:")
     for name, value in result["diagnostic"].items():
         m = value["local"]
-        print(f"{name:24s} F1={m['macro_f1']:.4f} accuracy={m['accuracy']:.4f} costly={m['costly_errors']}/{m['nonblue_n']}")
+        print(
+            f"{name:24s} F1={m['macro_f1']:.4f} accuracy={m['accuracy']:.4f} costly={m['costly_errors']}/{m['nonblue_n']}"
+        )
     print(f"Saved: {args.output}")
 
 

@@ -7,6 +7,7 @@ Swin-T is temperature-scaled on a separate calibration subset of validation
 groups. Weights are selected on disjoint selection groups; results are
 development-set estimates, not independent test estimates.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -19,8 +20,16 @@ from scipy.optimize import minimize_scalar
 from sklearn.metrics import accuracy_score, f1_score, log_loss
 
 CLASSES = (
-    "paper", "plastic", "glass", "metal", "beverage_carton",
-    "styrofoam", "e_waste", "textile", "food_waste", "other_general",
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
 )
 RECYCLABLE = {"paper", "plastic", "glass", "metal", "beverage_carton"}
 WEIGHTS = (0.0, 0.25, 0.5, 0.75, 1.0)
@@ -57,7 +66,9 @@ def evaluate(y: np.ndarray, probs: np.ndarray) -> dict[str, float | int]:
     predicted_blue = np.asarray([CLASSES[int(i)] in RECYCLABLE for i in predicted])
     return {
         "n": len(y),
-        "macro_f1": float(f1_score(y, predicted, labels=list(range(10)), average="macro", zero_division=0)),
+        "macro_f1": float(
+            f1_score(y, predicted, labels=list(range(10)), average="macro", zero_division=0)
+        ),
         "accuracy": float(accuracy_score(y, predicted)),
         "costly_error_rate": float(predicted_blue[non_blue].mean()) if non_blue.any() else 0.0,
         "costly_error_count": int((predicted_blue & non_blue).sum()),
@@ -67,15 +78,20 @@ def evaluate(y: np.ndarray, probs: np.ndarray) -> dict[str, float | int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--convnext", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv"))
+    parser.add_argument(
+        "--convnext", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv")
+    )
     parser.add_argument("--swin", type=Path, default=Path("data/ws2/run3/swin_validation.csv"))
-    parser.add_argument("--output", type=Path, default=Path("results/ws2/swin_ensemble_validation.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/ws2/swin_ensemble_validation.json")
+    )
     args = parser.parse_args()
 
     conv = read_predictions(args.convnext)
     swin = read_predictions(args.swin)
     common = sorted(
-        path for path in swin
+        path
+        for path in swin
         if path in conv and conv[path]["split"] == "val" and swin[path]["split"] == "val"
     )
     if len(common) != len(swin):
@@ -98,15 +114,14 @@ def main() -> None:
     for group_list in by_source.values():
         indices = rng.permutation(len(group_list))[: max(1, len(group_list) // 2)]
         calibration_groups.update(group_list[int(i)] for i in indices)
-    is_cal = np.asarray(
-        [(row["source"], row["group"]) in calibration_groups for row in rows_c]
-    )
+    is_cal = np.asarray([(row["source"], row["group"]) in calibration_groups for row in rows_c])
     is_select = ~is_cal
     if not is_cal.any() or not is_select.any():
         raise ValueError("Calibration and selection subsets must both be nonempty")
     fit = minimize_scalar(
         lambda t: log_loss(
-            y[is_cal], temperature_scale(ps[is_cal], float(np.exp(t))),
+            y[is_cal],
+            temperature_scale(ps[is_cal], float(np.exp(t))),
             labels=list(range(10)),
         ),
         bounds=(np.log(0.2), np.log(10.0)),
