@@ -48,7 +48,9 @@ def centroid_distance(query: np.ndarray, centroids: np.ndarray) -> np.ndarray:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--target-fpr", type=float, default=0.05)

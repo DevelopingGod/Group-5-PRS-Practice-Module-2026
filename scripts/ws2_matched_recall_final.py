@@ -6,12 +6,12 @@ local examples, then evaluates on canonical diagnostic local and public test.
 
 uv run --with scikit-learn --with scipy python scripts/ws2_matched_recall_final.py
 """
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -19,7 +19,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-
 from ws2_public_ensemble import CLASSES, ROOT, fit_temperature, read, temp_scale, vector
 
 BLUE_IDS = np.arange(5)
@@ -40,7 +39,9 @@ def gate_metrics(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, fl
         "nonblue_n": nonblue,
         "costly_error_rate": harmful / nonblue if nonblue else None,
         "blue_recall": int(np.sum(blue_decision & blue_truth)) / eligible if eligible else None,
-        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision)) if blue_decision.any() else None,
+        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision))
+        if blue_decision.any()
+        else None,
         "blue_recommendation_rate": float(np.mean(blue_decision)),
         "deferred_n": int(np.sum(~blue_decision)),
         "deferred_fraction": float(np.mean(~blue_decision)),
@@ -53,7 +54,11 @@ def main() -> None:
     ap.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     ap.add_argument("--manifest", type=Path, default=ROOT / "validation_partitions_v1.csv")
     ap.add_argument("--swin-val", type=Path, default=ROOT / "run3/swin_validation.csv")
-    ap.add_argument("--swin-public", type=Path, default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv")
+    ap.add_argument(
+        "--swin-public",
+        type=Path,
+        default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv",
+    )
     ap.add_argument("--output", type=Path, default=Path("results/ws2/matched_recall_final.json"))
     args = ap.parse_args()
 
@@ -62,15 +67,23 @@ def main() -> None:
     if len(set(r["path"] for r in rows)) != len(rows):
         raise ValueError("Duplicate CNN paths")
     cnn = {r["path"]: r for r in rows}
-    manifest, swin_val, swin_public = (read(p) for p in (args.manifest, args.swin_val, args.swin_public))
+    manifest, swin_val, swin_public = (
+        read(p) for p in (args.manifest, args.swin_val, args.swin_public)
+    )
     if len(manifest) != 1556 or set(manifest) != set(swin_val):
         raise ValueError("Validation manifest and Swin rows do not match")
     val_paths = sorted(manifest)
-    public_paths = sorted(r["path"] for r in rows if r["split"] == "test" and r["source"] != "local")
+    public_paths = sorted(
+        r["path"] for r in rows if r["split"] == "test" and r["source"] != "local"
+    )
     if set(public_paths) != set(swin_public):
         raise ValueError("Public test paths do not match")
     for path in val_paths:
-        if path not in cnn or any(manifest[path][k] != other[path][k] for other in (cnn, swin_val) for k in ("material", "source", "group")):
+        if path not in cnn or any(
+            manifest[path][k] != other[path][k]
+            for other in (cnn, swin_val)
+            for k in ("material", "source", "group")
+        ):
             raise ValueError(f"Validation mismatch: {path}")
     for path in public_paths:
         if cnn[path]["material"] != swin_public[path]["true"]:
@@ -107,8 +120,14 @@ def main() -> None:
     if tuple(int((local & mask).sum()) for mask in (cal, meta, diag)) != (99, 76, 72):
         raise ValueError("Canonical partition counts differ")
 
-    pcv, pcp = vector([cnn[p] for p in val_paths], True), vector([cnn[p] for p in public_paths], True)
-    psv, psp = vector([swin_val[p] for p in val_paths], True), vector([swin_public[p] for p in public_paths], False)
+    pcv, pcp = (
+        vector([cnn[p] for p in val_paths], True),
+        vector([cnn[p] for p in public_paths], True),
+    )
+    psv, psp = (
+        vector([swin_val[p] for p in val_paths], True),
+        vector([swin_public[p] for p in public_paths], False),
+    )
     pmv, pmp = svm_probs(val_paths), svm_probs(public_paths)
     ts, tm = fit_temperature(psv[cal], yv[cal]), fit_temperature(pmv[cal], yv[cal])
     psv, psp = temp_scale(psv, ts), temp_scale(psp, ts)
@@ -136,8 +155,10 @@ def main() -> None:
         tp = int((approve & truth).sum())
         fp = int((approve & ~truth).sum())
         return {
-            "n": len(y), "threshold": float(threshold),
-            "costly_errors": fp, "nonblue_n": n_bad,
+            "n": len(y),
+            "threshold": float(threshold),
+            "costly_errors": fp,
+            "nonblue_n": n_bad,
             "costly_error_rate": fp / n_bad if n_bad else None,
             "blue_recall": tp / n_good if n_good else None,
             "blue_precision": tp / int(approve.sum()) if approve.any() else None,
@@ -195,19 +216,25 @@ def main() -> None:
             ):
                 for i in np.flatnonzero(mask):
                     probability = float(p[i, BLUE_IDS].sum())
-                    audit.append({
-                        "model": name, "target_recall": key, "split": scope,
-                        "path": paths[i], "physical_group": (
-                            manifest[paths[i]]["source"] + "::" + manifest[paths[i]]["group"]
-                            if scope == "diagnostic_local" else cnn[paths[i]]["source"] + "::" + cnn[paths[i]]["group"]
-                        ),
-                        "true_material": CLASSES[int(y[i])],
-                        "blue_material_truth": int(y[i] in BLUE_IDS),
-                        "p_blue": f"{probability:.8f}",
-                        "threshold": f"{threshold:.8f}",
-                        "approved": int(probability >= threshold),
-                        "costly_error": int(probability >= threshold and y[i] not in BLUE_IDS),
-                    })
+                    audit.append(
+                        {
+                            "model": name,
+                            "target_recall": key,
+                            "split": scope,
+                            "path": paths[i],
+                            "physical_group": (
+                                manifest[paths[i]]["source"] + "::" + manifest[paths[i]]["group"]
+                                if scope == "diagnostic_local"
+                                else cnn[paths[i]]["source"] + "::" + cnn[paths[i]]["group"]
+                            ),
+                            "true_material": CLASSES[int(y[i])],
+                            "blue_material_truth": int(y[i] in BLUE_IDS),
+                            "p_blue": f"{probability:.8f}",
+                            "threshold": f"{threshold:.8f}",
+                            "approved": int(probability >= threshold),
+                            "costly_error": int(probability >= threshold and y[i] not in BLUE_IDS),
+                        }
+                    )
 
     # Paired decision audit: same images, fixed thresholds chosen independently
     # on meta_train. Counts reveal actual rescued vs introduced harmful errors.
@@ -216,8 +243,7 @@ def main() -> None:
         for scope in ("diagnostic_local", "public_test"):
             subset = [r for r in audit if r["target_recall"] == key and r["split"] == scope]
             by_model = {
-                name: {r["path"]: r for r in subset if r["model"] == name}
-                for name in models
+                name: {r["path"]: r for r in subset if r["model"] == name} for name in models
             }
             baseline = by_model["convnext"]
             for name in ("cnn_svm_equal", "stack_all_three"):
@@ -233,7 +259,8 @@ def main() -> None:
                     for p in baseline
                 )
                 report["models"][name][key][scope]["versus_convnext"] = {
-                    "harmful_prevented": prevented, "harmful_introduced": introduced,
+                    "harmful_prevented": prevented,
+                    "harmful_introduced": introduced,
                     "net_harmful_prevented": prevented - introduced,
                 }
     args.output.parent.mkdir(parents=True, exist_ok=True)
