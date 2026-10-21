@@ -19,7 +19,7 @@
 - [x] Confidence format: WS1's calibrated material probabilities (`state.confidence` is the verdict bin's probability, see below)
 
 **18–24 Oct**
-- [ ] Tune `CONFIDENCE_THRESHOLD` on validation data (contract change): run `scripts/simulate_gate.py` on `predictions.csv`, then decide
+- [ ] Tune `CONFIDENCE_THRESHOLD` on validation data (contract change): analysis done, **recommend 0.75** ([`WS3_analysis_report.md`](WS3_analysis_report.md)); waiting for the team's decision
 - [x] Question-flow screens: built by WS4 (PR #1) against the contract; WS3 supplies the plain-English rule trace and the confidence the meter shows
 - [x] `campus_example.yaml` as the multi-stream demonstration
 
@@ -81,6 +81,11 @@ uv run python scripts/simulate_gate.py --predictions <path>/predictions.csv --ou
 # Static questionnaire on real photos (needs recorded answers in data/labels.csv)
 uv run python scripts/evaluate_baselines.py --system static --split test --out results/static
 ```
+
+For the report, `scripts/analyse_decisions.py` runs nine analyses (threshold trade-off with
+bootstrap intervals, question-selection and D-003 ablations, answer noise, wrong tables, calibration,
+per material, held-out test, campus policy, condition prior); results and figures are in
+[`WS3_analysis_report.md`](WS3_analysis_report.md) and [`ws3_analysis/`](ws3_analysis/).
 
 `simulate_gate.py` simulates the condition and the answers from the likelihood tables, so it compares
 gate settings and adaptive vs static; it does not test the tables themselves. Its costly-error rate

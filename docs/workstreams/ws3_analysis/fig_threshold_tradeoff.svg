@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="524" viewBox="0 0 760 524" font-family="Helvetica, Arial, sans-serif" role="img" aria-label="Confidence gate trade-off (val photos, 95% intervals)">
+<rect width="760" height="524" fill="#fcfcfb"/>
+<text x="12" y="22" font-size="15" font-weight="700" fill="#0b0b0b">Confidence gate trade-off (val photos, 95% intervals)</text>
+<line x1="12.0" x2="30.0" y1="44" y2="44" stroke="#2a78d6" stroke-width="2"/>
+<circle cx="21.0" cy="44" r="4" fill="#2a78d6"/>
+<text x="36.0" y="48" font-size="12" fill="#0b0b0b">Adaptive</text>
+<line x1="100.0" x2="118.0" y1="44" y2="44" stroke="#eb6834" stroke-width="2"/>
+<circle cx="109.0" cy="44" r="4" fill="#eb6834"/>
+<text x="124.0" y="48" font-size="12" fill="#0b0b0b">Static (all 3)</text>
+<text x="52" y="82" font-size="13" font-weight="600" fill="#0b0b0b">Verdict accuracy</text>
+<line x1="52" x2="256" y1="252.0" y2="252.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="256.0" font-size="11" text-anchor="end" fill="#52514e">50%</text>
+<line x1="52" x2="256" y1="221.2" y2="221.2" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="225.2" font-size="11" text-anchor="end" fill="#52514e">60%</text>
+<line x1="52" x2="256" y1="190.4" y2="190.4" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="194.4" font-size="11" text-anchor="end" fill="#52514e">70%</text>
+<line x1="52" x2="256" y1="159.6" y2="159.6" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="163.6" font-size="11" text-anchor="end" fill="#52514e">80%</text>
+<line x1="52" x2="256" y1="128.8" y2="128.8" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="132.8" font-size="11" text-anchor="end" fill="#52514e">90%</text>
+<line x1="52" x2="256" y1="98.0" y2="98.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="102.0" font-size="11" text-anchor="end" fill="#52514e">100%</text>
+<text x="52.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.6</text>
+<text x="110.3" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.7</text>
+<text x="139.4" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.75</text>
+<text x="168.6" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.8</text>
+<text x="226.9" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
+<text x="256.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
+<text x="154.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
+<polygon points="52.0,129.5 110.3,130.6 139.4,131.6 168.6,136.5 226.9,173.2 256.0,193.3 256.0,220.5 226.9,194.5 168.6,150.8 139.4,144.4 110.3,142.7 52.0,140.9" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,135.0 110.3,136.5 139.4,137.9 168.6,143.5 226.9,184.6 256.0,208.2" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="135.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="136.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="137.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="143.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="184.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="208.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="52.0,129.2 110.3,132.5 139.4,146.7 168.6,154.3 226.9,174.2 256.0,194.8 256.0,221.5 226.9,195.4 168.6,170.6 139.4,161.1 110.3,144.9 52.0,140.0" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,134.3 110.3,138.5 139.4,154.0 168.6,162.6 226.9,185.6 256.0,209.4" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="134.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="138.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="154.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="162.6" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="185.6" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="209.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="274" y="212.2" font-size="10.5" fill="#0b0b0b">Adaptive 64.2%</text>
+<text x="274" y="225.2" font-size="10.5" fill="#0b0b0b">Static (all 3) 63.8%</text>
+<text x="432" y="82" font-size="13" font-weight="600" fill="#0b0b0b">Costly errors</text>
+<line x1="432" x2="636" y1="252.0" y2="252.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="256.0" font-size="11" text-anchor="end" fill="#52514e">0%</text>
+<line x1="432" x2="636" y1="213.5" y2="213.5" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="217.5" font-size="11" text-anchor="end" fill="#52514e">2%</text>
+<line x1="432" x2="636" y1="175.0" y2="175.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="179.0" font-size="11" text-anchor="end" fill="#52514e">4%</text>
+<line x1="432" x2="636" y1="136.5" y2="136.5" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="140.5" font-size="11" text-anchor="end" fill="#52514e">6%</text>
+<line x1="432" x2="636" y1="98.0" y2="98.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="102.0" font-size="11" text-anchor="end" fill="#52514e">8%</text>
+<text x="432.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.6</text>
+<text x="490.3" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.7</text>
+<text x="519.4" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.75</text>
+<text x="548.6" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.8</text>
+<text x="606.9" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
+<text x="636.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
+<text x="534.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
+<line x1="432" x2="636" y1="155.8" y2="155.8" stroke="#52514e" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="436" y="151.8" font-size="10" fill="#52514e">target 5%</text>
+<polygon points="432.0,133.9 490.3,149.7 519.4,177.7 548.6,190.8 606.9,240.7 636.0,252.0 636.0,252.0 606.9,250.8 548.6,218.2 519.4,213.0 490.3,201.6 432.0,192.3" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,165.6 490.3,178.1 519.4,196.6 548.6,205.5 606.9,246.6 636.0,252.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="165.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="178.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="196.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="205.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="246.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="252.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="432.0,140.8 490.3,169.9 519.4,200.7 548.6,217.6 606.9,240.7 636.0,252.0 636.0,252.0 606.9,250.8 548.6,238.0 519.4,230.6 490.3,210.6 432.0,194.1" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,169.2 490.3,192.4 519.4,217.5 548.6,228.8 606.9,246.6 636.0,252.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="169.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="192.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="217.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="228.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="246.6" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="252.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="654" y="256.0" font-size="10.5" fill="#0b0b0b">Adaptive 0%</text>
+<text x="654" y="269.0" font-size="10.5" fill="#0b0b0b">Static (all 3) 0%</text>
+<text x="52" y="312" font-size="13" font-weight="600" fill="#0b0b0b">Questions per item</text>
+<line x1="52" x2="256" y1="482.0" y2="482.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="486.0" font-size="11" text-anchor="end" fill="#52514e">0</text>
+<line x1="52" x2="256" y1="456.3" y2="456.3" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="460.3" font-size="11" text-anchor="end" fill="#52514e">0.5</text>
+<line x1="52" x2="256" y1="430.7" y2="430.7" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="434.7" font-size="11" text-anchor="end" fill="#52514e">1</text>
+<line x1="52" x2="256" y1="405.0" y2="405.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="409.0" font-size="11" text-anchor="end" fill="#52514e">1.5</text>
+<line x1="52" x2="256" y1="379.3" y2="379.3" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="383.3" font-size="11" text-anchor="end" fill="#52514e">2</text>
+<line x1="52" x2="256" y1="353.7" y2="353.7" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="357.7" font-size="11" text-anchor="end" fill="#52514e">2.5</text>
+<line x1="52" x2="256" y1="328.0" y2="328.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="46" y="332.0" font-size="11" text-anchor="end" fill="#52514e">3</text>
+<text x="52.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.6</text>
+<text x="110.3" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.7</text>
+<text x="139.4" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.75</text>
+<text x="168.6" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.8</text>
+<text x="226.9" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
+<text x="256.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
+<text x="154.0" y="518" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
+<polygon points="52.0,399.2 110.3,397.9 139.4,395.6 168.6,390.8 226.9,368.2 256.0,362.3 256.0,379.8 226.9,386.0 168.6,406.5 139.4,411.1 110.3,412.9 52.0,413.9" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,405.6 110.3,404.7 139.4,402.7 168.6,398.1 226.9,376.2 256.0,370.5" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="405.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="404.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="402.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="398.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="376.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="370.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="52.0,328.0 110.3,328.0 139.4,328.0 168.6,328.0 226.9,328.0 256.0,328.0 256.0,328.0 226.9,328.0 168.6,328.0 139.4,328.0 110.3,328.0 52.0,328.0" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,328.0 110.3,328.0 139.4,328.0 168.6,328.0 226.9,328.0 256.0,328.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="274" y="332.0" font-size="10.5" fill="#0b0b0b">Static (all 3) 3</text>
+<text x="274" y="374.5" font-size="10.5" fill="#0b0b0b">Adaptive 2.17</text>
+<text x="432" y="312" font-size="13" font-weight="600" fill="#0b0b0b">Fell back to general waste</text>
+<line x1="432" x2="636" y1="482.0" y2="482.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="486.0" font-size="11" text-anchor="end" fill="#52514e">0%</text>
+<line x1="432" x2="636" y1="443.5" y2="443.5" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="447.5" font-size="11" text-anchor="end" fill="#52514e">15%</text>
+<line x1="432" x2="636" y1="405.0" y2="405.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="409.0" font-size="11" text-anchor="end" fill="#52514e">30%</text>
+<line x1="432" x2="636" y1="366.5" y2="366.5" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="370.5" font-size="11" text-anchor="end" fill="#52514e">45%</text>
+<line x1="432" x2="636" y1="328.0" y2="328.0" stroke="#e4e3df" stroke-width="1"/>
+<text x="426" y="332.0" font-size="11" text-anchor="end" fill="#52514e">60%</text>
+<text x="432.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.6</text>
+<text x="490.3" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.7</text>
+<text x="519.4" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.75</text>
+<text x="548.6" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.8</text>
+<text x="606.9" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
+<text x="636.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
+<text x="534.0" y="518" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
+<polygon points="432.0,471.8 490.3,467.1 519.4,459.1 548.6,446.8 606.9,363.1 636.0,329.7 636.0,354.0 606.9,384.3 548.6,459.9 519.4,470.4 490.3,475.4 432.0,478.2" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,475.2 490.3,471.7 519.4,465.2 548.6,453.9 606.9,373.4 636.0,341.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="475.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="471.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="465.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="453.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="373.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="341.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="432.0,462.0 490.3,448.9 519.4,428.4 548.6,415.6 606.9,359.9 636.0,328.0 636.0,347.9 606.9,379.7 548.6,429.3 519.4,440.1 490.3,459.6 432.0,469.7" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,465.9 490.3,454.4 519.4,434.1 548.6,422.7 606.9,369.5 636.0,335.8" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="465.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="454.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="434.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="422.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="369.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="335.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
+<text x="654" y="339.8" font-size="10.5" fill="#0b0b0b">Static (all 3) 56.9%</text>
+<text x="654" y="352.8" font-size="10.5" fill="#0b0b0b">Adaptive 54.8%</text>
+</svg>

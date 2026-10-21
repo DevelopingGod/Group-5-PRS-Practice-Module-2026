@@ -13,7 +13,7 @@
 | Edge-case rules (Section 5.3) | **Done** in both policies and covered by tests |
 | Rule-trace explanations | **Done**: plain English, shown in the app's "How Bin Buddy decided" panel |
 | Next.js question-flow screens | **Built by WS4** (PR #1); unchanged, they show WS3's questions, confidence and trace |
-| Confidence-threshold tuning | **Analysis done**; recommend 0.70 (needs team approval, see below) |
+| Confidence-threshold tuning | **Analysis done**; recommend 0.75 (revised 21 Oct; needs team approval, see below). Full analysis: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md) |
 | Answer-likelihood estimation | **Partly done**: tables are hand-set; `scripts/estimate_likelihoods.py` replaces them once Q1–Q3 answers are recorded |
 
 All checks pass on the branch: ruff, mypy, all 146 Python tests, policy validation, repo hygiene, `pnpm gen` (no diff), web checks.
@@ -32,7 +32,8 @@ Example trace: *Looks like plastic (98% sure) → Probably not clean (99% likely
 | Gate | Avg questions | Answered with no questions | Accuracy | Costly errors | Fell back to general waste |
 |---|---|---|---|---|---|
 | 0.60 | 1.49 | 26% | 88.0% | 4.5% | 2.7% |
-| **0.70** | **1.51** | **26%** | **87.5%** | **3.8%** | **4.0%** |
+| 0.70 | 1.51 | 26% | 87.5% | 3.8% | 4.0% |
+| **0.75** | **1.54** | **26%** | **87.0%** | **2.9%** | **6.6%** |
 | 0.80 (current) | 1.63 | 25% | 85.2% | 2.4% | 11.0% |
 | 0.90 | 2.06 | 21% | 71.9% | 0.3% | 42.3% |
 | Static, all 3 questions (0.80) | 3.00 | 0% | 79.0% | 1.2% | 23.1% |
@@ -45,7 +46,7 @@ Costly errors: of the items whose true bin is not the blue bin, the share sent t
 - **Shreyash (WS4):** no web changes needed. `state.confidence` now means "how sure of the bin", so the meter moves towards the verdict with each answer. In `scripts/evaluate_baselines.py`: new `--system static` (baseline 2), and a fix: full-system contamination recall was always 0 because the vision condition is always "clean"; it now takes the condition from the rule applied.
 
 ## Decisions needed from the team
-1. **Threshold 0.80 → 0.70?** Costly errors stay within the target (3.8% against ≤ 5%; 0.60 is too close at 4.5%), +2 points accuracy, 7 points fewer fallbacks. It is a contract change (version bump, changelog, WS3 + WS4 approve).
+1. **Threshold 0.80 → 0.75?** (Revised 21 Oct; I first proposed 0.70.) Against 0.80: +1.8 points accuracy, 4 points fewer fallbacks, costly errors 2.9% against ≤ 5%. 0.70 is no more accurate than 0.75 but breaks the 5% target once 10% of answers are careless; 0.75 holds up to about 15%, and the test split confirms it (86.5%, 2.6%). Details: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md). It is a contract change (version bump, changelog, WS3 + WS4 approve).
 2. **Record Q1–Q3 answers** for the photos (columns already in `data/labels.csv`), about 60 items. Then one command counts the real likelihoods.
 3. **Report trade-off:** recyclables always get at least 2 questions (Q1 opens, Q2 checks cleanliness), so the "≤ 1 question on average" target is not met (1.5–1.6). We choose safety over fewer questions because the model cannot see cleanliness.
 
