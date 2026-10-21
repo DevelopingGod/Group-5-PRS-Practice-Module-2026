@@ -20,7 +20,8 @@ export type ScanState =
   | { step: "retake"; photoUrl: string; issues: QualityIssue[] }
   | {
       step: "question";
-      photoUrl: string;
+      /** Null after a reload restored the step without a thumbnail. */
+      photoUrl: string | null;
       scanId: string;
       analysis: VisionAnalysis | null;
       question: Question;
@@ -29,7 +30,7 @@ export type ScanState =
     }
   | {
       step: "verdict";
-      photoUrl: string;
+      photoUrl: string | null;
       scanId: string;
       analysis: VisionAnalysis | null;
       verdict: VerdictResult;
@@ -78,7 +79,7 @@ export function fromAnswer(
   return malformed(current.photoUrl);
 }
 
-function malformed(photoUrl: string): ScanState {
+function malformed(photoUrl: string | null): ScanState {
   return {
     step: "error",
     photoUrl,
