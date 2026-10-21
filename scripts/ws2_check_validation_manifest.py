@@ -2,6 +2,7 @@
 
 uv run python scripts/ws2_check_validation_manifest.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -13,9 +14,7 @@ from pathlib import Path
 
 def check(predictions: Path, manifest: Path) -> dict[str, object]:
     with predictions.open(newline="", encoding="utf-8") as handle:
-        expected = {
-            row["path"]: row for row in csv.DictReader(handle) if row["split"] == "val"
-        }
+        expected = {row["path"]: row for row in csv.DictReader(handle) if row["split"] == "val"}
     with manifest.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.DictReader(handle))
     if len(rows) != len(expected) or len({r["path"] for r in rows}) != len(rows):

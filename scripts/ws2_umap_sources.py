@@ -29,9 +29,7 @@ def main() -> None:
     parser.add_argument(
         "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
     )
-    parser.add_argument(
-        "--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy"
-    )
+    parser.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     parser.add_argument("--output", type=Path, default=Path("results/ws2/clustering"))
     parser.add_argument("--max-plot", type=int, default=4000)
     args = parser.parse_args()
@@ -52,8 +50,12 @@ def main() -> None:
     rng = np.random.default_rng(42)
     sample = rng.choice(len(train), size=min(args.max_plot, len(train)), replace=False)
     coords = umap.UMAP(
-        n_components=2, n_neighbors=30, min_dist=0.1,
-        metric="cosine", random_state=42, n_jobs=1,
+        n_components=2,
+        n_neighbors=30,
+        min_dist=0.1,
+        metric="cosine",
+        random_state=42,
+        n_jobs=1,
     ).fit_transform(x)
     unique = sorted(set(sources.tolist()))
     palette = plt.get_cmap("tab10")
@@ -62,8 +64,12 @@ def main() -> None:
     for j, source in enumerate(unique):
         selected = sample[sources[sample] == source]
         ax.scatter(
-            coords[selected, 0], coords[selected, 1],
-            s=9, alpha=0.65, color=palette(j), label=f"{source} (n={sum(sources == source)})",
+            coords[selected, 0],
+            coords[selected, 1],
+            s=9,
+            alpha=0.65,
+            color=palette(j),
+            label=f"{source} (n={sum(sources == source)})",
             rasterized=True,
         )
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1))
@@ -84,9 +90,7 @@ def main() -> None:
         "n_train": len(train),
         "source_counts": dict(sorted(Counter(sources.tolist()).items())),
         "source_material_counts": cross,
-        "umap_parameters": {
-            "metric": "cosine", "n_neighbors": 30, "min_dist": 0.1, "seed": 42
-        },
+        "umap_parameters": {"metric": "cosine", "n_neighbors": 30, "min_dist": 0.1, "seed": 42},
         "limitations": [
             "UMAP axes and apparent gaps are not calibrated distances.",
             "Different source class proportions can create apparent source separation.",
@@ -96,12 +100,17 @@ def main() -> None:
     (args.output / "sources_summary.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
-    print(json.dumps({
-        "n_train": len(train),
-        "source_counts": report["source_counts"],
-        "plot": str(args.output / "sources_umap.png"),
-        "summary": str(args.output / "sources_summary.json"),
-    }, indent=2))
+    print(
+        json.dumps(
+            {
+                "n_train": len(train),
+                "source_counts": report["source_counts"],
+                "plot": str(args.output / "sources_umap.png"),
+                "summary": str(args.output / "sources_summary.json"),
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ Requires the same WS1 ConvNeXt ONNX export used to generate embeddings.npy:
 config.json, model.onnx, head.npz. Downloads nothing automatically.
 Local calibration thresholds are frozen from WS2-11, not fitted on OOD photos.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -24,7 +25,7 @@ from PIL import Image
 from sklearn.metrics import roc_auc_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services/inference"))
-from app.vision import VisionModel  # noqa: E402
+from app.vision import VisionModel
 
 ROOT = Path("data/ws2")
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -59,15 +60,22 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-dir", type=Path, required=True)
     parser.add_argument("--ood-images", type=Path, default=ROOT / "ood_pilot")
-    parser.add_argument("--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     parser.add_argument("--reference", type=Path, default=Path("results/ws2/ood/ood_reference.npz"))
-    parser.add_argument("--thresholds", type=Path, default=Path("results/ws2/ood/local_thresholds.json"))
-    parser.add_argument("--output", type=Path, default=Path("results/ws2/ood/pilot_evaluation.json"))
+    parser.add_argument(
+        "--thresholds", type=Path, default=Path("results/ws2/ood/local_thresholds.json")
+    )
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/ws2/ood/pilot_evaluation.json")
+    )
     args = parser.parse_args()
 
     files = sorted(
-        path for path in args.ood_images.glob("*/*")
+        path
+        for path in args.ood_images.glob("*/*")
         if path.suffix.lower() in IMAGE_EXTENSIONS and path.is_file()
     )
     if not files:
@@ -94,8 +102,10 @@ def main() -> None:
     if known_embeddings.shape != (len(rows), 256):
         raise ValueError("Known embedding row mismatch")
     known_ids = [
-        i for i, row in enumerate(rows)
-        if row["split"] == "val" and row["source"] == "local"
+        i
+        for i, row in enumerate(rows)
+        if row["split"] == "val"
+        and row["source"] == "local"
         and diagnostic_group(row["source"], row["group"])
     ]
     if not known_ids:
@@ -142,14 +152,19 @@ def main() -> None:
         }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
-    with (args.output.parent / "pilot_scores.csv").open("w", newline="", encoding="utf-8") as handle:
+    with (args.output.parent / "pilot_scores.csv").open(
+        "w", newline="", encoding="utf-8"
+    ) as handle:
         writer = csv.writer(handle)
         writer.writerow(["item_id", "file", *METHODS])
         for i, path in enumerate(files):
-            writer.writerow([
-                item_ids[i], str(path.relative_to(args.ood_images)),
-                *(float(unknown_scores[name][i]) for name in METHODS),
-            ])
+            writer.writerow(
+                [
+                    item_ids[i],
+                    str(path.relative_to(args.ood_images)),
+                    *(float(unknown_scores[name][i]) for name in METHODS),
+                ]
+            )
     print(json.dumps(results, indent=2))
     print(f"Saved: {args.output}")
 

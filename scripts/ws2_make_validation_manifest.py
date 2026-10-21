@@ -6,6 +6,7 @@ contain several photos and labels. No test rows are included.
 
 uv run python scripts/ws2_make_validation_manifest.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -77,9 +78,15 @@ def make_manifest(predictions: Path, output: Path) -> dict[str, object]:
     counts = Counter(row["partition"] for row in records)
     local = Counter(row["partition"] for row in records if row["source"] == "local")
     by_class = {
-        part: dict(sorted(Counter(
-            row["material"] for row in records if row["source"] == "local" and row["partition"] == part
-        ).items()))
+        part: dict(
+            sorted(
+                Counter(
+                    row["material"]
+                    for row in records
+                    if row["source"] == "local" and row["partition"] == part
+                ).items()
+            )
+        )
         for part in PARTITIONS
     }
     summary: dict[str, object] = {
