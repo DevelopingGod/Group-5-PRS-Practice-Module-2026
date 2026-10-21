@@ -1,0 +1,2434 @@
+{
+  "settings": {
+    "predictions": "vision results/results/v0.2-local-data/predictions.csv",
+    "source": "local",
+    "thresholds": "[0.6, 0.7, 0.75, 0.8, 0.9, 0.95]",
+    "repeats": "20",
+    "clean_share": "0.5",
+    "worlds": "20",
+    "resamples": "1000",
+    "seed": "0",
+    "out": "docs/workstreams/ws3_analysis"
+  },
+  "1_threshold_tradeoff": {
+    "rows": [
+      {
+        "system": "adaptive",
+        "threshold": 0.6,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.4878542510121457,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8799595141700405,
+        "costly_error_rate": 0.04486386138613861,
+        "fallback_rate": 0.02651821862348178,
+        "ci95": {
+          "avg_questions": [
+            1.3268076586631272,
+            1.6125762130801684
+          ],
+          "no_question_share": [
+            0.19678550266640332,
+            0.3359073359073359
+          ],
+          "verdict_accuracy": [
+            0.8608159183673469,
+            0.8975880402291693
+          ],
+          "costly_error_rate": [
+            0.031012126458464347,
+            0.061357786357786354
+          ],
+          "fallback_rate": [
+            0.014897850629613548,
+            0.039871776491046326
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.6,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8819838056680162,
+        "costly_error_rate": 0.043007425742574254,
+        "fallback_rate": 0.06255060728744939,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.8635652858527132,
+            0.898556092249274
+          ],
+          "costly_error_rate": [
+            0.030089775202834443,
+            0.05774696662142024
+          ],
+          "fallback_rate": [
+            0.047889049839834184,
+            0.07790269474239492
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596,
+        "ci95": {
+          "avg_questions": [
+            1.3453388087666651,
+            1.6378722518321118
+          ],
+          "no_question_share": [
+            0.19678550266640332,
+            0.3359073359073359
+          ],
+          "verdict_accuracy": [
+            0.8548582995951417,
+            0.894283206681608
+          ],
+          "costly_error_rate": [
+            0.0261918257778815,
+            0.0531303031717156
+          ],
+          "fallback_rate": [
+            0.025679535505836574,
+            0.05809910946567941
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8686234817813765,
+        "costly_error_rate": 0.03094059405940594,
+        "fallback_rate": 0.1076923076923077,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.8477267992424243,
+            0.8880762998148021
+          ],
+          "costly_error_rate": [
+            0.021519326989591997,
+            0.04264325638503142
+          ],
+          "fallback_rate": [
+            0.08734939759036145,
+            0.1289986186770428
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296,
+        "ci95": {
+          "avg_questions": [
+            1.3811840134297522,
+            1.6838198818897636
+          ],
+          "no_question_share": [
+            0.19678550266640332,
+            0.3359073359073359
+          ],
+          "verdict_accuracy": [
+            0.8494173167500736,
+            0.8908763241483985
+          ],
+          "costly_error_rate": [
+            0.020275284227348034,
+            0.038605900766363
+          ],
+          "fallback_rate": [
+            0.045325051894135965,
+            0.08914335092811125
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8182186234817814,
+        "costly_error_rate": 0.017945544554455444,
+        "fallback_rate": 0.18643724696356276,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.7951762048192771,
+            0.841843998687341
+          ],
+          "costly_error_rate": [
+            0.011118072664605913,
+            0.026641094020767506
+          ],
+          "fallback_rate": [
+            0.16317117312702298,
+            0.20878846459403635
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583,
+        "ci95": {
+          "avg_questions": [
+            1.4698096961439102,
+            1.77712037806398
+          ],
+          "no_question_share": [
+            0.1887492593324116,
+            0.3248015873015873
+          ],
+          "verdict_accuracy": [
+            0.8286010738984575,
+            0.8750988539136785
+          ],
+          "costly_error_rate": [
+            0.017535300808640207,
+            0.03178776606116969
+          ],
+          "fallback_rate": [
+            0.08608155366387893,
+            0.13703267716535433
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7902834008097166,
+        "costly_error_rate": 0.012066831683168317,
+        "fallback_rate": 0.23117408906882592,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.7642487517217631,
+            0.8172842294445659
+          ],
+          "costly_error_rate": [
+            0.007269213143391381,
+            0.017869716654576318
+          ],
+          "fallback_rate": [
+            0.20530776554350524,
+            0.2588054901960784
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.9,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 2.0615384615384613,
+        "no_question_share": 0.21052631578947367,
+        "verdict_accuracy": 0.7188259109311741,
+        "costly_error_rate": 0.0027846534653465345,
+        "fallback_rate": 0.4230769230769231,
+        "ci95": {
+          "avg_questions": [
+            1.869823753720238,
+            2.216260029560811
+          ],
+          "no_question_share": [
+            0.1505646718146718,
+            0.2845975487136814
+          ],
+          "verdict_accuracy": [
+            0.6866973443223443,
+            0.7559706889108178
+          ],
+          "costly_error_rate": [
+            0.000600930003748126,
+            0.005872113202824876
+          ],
+          "fallback_rate": [
+            0.3808077746916486,
+            0.463085195806962
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.9,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7155870445344129,
+        "costly_error_rate": 0.0027846534653465345,
+        "fallback_rate": 0.43846153846153846,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.6837136764154481,
+            0.7527250864677907
+          ],
+          "costly_error_rate": [
+            0.000600930003748126,
+            0.005872113202824876
+          ],
+          "fallback_rate": [
+            0.398578738512949,
+            0.47555625451023587
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.95,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 2.171862348178138,
+        "no_question_share": 0.18218623481781376,
+        "verdict_accuracy": 0.6421052631578947,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.5477732793522267,
+        "ci95": {
+          "avg_questions": [
+            1.9901926629118216,
+            2.33212473628692
+          ],
+          "no_question_share": [
+            0.125,
+            0.2478650137741047
+          ],
+          "verdict_accuracy": [
+            0.6023067641817642,
+            0.6905329518275481
+          ],
+          "costly_error_rate": [
+            0.0,
+            0.0
+          ],
+          "fallback_rate": [
+            0.49867296816697765,
+            0.5935558203125
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.95,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.6382591093117409,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.5694331983805668,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.5991326023238773,
+            0.6858440289495586
+          ],
+          "costly_error_rate": [
+            0.0,
+            0.0
+          ],
+          "fallback_rate": [
+            0.5225495276772314,
+            0.6116756329113924
+          ]
+        }
+      }
+    ],
+    "paired_differences": {
+      "adaptive 0.70 minus 0.80": {
+        "avg_questions": [
+          -0.12955465587044523,
+          -0.15942890061874085,
+          -0.10493493785346832
+        ],
+        "no_question_share": [
+          0.008097165991902855,
+          0.0,
+          0.020833333333333315
+        ],
+        "verdict_accuracy": [
+          0.02267206477732797,
+          0.011156508168077514,
+          0.03375111166007911
+        ],
+        "costly_error_rate": [
+          0.014232673267326731,
+          0.006809382253505951,
+          0.024071208379933002
+        ],
+        "fallback_rate": [
+          -0.06923076923076923,
+          -0.08508290659879798,
+          -0.05525046636912025
+        ]
+      },
+      "adaptive 0.75 minus 0.80": {
+        "avg_questions": [
+          -0.09048582995951415,
+          -0.11702260926204545,
+          -0.06950594762095168
+        ],
+        "no_question_share": [
+          0.008097165991902855,
+          0.0,
+          0.020833333333333315
+        ],
+        "verdict_accuracy": [
+          0.018218623481781382,
+          0.01120101429230056,
+          0.025610268497642873
+        ],
+        "costly_error_rate": [
+          0.004641089108910892,
+          0.0021565731444385633,
+          0.008081642804074899
+        ],
+        "fallback_rate": [
+          -0.043927125506072875,
+          -0.055078290519067805,
+          -0.03484817436661699
+        ]
+      },
+      "adaptive 0.70 minus 0.75": {
+        "avg_questions": [
+          -0.03906882591093108,
+          -0.05567226890756305,
+          -0.025100308641975228
+        ],
+        "no_question_share": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "verdict_accuracy": [
+          0.00445344129554659,
+          -0.0020335745369902208,
+          0.010645060711596469
+        ],
+        "costly_error_rate": [
+          0.00959158415841584,
+          0.00398482904931478,
+          0.01699401605810563
+        ],
+        "fallback_rate": [
+          -0.02530364372469636,
+          -0.03481843141317861,
+          -0.017455696809995813
+        ]
+      },
+      "adaptive 0.70 minus static 0.80": {
+        "avg_questions": [
+          -1.4947368421052631,
+          -1.6546611912333349,
+          -1.3621277481678882
+        ],
+        "no_question_share": [
+          0.2591093117408907,
+          0.19678550266640332,
+          0.3359073359073359
+        ],
+        "verdict_accuracy": [
+          0.08461538461538465,
+          0.06647408615623925,
+          0.10099673029194695
+        ],
+        "costly_error_rate": [
+          0.02629950495049505,
+          0.017431420881634133,
+          0.03773366381717267
+        ],
+        "fallback_rate": [
+          -0.19089068825910932,
+          -0.21112622036262205,
+          -0.17103439970355733
+        ]
+      },
+      "adaptive 0.75 minus static 0.80": {
+        "avg_questions": [
+          -1.455668016194332,
+          -1.6188159865702478,
+          -1.3161801181102364
+        ],
+        "no_question_share": [
+          0.2591093117408907,
+          0.19678550266640332,
+          0.3359073359073359
+        ],
+        "verdict_accuracy": [
+          0.08016194331983806,
+          0.06473668318850587,
+          0.09395178091397853
+        ],
+        "costly_error_rate": [
+          0.01670792079207921,
+          0.011693599508970347,
+          0.022931179171311024
+        ],
+        "fallback_rate": [
+          -0.16558704453441297,
+          -0.1848007264957265,
+          -0.14776036099504422
+        ]
+      },
+      "adaptive 0.80 minus static 0.80": {
+        "avg_questions": [
+          -1.365182186234818,
+          -1.5301903038560898,
+          -1.22287962193602
+        ],
+        "no_question_share": [
+          0.25101214574898784,
+          0.1887492593324116,
+          0.3248015873015873
+        ],
+        "verdict_accuracy": [
+          0.061943319838056676,
+          0.04874875340587318,
+          0.07550200803212848
+        ],
+        "costly_error_rate": [
+          0.012066831683168317,
+          0.008124479814081447,
+          0.01674564227833033
+        ],
+        "fallback_rate": [
+          -0.12165991902834009,
+          -0.13834527834658794,
+          -0.10557624470872808
+        ]
+      }
+    },
+    "resamples": 1000
+  },
+  "2_question_selection": {
+    "rows": [
+      {
+        "variant": "as designed: entropy choice, D-003 on",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 on",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 on",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "variant": "entropy choice, D-003 off",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.05425101214574899,
+        "no_question_share": 0.9676113360323887,
+        "verdict_accuracy": 0.654251012145749,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.009919028340080972
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 off",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.05425101214574899,
+        "no_question_share": 0.9676113360323887,
+        "verdict_accuracy": 0.654251012145749,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.009919028340080972
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 off",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.053643724696356275,
+        "no_question_share": 0.9676113360323887,
+        "verdict_accuracy": 0.654251012145749,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.008906882591093117
+      },
+      {
+        "variant": "as designed: entropy choice, D-003 on",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 on",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 on",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.545344129554656,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06538461538461539
+      },
+      {
+        "variant": "entropy choice, D-003 off",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.8246963562753037,
+        "no_question_share": 0.4251012145748988,
+        "verdict_accuracy": 0.7052631578947368,
+        "costly_error_rate": 0.006497524752475247,
+        "fallback_rate": 0.03906882591093117
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 off",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.8246963562753037,
+        "no_question_share": 0.4251012145748988,
+        "verdict_accuracy": 0.7052631578947368,
+        "costly_error_rate": 0.006497524752475247,
+        "fallback_rate": 0.03906882591093117
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 off",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 0.875910931174089,
+        "no_question_share": 0.4251012145748988,
+        "verdict_accuracy": 0.6819838056680162,
+        "costly_error_rate": 0.0018564356435643563,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "variant": "as designed: entropy choice, D-003 on",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 on",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 on",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6356275303643724,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "variant": "entropy choice, D-003 off",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.598987854251012,
+        "no_question_share": 0.26720647773279355,
+        "verdict_accuracy": 0.8518218623481781,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10364372469635627
+      },
+      {
+        "variant": "fixed order Q2 then Q3, D-003 off",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.598987854251012,
+        "no_question_share": 0.26720647773279355,
+        "verdict_accuracy": 0.8518218623481781,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10364372469635627
+      },
+      {
+        "variant": "fixed order Q3 then Q2, D-003 off",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.9206477732793523,
+        "no_question_share": 0.26720647773279355,
+        "verdict_accuracy": 0.7902834008097166,
+        "costly_error_rate": 0.012066831683168317,
+        "fallback_rate": 0.12651821862348178
+      }
+    ],
+    "question_paths": {
+      "as designed: entropy choice, D-003 on @ 0.70": {
+        "Q1 > Q2": 0.6732793522267206,
+        "none": 0.2591093117408907,
+        "Q1 > Q2 > Q3": 0.04554655870445344,
+        "Q1": 0.02206477732793522
+      },
+      "entropy choice, D-003 off @ 0.70": {
+        "none": 0.9676113360323887,
+        "Q1": 0.020445344129554656,
+        "Q1 > Q2 > Q3": 0.009919028340080972,
+        "Q1 > Q2": 0.0020242914979757085
+      },
+      "as designed: entropy choice, D-003 on @ 0.75": {
+        "Q1 > Q2": 0.6435222672064778,
+        "none": 0.2591093117408907,
+        "Q1 > Q2 > Q3": 0.07995951417004049,
+        "Q1": 0.017408906882591092
+      },
+      "entropy choice, D-003 off @ 0.75": {
+        "none": 0.4251012145748988,
+        "Q1": 0.3712550607287449,
+        "Q1 > Q2": 0.15748987854251012,
+        "Q1 > Q2 > Q3": 0.046153846153846156
+      },
+      "as designed: entropy choice, D-003 on @ 0.80": {
+        "Q1 > Q2": 0.5684210526315789,
+        "none": 0.25101214574898784,
+        "Q1 > Q2 > Q3": 0.15870445344129555,
+        "Q1": 0.02186234817813765
+      },
+      "entropy choice, D-003 off @ 0.80": {
+        "Q1 > Q2": 0.5613360323886639,
+        "none": 0.26720647773279355,
+        "Q1 > Q2 > Q3": 0.15242914979757086,
+        "Q1": 0.01902834008097166
+      }
+    }
+  },
+  "3_answer_noise": {
+    "rows": [
+      {
+        "noise": 0.0,
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "noise": 0.0,
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8686234817813765,
+        "costly_error_rate": 0.03094059405940594,
+        "fallback_rate": 0.1076923076923077
+      },
+      {
+        "noise": 0.0,
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296
+      },
+      {
+        "noise": 0.0,
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8182186234817814,
+        "costly_error_rate": 0.017945544554455444,
+        "fallback_rate": 0.18643724696356276
+      },
+      {
+        "noise": 0.0,
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "noise": 0.0,
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7902834008097166,
+        "costly_error_rate": 0.012066831683168317,
+        "fallback_rate": 0.23117408906882592
+      },
+      {
+        "noise": 0.1,
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5147773279352226,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8463562753036438,
+        "costly_error_rate": 0.0525990099009901,
+        "fallback_rate": 0.048987854251012146
+      },
+      {
+        "noise": 0.1,
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.841497975708502,
+        "costly_error_rate": 0.0426980198019802,
+        "fallback_rate": 0.1228744939271255
+      },
+      {
+        "noise": 0.1,
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.555668016194332,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8417004048582996,
+        "costly_error_rate": 0.0411509900990099,
+        "fallback_rate": 0.07874493927125506
+      },
+      {
+        "noise": 0.1,
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7963562753036437,
+        "costly_error_rate": 0.025371287128712873,
+        "fallback_rate": 0.2040485829959514
+      },
+      {
+        "noise": 0.1,
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6536437246963562,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8251012145748988,
+        "costly_error_rate": 0.034962871287128716,
+        "fallback_rate": 0.12631578947368421
+      },
+      {
+        "noise": 0.1,
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7704453441295547,
+        "costly_error_rate": 0.018873762376237623,
+        "fallback_rate": 0.24878542510121457
+      },
+      {
+        "noise": 0.2,
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5204453441295547,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8186234817813766,
+        "costly_error_rate": 0.06775990099009901,
+        "fallback_rate": 0.05506072874493927
+      },
+      {
+        "noise": 0.2,
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8135627530364372,
+        "costly_error_rate": 0.05631188118811881,
+        "fallback_rate": 0.13522267206477734
+      },
+      {
+        "noise": 0.2,
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.564574898785425,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8151821862348179,
+        "costly_error_rate": 0.055383663366336634,
+        "fallback_rate": 0.08643724696356275
+      },
+      {
+        "noise": 0.2,
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7763157894736842,
+        "costly_error_rate": 0.03372524752475248,
+        "fallback_rate": 0.21700404858299596
+      },
+      {
+        "noise": 0.2,
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6680161943319838,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8004048582995952,
+        "costly_error_rate": 0.04733910891089109,
+        "fallback_rate": 0.13846153846153847
+      },
+      {
+        "noise": 0.2,
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7528340080971659,
+        "costly_error_rate": 0.024443069306930694,
+        "fallback_rate": 0.2639676113360324
+      },
+      {
+        "noise": 0.3,
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.525910931174089,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.7917004048582996,
+        "costly_error_rate": 0.08415841584158416,
+        "fallback_rate": 0.05931174089068826
+      },
+      {
+        "noise": 0.3,
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7884615384615384,
+        "costly_error_rate": 0.07054455445544554,
+        "fallback_rate": 0.14251012145748987
+      },
+      {
+        "noise": 0.3,
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5688259109311742,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.7888663967611336,
+        "costly_error_rate": 0.07054455445544554,
+        "fallback_rate": 0.0917004048582996
+      },
+      {
+        "noise": 0.3,
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7576923076923077,
+        "costly_error_rate": 0.043007425742574254,
+        "fallback_rate": 0.22489878542510122
+      },
+      {
+        "noise": 0.3,
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6803643724696355,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.7763157894736842,
+        "costly_error_rate": 0.06064356435643564,
+        "fallback_rate": 0.14696356275303643
+      },
+      {
+        "noise": 0.3,
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7360323886639676,
+        "costly_error_rate": 0.03310643564356436,
+        "fallback_rate": 0.2732793522267207
+      }
+    ]
+  },
+  "4_wrong_tables": {
+    "rows": [
+      {
+        "sigma": 0.25,
+        "threshold": 0.6,
+        "worlds": 20,
+        "accuracy_mean": 0.8738360323886638,
+        "accuracy_min": 0.8504048582995951,
+        "accuracy_max": 0.8991902834008098,
+        "costly_mean": 0.048575647319269964,
+        "costly_max": 0.07089783281733746,
+        "worlds_within_target": 0.55,
+        "avg_questions_mean": 1.4914473684210525
+      },
+      {
+        "sigma": 0.25,
+        "threshold": 0.7,
+        "worlds": 20,
+        "accuracy_mean": 0.868825910931174,
+        "accuracy_min": 0.844331983805668,
+        "accuracy_max": 0.8951417004048583,
+        "costly_mean": 0.04034131632985421,
+        "costly_max": 0.05851393188854489,
+        "worlds_within_target": 0.9,
+        "avg_questions_mean": 1.5106174089068825
+      },
+      {
+        "sigma": 0.25,
+        "threshold": 0.75,
+        "worlds": 20,
+        "accuracy_mean": 0.8620647773279352,
+        "accuracy_min": 0.8406882591093118,
+        "accuracy_max": 0.8870445344129555,
+        "costly_mean": 0.032380382191755014,
+        "costly_max": 0.04736842105263158,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 1.552732793522267
+      },
+      {
+        "sigma": 0.25,
+        "threshold": 0.8,
+        "worlds": 20,
+        "accuracy_mean": 0.8445242914979756,
+        "accuracy_min": 0.823076923076923,
+        "accuracy_max": 0.8676113360323887,
+        "costly_mean": 0.025817725359597764,
+        "costly_max": 0.03808049535603715,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 1.647085020242915
+      },
+      {
+        "sigma": 0.25,
+        "threshold": 0.9,
+        "worlds": 20,
+        "accuracy_mean": 0.7169635627530363,
+        "accuracy_min": 0.692914979757085,
+        "accuracy_max": 0.7360323886639676,
+        "costly_mean": 0.003336796877474982,
+        "costly_max": 0.007096575131132366,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 2.0722267206477736
+      },
+      {
+        "sigma": 0.25,
+        "threshold": 0.95,
+        "worlds": 20,
+        "accuracy_mean": 0.643006072874494,
+        "accuracy_min": 0.6346153846153846,
+        "accuracy_max": 0.6508097165991903,
+        "costly_mean": 0.0,
+        "costly_max": 0.0,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 2.181912955465587
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.6,
+        "worlds": 20,
+        "accuracy_mean": 0.8594736842105265,
+        "accuracy_min": 0.8046558704453441,
+        "accuracy_max": 0.904251012145749,
+        "costly_mean": 0.05205768736516162,
+        "costly_max": 0.10371517027863777,
+        "worlds_within_target": 0.55,
+        "avg_questions_mean": 1.4924797570850201
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.7,
+        "worlds": 20,
+        "accuracy_mean": 0.8543319838056679,
+        "accuracy_min": 0.8038461538461539,
+        "accuracy_max": 0.9,
+        "costly_mean": 0.04388427442965652,
+        "costly_max": 0.0913312693498452,
+        "worlds_within_target": 0.7,
+        "avg_questions_mean": 1.5124291497975706
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.75,
+        "worlds": 20,
+        "accuracy_mean": 0.847257085020243,
+        "accuracy_min": 0.7991902834008097,
+        "accuracy_max": 0.8933198380566801,
+        "costly_mean": 0.03591013402260641,
+        "costly_max": 0.07708978328173374,
+        "worlds_within_target": 0.85,
+        "avg_questions_mean": 1.5564271255060729
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.8,
+        "worlds": 20,
+        "accuracy_mean": 0.8302327935222673,
+        "accuracy_min": 0.787246963562753,
+        "accuracy_max": 0.8734817813765182,
+        "costly_mean": 0.02880396299260272,
+        "costly_max": 0.062229102167182665,
+        "worlds_within_target": 0.9,
+        "avg_questions_mean": 1.6571659919028339
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.9,
+        "worlds": 20,
+        "accuracy_mean": 0.7125809716599191,
+        "accuracy_min": 0.6748987854251012,
+        "accuracy_max": 0.7439271255060729,
+        "costly_mean": 0.0033059716829710846,
+        "costly_max": 0.007096575131132366,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 2.0781983805668016
+      },
+      {
+        "sigma": 0.5,
+        "threshold": 0.95,
+        "worlds": 20,
+        "accuracy_mean": 0.643006072874494,
+        "accuracy_min": 0.6346153846153846,
+        "accuracy_max": 0.6508097165991903,
+        "costly_mean": 0.0,
+        "costly_max": 0.0,
+        "worlds_within_target": 1.0,
+        "avg_questions_mean": 2.189412955465587
+      }
+    ],
+    "best_threshold_counts": {
+      "0.25": {
+        "0.70": 7,
+        "0.60": 11,
+        "0.75": 2
+      },
+      "0.5": {
+        "0.75": 3,
+        "0.60": 11,
+        "0.70": 3,
+        "0.80": 1,
+        "0.90": 2
+      }
+    },
+    "clean_share_rows": [
+      {
+        "clean_share": 0.3,
+        "threshold": 0.6,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.4783400809716598,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.915587044534413,
+        "costly_error_rate": 0.04062976130015236,
+        "fallback_rate": 0.017611336032388663
+      },
+      {
+        "clean_share": 0.3,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.491902834008097,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.9121457489878543,
+        "costly_error_rate": 0.036566785170137124,
+        "fallback_rate": 0.02894736842105263
+      },
+      {
+        "clean_share": 0.3,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.5224696356275305,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.9087044534412956,
+        "costly_error_rate": 0.031234128999492128,
+        "fallback_rate": 0.04757085020242915
+      },
+      {
+        "clean_share": 0.3,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.605668016194332,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.9008097165991903,
+        "costly_error_rate": 0.02488572879634332,
+        "fallback_rate": 0.0860323886639676
+      },
+      {
+        "clean_share": 0.3,
+        "threshold": 0.9,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.9619433198380567,
+        "no_question_share": 0.21052631578947367,
+        "verdict_accuracy": 0.8285425101214575,
+        "costly_error_rate": 0.0022854240731335703,
+        "fallback_rate": 0.35506072874493927
+      },
+      {
+        "clean_share": 0.3,
+        "threshold": 0.95,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 2.080769230769231,
+        "no_question_share": 0.18218623481781376,
+        "verdict_accuracy": 0.7850202429149797,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.4568825910931174
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.6,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.4878542510121457,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8799595141700405,
+        "costly_error_rate": 0.04486386138613861,
+        "fallback_rate": 0.02651821862348178
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.9,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 2.0615384615384613,
+        "no_question_share": 0.21052631578947367,
+        "verdict_accuracy": 0.7188259109311741,
+        "costly_error_rate": 0.0027846534653465345,
+        "fallback_rate": 0.4230769230769231
+      },
+      {
+        "clean_share": 0.5,
+        "threshold": 0.95,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 2.171862348178138,
+        "no_question_share": 0.18218623481781376,
+        "verdict_accuracy": 0.6421052631578947,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.5477732793522267
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.6,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.5036437246963563,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8518218623481781,
+        "costly_error_rate": 0.05087440381558029,
+        "fallback_rate": 0.03744939271255061
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.5267206477732793,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.844331983805668,
+        "costly_error_rate": 0.038553259141494434,
+        "fallback_rate": 0.058704453441295545
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.5746963562753036,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8340080971659919,
+        "costly_error_rate": 0.02782193958664547,
+        "fallback_rate": 0.08765182186234818
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.6765182186234817,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.804251012145749,
+        "costly_error_rate": 0.01987281399046105,
+        "fallback_rate": 0.147165991902834
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.9,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 2.175910931174089,
+        "no_question_share": 0.21052631578947367,
+        "verdict_accuracy": 0.6087044534412955,
+        "costly_error_rate": 0.003179650238473768,
+        "fallback_rate": 0.5024291497975708
+      },
+      {
+        "clean_share": 0.7,
+        "threshold": 0.95,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 2.2775303643724696,
+        "no_question_share": 0.18218623481781376,
+        "verdict_accuracy": 0.497165991902834,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.652834008097166
+      }
+    ]
+  },
+  "5_calibration": {
+    "vision_material_scores": {
+      "photos": 247,
+      "top1_accuracy": 0.8137651821862348,
+      "mean_top1_confidence": 0.8255238569610169,
+      "ece": 0.044438898075987034
+    },
+    "temperature_rows": [
+      {
+        "temperature": 0.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.4983805668016195,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8765182186234818,
+        "costly_error_rate": 0.054455445544554455,
+        "fallback_rate": 0.024493927125506073,
+        "verdict_ece": 0.03350031456373497
+      },
+      {
+        "temperature": 0.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5056680161943319,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8755060728744939,
+        "costly_error_rate": 0.05228960396039604,
+        "fallback_rate": 0.029149797570850202,
+        "verdict_ece": 0.033057413360706174
+      },
+      {
+        "temperature": 0.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5615384615384615,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8763157894736842,
+        "costly_error_rate": 0.04455445544554455,
+        "fallback_rate": 0.05303643724696356,
+        "verdict_ece": 0.030790194547652187
+      },
+      {
+        "temperature": 0.75,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5036437246963563,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8781376518218623,
+        "costly_error_rate": 0.04455445544554455,
+        "fallback_rate": 0.03178137651821862,
+        "verdict_ece": 0.03238805181751757
+      },
+      {
+        "temperature": 0.75,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5188259109311741,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8777327935222672,
+        "costly_error_rate": 0.039603960396039604,
+        "fallback_rate": 0.04190283400809717,
+        "verdict_ece": 0.031414372365769924
+      },
+      {
+        "temperature": 0.75,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5947368421052632,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.868421052631579,
+        "costly_error_rate": 0.03217821782178218,
+        "fallback_rate": 0.07793522267206478,
+        "verdict_ece": 0.018063574155523933
+      },
+      {
+        "temperature": 1.0,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596,
+        "verdict_ece": 0.025406046458632668
+      },
+      {
+        "temperature": 1.0,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296,
+        "verdict_ece": 0.025934538023948562
+      },
+      {
+        "temperature": 1.0,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583,
+        "verdict_ece": 0.019459006985998308
+      },
+      {
+        "temperature": 1.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.57165991902834,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8534412955465587,
+        "costly_error_rate": 0.026608910891089108,
+        "fallback_rate": 0.08704453441295547,
+        "verdict_ece": 0.04729943131179236
+      },
+      {
+        "temperature": 1.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6423076923076922,
+        "no_question_share": 0.24696356275303644,
+        "verdict_accuracy": 0.8319838056680162,
+        "costly_error_rate": 0.019183168316831683,
+        "fallback_rate": 0.13299595141700404,
+        "verdict_ece": 0.04599343336051786
+      },
+      {
+        "temperature": 1.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.8720647773279353,
+        "no_question_share": 0.22267206477732793,
+        "verdict_accuracy": 0.7623481781376519,
+        "costly_error_rate": 0.008972772277227722,
+        "fallback_rate": 0.25587044534412956,
+        "verdict_ece": 0.04440546273785324
+      },
+      {
+        "temperature": 2.0,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6459514170040486,
+        "no_question_share": 0.23076923076923078,
+        "verdict_accuracy": 0.8216599190283401,
+        "costly_error_rate": 0.02103960396039604,
+        "fallback_rate": 0.13441295546558704,
+        "verdict_ece": 0.08605922314507809
+      },
+      {
+        "temperature": 2.0,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.8502024291497976,
+        "no_question_share": 0.1902834008097166,
+        "verdict_accuracy": 0.7692307692307693,
+        "costly_error_rate": 0.011757425742574257,
+        "fallback_rate": 0.23522267206477732,
+        "verdict_ece": 0.07854243938079597
+      },
+      {
+        "temperature": 2.0,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 2.140080971659919,
+        "no_question_share": 0.13765182186234817,
+        "verdict_accuracy": 0.690080971659919,
+        "costly_error_rate": 0.0034034653465346535,
+        "fallback_rate": 0.38441295546558707,
+        "verdict_ece": 0.07460423269518313
+      }
+    ],
+    "verdict": {
+      "0.70": {
+        "ece": 0.025406046458632668,
+        "bins": [
+          {
+            "bin": "0%-50%",
+            "runs": 174,
+            "mean_confidence": 0.3375635361465474,
+            "accuracy": 0.3735632183908046
+          },
+          {
+            "bin": "50%-60%",
+            "runs": 15,
+            "mean_confidence": 0.5453578132550282,
+            "accuracy": 0.8
+          },
+          {
+            "bin": "60%-70%",
+            "runs": 6,
+            "mean_confidence": 0.645493907820402,
+            "accuracy": 1.0
+          },
+          {
+            "bin": "70%-80%",
+            "runs": 625,
+            "mean_confidence": 0.7657801461285291,
+            "accuracy": 0.7376
+          },
+          {
+            "bin": "80%-90%",
+            "runs": 1773,
+            "mean_confidence": 0.8282838179173684,
+            "accuracy": 0.8573040045121263
+          },
+          {
+            "bin": "90%-95%",
+            "runs": 253,
+            "mean_confidence": 0.9235028322327626,
+            "accuracy": 0.9288537549407114
+          },
+          {
+            "bin": "95%-100%",
+            "runs": 2094,
+            "mean_confidence": 0.9811083492921822,
+            "accuracy": 0.9660936007640879
+          }
+        ]
+      },
+      "0.75": {
+        "ece": 0.02593453802394856,
+        "bins": [
+          {
+            "bin": "0%-50%",
+            "runs": 264,
+            "mean_confidence": 0.3189300425667257,
+            "accuracy": 0.38636363636363635
+          },
+          {
+            "bin": "50%-60%",
+            "runs": 27,
+            "mean_confidence": 0.5455909830359439,
+            "accuracy": 0.7777777777777778
+          },
+          {
+            "bin": "60%-70%",
+            "runs": 14,
+            "mean_confidence": 0.6392727043558055,
+            "accuracy": 0.5
+          },
+          {
+            "bin": "70%-80%",
+            "runs": 488,
+            "mean_confidence": 0.7822717157679663,
+            "accuracy": 0.7540983606557377
+          },
+          {
+            "bin": "80%-90%",
+            "runs": 1800,
+            "mean_confidence": 0.8281183234614315,
+            "accuracy": 0.8577777777777778
+          },
+          {
+            "bin": "90%-95%",
+            "runs": 253,
+            "mean_confidence": 0.9235028322327626,
+            "accuracy": 0.9288537549407114
+          },
+          {
+            "bin": "95%-100%",
+            "runs": 2094,
+            "mean_confidence": 0.9811083492921822,
+            "accuracy": 0.9660936007640879
+          }
+        ]
+      },
+      "0.80": {
+        "ece": 0.019459006985998263,
+        "bins": [
+          {
+            "bin": "0%-50%",
+            "runs": 386,
+            "mean_confidence": 0.29305239376114983,
+            "accuracy": 0.3082901554404145
+          },
+          {
+            "bin": "50%-60%",
+            "runs": 66,
+            "mean_confidence": 0.5630696238200402,
+            "accuracy": 0.5454545454545454
+          },
+          {
+            "bin": "60%-70%",
+            "runs": 25,
+            "mean_confidence": 0.6513053050385353,
+            "accuracy": 0.48
+          },
+          {
+            "bin": "70%-80%",
+            "runs": 64,
+            "mean_confidence": 0.7539978343268329,
+            "accuracy": 0.796875
+          },
+          {
+            "bin": "80%-90%",
+            "runs": 2052,
+            "mean_confidence": 0.8306772212765857,
+            "accuracy": 0.8450292397660819
+          },
+          {
+            "bin": "90%-95%",
+            "runs": 253,
+            "mean_confidence": 0.9235028322327626,
+            "accuracy": 0.9288537549407114
+          },
+          {
+            "bin": "95%-100%",
+            "runs": 2094,
+            "mean_confidence": 0.9811083492921822,
+            "accuracy": 0.9660936007640879
+          }
+        ]
+      }
+    }
+  },
+  "6_per_material": {
+    "threshold": 0.75,
+    "rows": [
+      {
+        "material": "paper",
+        "photos": 16,
+        "runs": 320,
+        "costly_error_base": 146,
+        "avg_questions": 2.05625,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.81875,
+        "costly_error_rate": 0.0547945205479452,
+        "fallback_rate": 0.046875,
+        "costly_runs": 8,
+        "wrong_runs": 58
+      },
+      {
+        "material": "plastic",
+        "photos": 83,
+        "runs": 1660,
+        "costly_error_base": 824,
+        "avg_questions": 1.9518072289156627,
+        "no_question_share": 0.07228915662650602,
+        "verdict_accuracy": 0.7897590361445783,
+        "costly_error_rate": 0.027912621359223302,
+        "fallback_rate": 0.08012048192771085,
+        "costly_runs": 23,
+        "wrong_runs": 349
+      },
+      {
+        "material": "glass",
+        "photos": 35,
+        "runs": 700,
+        "costly_error_base": 347,
+        "avg_questions": 2.0342857142857143,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8857142857142857,
+        "costly_error_rate": 0.0345821325648415,
+        "fallback_rate": 0.022857142857142857,
+        "costly_runs": 12,
+        "wrong_runs": 80
+      },
+      {
+        "material": "metal",
+        "photos": 21,
+        "runs": 420,
+        "costly_error_base": 219,
+        "avg_questions": 2.111904761904762,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7880952380952381,
+        "costly_error_rate": 0.0593607305936073,
+        "fallback_rate": 0.09761904761904762,
+        "costly_runs": 13,
+        "wrong_runs": 89
+      },
+      {
+        "material": "beverage_carton",
+        "photos": 15,
+        "runs": 300,
+        "costly_error_base": 156,
+        "avg_questions": 2.046666666666667,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.89,
+        "costly_error_rate": 0.038461538461538464,
+        "fallback_rate": 0.03666666666666667,
+        "costly_runs": 6,
+        "wrong_runs": 33
+      },
+      {
+        "material": "styrofoam",
+        "photos": 7,
+        "runs": 140,
+        "costly_error_base": 140,
+        "avg_questions": 1.6142857142857143,
+        "no_question_share": 0.2857142857142857,
+        "verdict_accuracy": 0.8928571428571429,
+        "costly_error_rate": 0.10714285714285714,
+        "fallback_rate": 0.2,
+        "costly_runs": 15,
+        "wrong_runs": 15
+      },
+      {
+        "material": "e_waste",
+        "photos": 11,
+        "runs": 220,
+        "costly_error_base": 220,
+        "avg_questions": 0.0,
+        "no_question_share": 1.0,
+        "verdict_accuracy": 1.0,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.0,
+        "costly_runs": 0,
+        "wrong_runs": 0
+      },
+      {
+        "material": "textile",
+        "photos": 15,
+        "runs": 300,
+        "costly_error_base": 300,
+        "avg_questions": 0.0,
+        "no_question_share": 1.0,
+        "verdict_accuracy": 1.0,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.0,
+        "costly_runs": 0,
+        "wrong_runs": 0
+      },
+      {
+        "material": "food_waste",
+        "photos": 4,
+        "runs": 80,
+        "costly_error_base": 80,
+        "avg_questions": 0.0,
+        "no_question_share": 1.0,
+        "verdict_accuracy": 1.0,
+        "costly_error_rate": 0.0,
+        "fallback_rate": 0.0,
+        "costly_runs": 0,
+        "wrong_runs": 0
+      },
+      {
+        "material": "other_general",
+        "photos": 40,
+        "runs": 800,
+        "costly_error_base": 800,
+        "avg_questions": 0.725,
+        "no_question_share": 0.65,
+        "verdict_accuracy": 0.98,
+        "costly_error_rate": 0.02,
+        "fallback_rate": 0.1,
+        "costly_runs": 16,
+        "wrong_runs": 16
+      }
+    ]
+  },
+  "7_held_out_test": {
+    "photos": 395,
+    "rows": [
+      {
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 1.5767088607594937,
+        "no_question_share": 0.23037974683544304,
+        "verdict_accuracy": 0.869493670886076,
+        "costly_error_rate": 0.03256743256743257,
+        "fallback_rate": 0.04746835443037975,
+        "ci95": {
+          "avg_questions": [
+            1.4687270105985037,
+            1.6799924542836937
+          ],
+          "no_question_share": [
+            0.1799959128065395,
+            0.2832091003370495
+          ],
+          "verdict_accuracy": [
+            0.8525339860439576,
+            0.8845838354220222
+          ],
+          "costly_error_rate": [
+            0.025684611332175856,
+            0.04052244156257854
+          ],
+          "fallback_rate": [
+            0.03083491704840906,
+            0.067992317593114
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8559493670886076,
+        "costly_error_rate": 0.02877122877122877,
+        "fallback_rate": 0.11215189873417722,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.8387712667396614,
+            0.8725812395973687
+          ],
+          "costly_error_rate": [
+            0.022980142377559513,
+            0.036016198418152706
+          ],
+          "fallback_rate": [
+            0.09227281168750773,
+            0.1345214058761725
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 1.6231645569620252,
+        "no_question_share": 0.22278481012658227,
+        "verdict_accuracy": 0.8649367088607595,
+        "costly_error_rate": 0.025974025974025976,
+        "fallback_rate": 0.07253164556962026,
+        "ci95": {
+          "avg_questions": [
+            1.506323633635551,
+            1.7332114297768793
+          ],
+          "no_question_share": [
+            0.1714950874454071,
+            0.27614646972391926
+          ],
+          "verdict_accuracy": [
+            0.8481755456972362,
+            0.8796834803759894
+          ],
+          "costly_error_rate": [
+            0.02104148163692304,
+            0.0318100678556806
+          ],
+          "fallback_rate": [
+            0.05135379854392368,
+            0.09892073078207034
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8074683544303798,
+        "costly_error_rate": 0.016383616383616385,
+        "fallback_rate": 0.19227848101265824,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.7890137987012987,
+            0.8239908607201522
+          ],
+          "costly_error_rate": [
+            0.012398203977392934,
+            0.02081145425308737
+          ],
+          "fallback_rate": [
+            0.17089555651061192,
+            0.2177797619047619
+          ]
+        }
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 1.729113924050633,
+        "no_question_share": 0.21518987341772153,
+        "verdict_accuracy": 0.8467088607594937,
+        "costly_error_rate": 0.02197802197802198,
+        "fallback_rate": 0.12443037974683545,
+        "ci95": {
+          "avg_questions": [
+            1.6090961538461537,
+            1.843965814642488
+          ],
+          "no_question_share": [
+            0.16451578866592487,
+            0.2707342479674797
+          ],
+          "verdict_accuracy": [
+            0.82869812813869,
+            0.864669496704932
+          ],
+          "costly_error_rate": [
+            0.017220958793315963,
+            0.027184772505850597
+          ],
+          "fallback_rate": [
+            0.09960190269441963,
+            0.15330221233230135
+          ]
+        }
+      },
+      {
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 7900,
+        "costly_error_base": 5005,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7763291139240507,
+        "costly_error_rate": 0.011588411588411588,
+        "fallback_rate": 0.2468354430379747,
+        "ci95": {
+          "avg_questions": [
+            3.0,
+            3.0
+          ],
+          "no_question_share": [
+            0.0,
+            0.0
+          ],
+          "verdict_accuracy": [
+            0.755563275239441,
+            0.7957918792517007
+          ],
+          "costly_error_rate": [
+            0.008593270036630862,
+            0.014968849740112637
+          ],
+          "fallback_rate": [
+            0.2219685124159055,
+            0.2738332545832546
+          ]
+        }
+      }
+    ]
+  },
+  "8_campus_policy": {
+    "site": "campus_example",
+    "rows": [
+      {
+        "system": "adaptive",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5582995951417005,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8331983805668016,
+        "costly_error_rate": 0.027846534653465347,
+        "fallback_rate": 0.08866396761133603
+      },
+      {
+        "system": "static",
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.8168016194331984,
+        "costly_error_rate": 0.023514851485148515,
+        "fallback_rate": 0.16295546558704455
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6010121457489879,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8188259109311741,
+        "costly_error_rate": 0.023514851485148515,
+        "fallback_rate": 0.1180161943319838
+      },
+      {
+        "system": "static",
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7769230769230769,
+        "costly_error_rate": 0.01485148514851485,
+        "fallback_rate": 0.2271255060728745
+      },
+      {
+        "system": "adaptive",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.7018218623481782,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.795748987854251,
+        "costly_error_rate": 0.01670792079207921,
+        "fallback_rate": 0.17044534412955464
+      },
+      {
+        "system": "static",
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 3.0,
+        "no_question_share": 0.0,
+        "verdict_accuracy": 0.7512145748987854,
+        "costly_error_rate": 0.006806930693069307,
+        "fallback_rate": 0.27348178137651824
+      }
+    ]
+  },
+  "9_condition_prior": {
+    "rows": [
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.25,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.491902834008097,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.9121457489878543,
+        "costly_error_rate": 0.036566785170137124,
+        "fallback_rate": 0.02894736842105263
+      },
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.25,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.5224696356275305,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.9087044534412956,
+        "costly_error_rate": 0.031234128999492128,
+        "fallback_rate": 0.04757085020242915
+      },
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.25,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.605668016194332,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.9008097165991903,
+        "costly_error_rate": 0.02488572879634332,
+        "fallback_rate": 0.0860323886639676
+      },
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.6342105263157896,
+        "no_question_share": 0.2550607287449393,
+        "verdict_accuracy": 0.9143724696356276,
+        "costly_error_rate": 0.03809040121889284,
+        "fallback_rate": 0.10607287449392712
+      },
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.6692307692307693,
+        "no_question_share": 0.24696356275303644,
+        "verdict_accuracy": 0.9127530364372469,
+        "costly_error_rate": 0.03707465718638903,
+        "fallback_rate": 0.16821862348178138
+      },
+      {
+        "clean_share": 0.3,
+        "prior_clean": 0.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3938,
+        "avg_questions": 1.7234817813765182,
+        "no_question_share": 0.22672064777327935,
+        "verdict_accuracy": 0.9123481781376518,
+        "costly_error_rate": 0.03224987303199594,
+        "fallback_rate": 0.18927125506072875
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.25,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.5052631578947369,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8748987854251012,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.040283400809716596
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.25,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.544331983805668,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8704453441295547,
+        "costly_error_rate": 0.028774752475247526,
+        "fallback_rate": 0.06558704453441296
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.25,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.634817813765182,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.8522267206477733,
+        "costly_error_rate": 0.024133663366336634,
+        "fallback_rate": 0.10951417004048583
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.6392712550607287,
+        "no_question_share": 0.2550607287449393,
+        "verdict_accuracy": 0.8791497975708502,
+        "costly_error_rate": 0.039913366336633664,
+        "fallback_rate": 0.12388663967611337
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.676923076923077,
+        "no_question_share": 0.24696356275303644,
+        "verdict_accuracy": 0.8757085020242915,
+        "costly_error_rate": 0.038366336633663366,
+        "fallback_rate": 0.17449392712550607
+      },
+      {
+        "clean_share": 0.5,
+        "prior_clean": 0.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 3232,
+        "avg_questions": 1.7350202429149797,
+        "no_question_share": 0.22672064777327935,
+        "verdict_accuracy": 0.874089068825911,
+        "costly_error_rate": 0.03310643564356436,
+        "fallback_rate": 0.19878542510121458
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.25,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.5267206477732793,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.844331983805668,
+        "costly_error_rate": 0.038553259141494434,
+        "fallback_rate": 0.058704453441295545
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.25,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.5746963562753036,
+        "no_question_share": 0.2591093117408907,
+        "verdict_accuracy": 0.8340080971659919,
+        "costly_error_rate": 0.02782193958664547,
+        "fallback_rate": 0.08765182186234818
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.25,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.6765182186234817,
+        "no_question_share": 0.25101214574898784,
+        "verdict_accuracy": 0.804251012145749,
+        "costly_error_rate": 0.01987281399046105,
+        "fallback_rate": 0.147165991902834
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.5,
+        "threshold": 0.7,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.654251012145749,
+        "no_question_share": 0.2550607287449393,
+        "verdict_accuracy": 0.8473684210526315,
+        "costly_error_rate": 0.046104928457869634,
+        "fallback_rate": 0.13663967611336034
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.5,
+        "threshold": 0.75,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.6979757085020244,
+        "no_question_share": 0.24696356275303644,
+        "verdict_accuracy": 0.847165991902834,
+        "costly_error_rate": 0.038950715421303655,
+        "fallback_rate": 0.19412955465587045
+      },
+      {
+        "clean_share": 0.7,
+        "prior_clean": 0.5,
+        "threshold": 0.8,
+        "runs": 4940,
+        "costly_error_base": 2516,
+        "avg_questions": 1.7550607287449393,
+        "no_question_share": 0.22672064777327935,
+        "verdict_accuracy": 0.8437246963562753,
+        "costly_error_rate": 0.03179650238473768,
+        "fallback_rate": 0.21680161943319837
+      }
+    ]
+  }
+}

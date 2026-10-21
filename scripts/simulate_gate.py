@@ -27,7 +27,7 @@ import csv
 import json
 import random
 import sys
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from uuid import UUID
@@ -51,6 +51,7 @@ NIL_UUID = UUID(int=0)
 class Item:
     material: Material
     probabilities: dict[Material, float]
+    group: str = ""  # the physical item (photos of one item share it)
 
 
 @dataclass(frozen=True)
@@ -58,6 +59,18 @@ class Case:
     item: Item
     condition: Condition
     answers: dict[QuestionId, str]
+
+
+@dataclass(frozen=True)
+class Outcome:
+    """One simulated user's run through the flow."""
+
+    asked: tuple[QuestionId, ...]
+    correct: bool
+    not_recycling: bool  # the true bin is not a recycling bin
+    costly: bool  # ... and the verdict sent it to one anyway
+    fallback: bool
+    confidence: float  # the confidence the verdict showed
 
 
 @dataclass
@@ -87,7 +100,8 @@ def load_items(path: Path, split: str, source: str | None = None) -> list[Item]:
             total = sum(probs.values())
             if total <= 0.0:
                 continue
-            items.append(Item(Material(row["material"]), {m: p / total for m, p in probs.items()}))
+            probabilities = {m: p / total for m, p in probs.items()}
+            items.append(Item(Material(row["material"]), probabilities, row.get("group", "")))
     return items
 
 
@@ -97,75 +111,116 @@ def _draw(rng: random.Random, row: likelihoods.Row) -> str:
 
 
 def simulate_answers(
-    rng: random.Random, material: Material, condition: Condition
+    rng: random.Random,
+    material: Material,
+    condition: Condition,
+    world: Mapping[str, likelihoods.Row] | None = None,
 ) -> dict[QuestionId, str]:
-    """A user's answers drawn from the likelihood tables for the true material and condition."""
+    """A user's answers for the true material and condition.
+
+    Drawn from `world`, the tables real users follow (named as in likelihoods.all_rows()). It
+    defaults to the tables the decision flow uses; scripts/analyse_decisions.py passes others to
+    test what happens when users do not behave as the tables assume.
+    """
+    rows = likelihoods.all_rows() if world is None else world
     if condition is Condition.CLEAN:
-        q3 = likelihoods.Q3_GIVEN_CLEAN
+        q3 = rows["q3/clean"]
     elif material in likelihoods.PERISHABLE_CONTENTS:
-        q3 = likelihoods.Q3_GIVEN_RESIDUE_PERISHABLE
+        q3 = rows["q3/residue_perishable"]
     else:
-        q3 = likelihoods.Q3_GIVEN_RESIDUE_DRY
+        q3 = rows["q3/residue_dry"]
     return {
-        QuestionId.Q1_RECYCLING_SYMBOL: _draw(rng, likelihoods.Q1_GIVEN_MATERIAL[material]),
-        QuestionId.Q2_CLEANED: _draw(rng, likelihoods.Q2_GIVEN_CONDITION[condition]),
+        QuestionId.Q1_RECYCLING_SYMBOL: _draw(rng, rows[f"q1/{material.value}"]),
+        QuestionId.Q2_CLEANED: _draw(rng, rows[f"q2/{condition.value}"]),
         QuestionId.Q3_SITTING_TIME: _draw(rng, q3),
     }
 
 
-def make_cases(items: Sequence[Item], repeats: int, clean_share: float, seed: int) -> list[Case]:
+def make_cases(
+    items: Sequence[Item],
+    repeats: int,
+    clean_share: float,
+    seed: int,
+    world: Mapping[str, likelihoods.Row] | None = None,
+) -> list[Case]:
+    """Simulated users. The same seed gives the same true conditions whatever the world."""
     rng = random.Random(seed)
     cases: list[Case] = []
     for item in items:
         for _ in range(repeats):
             clean = rng.random() < clean_share
             condition = Condition.CLEAN if clean else rng.choice(CONTAMINATED)
-            cases.append(Case(item, condition, simulate_answers(rng, item.material, condition)))
+            answers = simulate_answers(rng, item.material, condition, world)
+            cases.append(Case(item, condition, answers))
     return cases
 
 
-def _state(item: Item, site: str) -> DecisionState:
+def condition_prior(clean: float) -> list[ConditionScore]:
+    """P(clean) = `clean`, the rest shared by the contaminated conditions (uniform is 0.25)."""
+    rest = (1.0 - clean) / len(CONTAMINATED)
+    return [
+        ConditionScore(label=c, probability=clean if c is Condition.CLEAN else rest)
+        for c in Condition
+    ]
+
+
+def _state(
+    item: Item, site: str, prior: Sequence[ConditionScore] = UNIFORM_CONDITIONS
+) -> DecisionState:
     return DecisionState(
         scan_id=NIL_UUID,
         site_policy=site,
         material_scores=[
             MaterialScore(label=m, probability=item.probabilities[m]) for m in Material
         ],
-        condition_scores=UNIFORM_CONDITIONS,
+        condition_scores=list(prior),
         confidence=max(item.probabilities.values()),
         signature="offline",
+    )
+
+
+def run_case(
+    case: Case,
+    policy: SitePolicy,
+    gate: decision.Gate,
+    static: bool = False,
+    prior: Sequence[ConditionScore] = UNIFORM_CONDITIONS,
+) -> Outcome:
+    run = decision.decide_static if static else decision.decide_offline
+    verdict = run(_state(case.item, policy.site, prior), policy, case.answers, gate)
+    true_bin = policy.first_match(case.item.material, case.condition).then
+    not_recycling = policy.bin(true_bin).channel is not Channel.RECYCLE
+    return Outcome(
+        asked=tuple(a.question_id for a in verdict.questions_asked),
+        correct=verdict.bin_key == true_bin,
+        not_recycling=not_recycling,
+        costly=not_recycling and verdict.channel is Channel.RECYCLE,
+        fallback=verdict.rule_id == "uncertain_fallback",
+        confidence=verdict.confidence,
+    )
+
+
+def summarise(outcomes: Sequence[Outcome], gate: decision.Gate, static: bool = False) -> GateResult:
+    n = max(1, len(outcomes))
+    not_recycling = sum(o.not_recycling for o in outcomes)
+    return GateResult(
+        system="static" if static else "adaptive",
+        threshold=gate.threshold,
+        e_waste_rule=gate.e_waste_alert is not None,
+        runs=len(outcomes),
+        avg_questions=sum(len(o.asked) for o in outcomes) / n,
+        no_question_share=sum(not o.asked for o in outcomes) / n,
+        verdict_accuracy=sum(o.correct for o in outcomes) / n,
+        costly_error_rate=sum(o.costly for o in outcomes) / max(1, not_recycling),
+        costly_error_base=not_recycling,
+        fallback_rate=sum(o.fallback for o in outcomes) / n,
     )
 
 
 def run_gate(
     cases: Sequence[Case], policy: SitePolicy, gate: decision.Gate, static: bool = False
 ) -> GateResult:
-    run = decision.decide_static if static else decision.decide_offline
-    questions = no_questions = correct = costly = not_recycling = fallback = 0
-    for case in cases:
-        verdict = run(_state(case.item, policy.site), policy, case.answers, gate)
-        true_bin = policy.first_match(case.item.material, case.condition).then
-        asked = len(verdict.questions_asked)
-        questions += asked
-        no_questions += asked == 0
-        correct += verdict.bin_key == true_bin
-        if policy.bin(true_bin).channel is not Channel.RECYCLE:
-            not_recycling += 1
-            costly += verdict.channel is Channel.RECYCLE
-        fallback += verdict.rule_id == "uncertain_fallback"
-    n = max(1, len(cases))
-    return GateResult(
-        system="static" if static else "adaptive",
-        threshold=gate.threshold,
-        e_waste_rule=gate.e_waste_alert is not None,
-        runs=len(cases),
-        avg_questions=questions / n,
-        no_question_share=no_questions / n,
-        verdict_accuracy=correct / n,
-        costly_error_rate=costly / max(1, not_recycling),
-        costly_error_base=not_recycling,
-        fallback_rate=fallback / n,
-    )
+    return summarise([run_case(c, policy, gate, static) for c in cases], gate, static)
 
 
 def sweep(

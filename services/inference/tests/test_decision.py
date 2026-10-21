@@ -153,6 +153,22 @@ def test_follow_up_is_the_most_informative_question() -> None:
     assert question.id is max(gains, key=gains.__getitem__)
 
 
+def test_ablation_switches_change_only_what_they_name() -> None:
+    # For scripts/analyse_decisions.py; the API always uses DEFAULT_GATE.
+    clean = {c: (0.97 if c is Condition.CLEAN else 0.01) for c in Condition}
+    state = make_state({Material.PLASTIC: 0.99}, clean)
+    state = decision.answer(state, QuestionAnswer(question_id=Q1, answer="yes"), SECRET, HDB)
+    assert not decision.is_settled(state, HDB)
+    assert decision.is_settled(state, HDB, decision.Gate(require_q2=False))
+
+    unsure = make_state({Material.TEXTILE: 0.40, Material.PLASTIC: 0.35})
+    unsure = decision.answer(unsure, QuestionAnswer(question_id=Q1, answer="no"), SECRET, HDB)
+    for follow_up, expected in (("q2_first", Q2), ("q3_first", Q3)):
+        gate = decision.Gate(follow_up=follow_up)  # type: ignore[arg-type]
+        question, _ = decision.step(unsure, HDB, gate)
+        assert question is not None and question.id is expected
+
+
 def test_q3_follows_an_unsure_q2() -> None:
     answers = {Q1: "yes", Q2: "not_sure", Q3: "same_day"}
     asked, _ = run(make_state({Material.PLASTIC: 0.95}), answers)
