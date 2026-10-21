@@ -6,6 +6,7 @@ local examples, then evaluates on canonical diagnostic local and public test.
 
 uv run --with scikit-learn --with scipy python scripts/ws2_hybrid_selective.py
 """
+
 from __future__ import annotations
 
 import argparse
@@ -14,11 +15,9 @@ import json
 from pathlib import Path
 
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-
 from ws2_public_ensemble import CLASSES, ROOT, fit_temperature, read, temp_scale, vector
 
 BLUE_IDS = np.arange(5)
@@ -39,30 +38,40 @@ def gate_metrics(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, fl
         "nonblue_n": nonblue,
         "costly_error_rate": harmful / nonblue if nonblue else None,
         "blue_recall": int(np.sum(blue_decision & blue_truth)) / eligible if eligible else None,
-        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision)) if blue_decision.any() else None,
+        "blue_precision": int(np.sum(blue_decision & blue_truth)) / int(np.sum(blue_decision))
+        if blue_decision.any()
+        else None,
         "blue_recommendation_rate": float(np.mean(blue_decision)),
         "deferred_n": int(np.sum(~blue_decision)),
         "deferred_fraction": float(np.mean(~blue_decision)),
     }
 
 
-def novelty_scores(query: np.ndarray, reference: np.ndarray, centroids: np.ndarray) -> dict[str, np.ndarray]:
+def novelty_scores(
+    query: np.ndarray, reference: np.ndarray, centroids: np.ndarray
+) -> dict[str, np.ndarray]:
     def unit(a: np.ndarray) -> np.ndarray:
         a = np.asarray(a, dtype=np.float32)
         norm = np.linalg.norm(a, axis=1, keepdims=True)
         if np.any(norm < 1e-8):
             raise ValueError("Zero embedding")
         return a / norm
+
     q, ref, centers = unit(query), unit(reference), unit(centroids)
     knn = np.empty(len(q), dtype=np.float32)
     for start in range(0, len(q), 128):
-        similarity = q[start:start + 128] @ ref.T
-        knn[start:start + 128] = 1 - np.partition(similarity, -5, axis=1)[:, -5:].mean(axis=1)
+        similarity = q[start : start + 128] @ ref.T
+        knn[start : start + 128] = 1 - np.partition(similarity, -5, axis=1)[:, -5:].mean(axis=1)
     return {"cosine_knn5": knn, "cosine_centroid": 1 - (q @ centers.T).max(axis=1)}
 
 
-def gated_metrics(y: np.ndarray, p: np.ndarray, confidence_threshold: float,
-                  novelty: np.ndarray | None = None, novelty_threshold: float | None = None) -> dict[str, object]:
+def gated_metrics(
+    y: np.ndarray,
+    p: np.ndarray,
+    confidence_threshold: float,
+    novelty: np.ndarray | None = None,
+    novelty_threshold: float | None = None,
+) -> dict[str, object]:
     blue = np.isin(y, BLUE_IDS)
     candidate = p[:, BLUE_IDS].sum(axis=1) >= confidence_threshold
     accepted = candidate if novelty is None else candidate & (novelty <= float(novelty_threshold))
@@ -74,7 +83,9 @@ def gated_metrics(y: np.ndarray, p: np.ndarray, confidence_threshold: float,
         "nonblue_n": int((~blue).sum()),
         "costly_error_rate": harmful / int((~blue).sum()) if (~blue).any() else None,
         "blue_recall": float((accepted & blue).sum() / eligible) if eligible else None,
-        "blue_precision": float((accepted & blue).sum() / accepted.sum()) if accepted.any() else None,
+        "blue_precision": float((accepted & blue).sum() / accepted.sum())
+        if accepted.any()
+        else None,
         "deferred_n": int((~accepted).sum()),
         "deferred_fraction": float((~accepted).mean()),
         "additional_deferred": int((candidate & ~accepted).sum()),
@@ -89,10 +100,16 @@ def main() -> None:
     ap.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     ap.add_argument("--manifest", type=Path, default=ROOT / "validation_partitions_v1.csv")
     ap.add_argument("--swin-val", type=Path, default=ROOT / "run3/swin_validation.csv")
-    ap.add_argument("--swin-public", type=Path, default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv")
+    ap.add_argument(
+        "--swin-public",
+        type=Path,
+        default=ROOT / "run3/pred_E2_public_plus_local_swin_t_public_test.csv",
+    )
     ap.add_argument("--output", type=Path, default=Path("results/ws2/hybrid_selective_v1.json"))
     ap.add_argument("--ood-reference", type=Path, default=Path("results/ws2/ood/ood_reference.npz"))
-    ap.add_argument("--ood-thresholds", type=Path, default=Path("results/ws2/ood/local_thresholds.json"))
+    ap.add_argument(
+        "--ood-thresholds", type=Path, default=Path("results/ws2/ood/local_thresholds.json")
+    )
     args = ap.parse_args()
 
     with args.predictions.open(newline="", encoding="utf-8") as handle:
@@ -100,15 +117,23 @@ def main() -> None:
     if len(set(r["path"] for r in rows)) != len(rows):
         raise ValueError("Duplicate CNN paths")
     cnn = {r["path"]: r for r in rows}
-    manifest, swin_val, swin_public = (read(p) for p in (args.manifest, args.swin_val, args.swin_public))
+    manifest, swin_val, swin_public = (
+        read(p) for p in (args.manifest, args.swin_val, args.swin_public)
+    )
     if len(manifest) != 1556 or set(manifest) != set(swin_val):
         raise ValueError("Validation manifest and Swin rows do not match")
     val_paths = sorted(manifest)
-    public_paths = sorted(r["path"] for r in rows if r["split"] == "test" and r["source"] != "local")
+    public_paths = sorted(
+        r["path"] for r in rows if r["split"] == "test" and r["source"] != "local"
+    )
     if set(public_paths) != set(swin_public):
         raise ValueError("Public test paths do not match")
     for path in val_paths:
-        if path not in cnn or any(manifest[path][k] != other[path][k] for other in (cnn, swin_val) for k in ("material", "source", "group")):
+        if path not in cnn or any(
+            manifest[path][k] != other[path][k]
+            for other in (cnn, swin_val)
+            for k in ("material", "source", "group")
+        ):
             raise ValueError(f"Validation mismatch: {path}")
     for path in public_paths:
         if cnn[path]["material"] != swin_public[path]["true"]:
@@ -145,8 +170,14 @@ def main() -> None:
     if tuple(int((local & mask).sum()) for mask in (cal, meta, diag)) != (99, 76, 72):
         raise ValueError("Canonical partition counts differ")
 
-    pcv, pcp = vector([cnn[p] for p in val_paths], True), vector([cnn[p] for p in public_paths], True)
-    psv, psp = vector([swin_val[p] for p in val_paths], True), vector([swin_public[p] for p in public_paths], False)
+    pcv, pcp = (
+        vector([cnn[p] for p in val_paths], True),
+        vector([cnn[p] for p in public_paths], True),
+    )
+    psv, psp = (
+        vector([swin_val[p] for p in val_paths], True),
+        vector([swin_public[p] for p in public_paths], False),
+    )
     pmv, pmp = svm_probs(val_paths), svm_probs(public_paths)
     ts, tm = fit_temperature(psv[cal], yv[cal]), fit_temperature(pmv[cal], yv[cal])
     psv, psp = temp_scale(psv, ts), temp_scale(psp, ts)
@@ -182,8 +213,14 @@ def main() -> None:
         ],
     }
     for name, (pv, pp) in models.items():
-        meta_trials = [gate_metrics(yv[meta & local], pv[meta & local], float(t)) for t in THRESHOLDS]
-        feasible = [r for r in meta_trials if r["blue_recall"] is not None and r["blue_recall"] >= min_blue_recall]
+        meta_trials = [
+            gate_metrics(yv[meta & local], pv[meta & local], float(t)) for t in THRESHOLDS
+        ]
+        feasible = [
+            r
+            for r in meta_trials
+            if r["blue_recall"] is not None and r["blue_recall"] >= min_blue_recall
+        ]
         if not feasible:
             raise ValueError(f"No threshold satisfies minimum blue recall for {name}")
         chosen = min(
@@ -216,8 +253,11 @@ def main() -> None:
             novelty_report[model_name][method] = {
                 "novelty_threshold": novelty_t,
                 "local_diagnostic": gated_metrics(
-                    yv[diag & local], pv[diag & local], t,
-                    val_novelty[method][diag & local], novelty_t,
+                    yv[diag & local],
+                    pv[diag & local],
+                    t,
+                    val_novelty[method][diag & local],
+                    novelty_t,
                 ),
                 "public_test": gated_metrics(yp, pp, t, pub_novelty[method], novelty_t),
             }

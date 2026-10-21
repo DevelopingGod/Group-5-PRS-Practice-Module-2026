@@ -24,8 +24,16 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
 CLASSES = (
-    "paper", "plastic", "glass", "metal", "beverage_carton", "styrofoam",
-    "e_waste", "textile", "food_waste", "other_general",
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
 )
 BLUE = frozenset(CLASSES[:5])
 ROOT = Path("data/ws2")
@@ -57,10 +65,9 @@ def scale(p: np.ndarray, temperature: float) -> np.ndarray:
 
 def calibrate(p: np.ndarray, y: np.ndarray) -> float:
     result = minimize_scalar(
-        lambda log_t: log_loss(
-            y, scale(p, float(np.exp(log_t))), labels=np.arange(len(CLASSES))
-        ),
-        method="bounded", bounds=(np.log(0.2), np.log(10)),
+        lambda log_t: log_loss(y, scale(p, float(np.exp(log_t))), labels=np.arange(len(CLASSES))),
+        method="bounded",
+        bounds=(np.log(0.2), np.log(10)),
     )
     return float(np.exp(result.x))
 
@@ -71,7 +78,9 @@ def metrics(y: np.ndarray, p: np.ndarray) -> dict[str, float | int]:
     blue_pred = np.array([CLASSES[int(i)] in BLUE for i in pred])
     return {
         "n": len(y),
-        "macro_f1": float(f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)),
+        "macro_f1": float(
+            f1_score(y, pred, labels=np.arange(10), average="macro", zero_division=0)
+        ),
         "accuracy": float(accuracy_score(y, pred)),
         "costly_error_count": int((not_blue & blue_pred).sum()),
         "non_blue_count": int(not_blue.sum()),

@@ -6,19 +6,27 @@ Compare fixed confidence gating with fixed voting on the SAME subset.
 
 uv run python scripts/ws2_confidence_fusion.py
 """
+
 from __future__ import annotations
 
 import argparse
 import csv
-import hashlib
 import json
 from pathlib import Path
 
 import numpy as np
 
 CLASSES = (
-    "paper", "plastic", "glass", "metal", "beverage_carton",
-    "styrofoam", "e_waste", "textile", "food_waste", "other_general",
+    "paper",
+    "plastic",
+    "glass",
+    "metal",
+    "beverage_carton",
+    "styrofoam",
+    "e_waste",
+    "textile",
+    "food_waste",
+    "other_general",
 )
 BLUE = set(CLASSES[:5])
 
@@ -52,8 +60,10 @@ def score(y: np.ndarray, p: np.ndarray) -> dict[str, float | int]:
     nonblue = np.array([CLASSES[int(i)] not in BLUE for i in y])
     predblue = np.array([CLASSES[int(i)] in BLUE for i in pred])
     return {
-        "n": int(len(y)),
-        "macro_f1": float(f1_score(y, pred, labels=list(range(10)), average="macro", zero_division=0)),
+        "n": len(y),
+        "macro_f1": float(
+            f1_score(y, pred, labels=list(range(10)), average="macro", zero_division=0)
+        ),
         "accuracy": float(np.mean(pred == y)),
         "costly_error_count": int((nonblue & predblue).sum()),
         "nonblue_count": int(nonblue.sum()),
@@ -68,10 +78,7 @@ def main() -> None:
     ap.add_argument("--output", type=Path, default=Path("results/ws2/confidence_fusion.json"))
     args = ap.parse_args()
     cnn, swin = load(args.cnn), load(args.swin)
-    paths = sorted(
-        p for p, r in swin.items()
-        if r["source"] == "local" and r["split"] == "val"
-    )
+    paths = sorted(p for p, r in swin.items() if r["source"] == "local" and r["split"] == "val")
     if len(paths) != 247:
         raise ValueError(f"Expected 247 local validation rows, got {len(paths)}")
     for path in paths:
@@ -102,9 +109,7 @@ def main() -> None:
     conf_c, conf_s = pc.max(axis=1), ps.max(axis=1)
     selected = np.where((conf_s > conf_c + 0.10)[:, None], ps, pc)
     disagreement = pc.argmax(axis=1) != ps.argmax(axis=1)
-    cautious = np.where(
-        (disagreement & (conf_c < 0.70))[:, None], 0.5 * (pc + ps), pc
-    )
+    cautious = np.where((disagreement & (conf_c < 0.70))[:, None], 0.5 * (pc + ps), pc)
     methods = {
         "convnext": pc,
         "swin": ps,
