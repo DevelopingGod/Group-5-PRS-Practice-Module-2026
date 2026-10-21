@@ -31,7 +31,9 @@ C_VALUES = (0.1, 1.0, 10.0)
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--features", type=Path, default=ROOT / "features")
     parser.add_argument("--output", type=Path, default=Path("results/ws2/svm_validation.json"))
     args = parser.parse_args()
@@ -49,7 +51,10 @@ def main() -> None:
     if set(groups[i] for i in train_idx) & set(groups[i] for i in val_idx):
         raise ValueError("Item leakage between training and validation")
 
-    matrices = {name: np.load(args.features / f"{name}.npy", mmap_mode="r") for name in ("hsv", "hog", "lbp")}
+    matrices = {
+        name: np.load(args.features / f"{name}.npy", mmap_mode="r")
+        for name in ("hsv", "hog", "lbp")
+    }
     for name, matrix in matrices.items():
         if matrix.shape[0] != len(rows):
             raise ValueError(f"{name} rows {matrix.shape[0]} != predictions {len(rows)}")
@@ -63,7 +68,10 @@ def main() -> None:
                 pipeline = Pipeline(
                     [
                         ("scale", StandardScaler()),
-                        ("svm", SVC(kernel=kernel, C=c_value, gamma="scale", class_weight="balanced")),
+                        (
+                            "svm",
+                            SVC(kernel=kernel, C=c_value, gamma="scale", class_weight="balanced"),
+                        ),
                     ]
                 )
                 pipeline.fit(x[train_idx], y[train_idx])
@@ -72,8 +80,8 @@ def main() -> None:
                     "features": feature_set,
                     "kernel": kernel,
                     "C": c_value,
-                    "train_n": int(len(train_idx)),
-                    "local_val_n": int(len(val_idx)),
+                    "train_n": len(train_idx),
+                    "local_val_n": len(val_idx),
                     "local_val_macro_f1": float(
                         f1_score(y[val_idx], predicted, average="macro", zero_division=0)
                     ),
@@ -86,7 +94,9 @@ def main() -> None:
                     f"accuracy={result['local_val_accuracy']:.4f}",
                     flush=True,
                 )
-    best = max(trials, key=lambda r: (float(r["local_val_macro_f1"]), float(r["local_val_accuracy"])))
+    best = max(
+        trials, key=lambda r: (float(r["local_val_macro_f1"]), float(r["local_val_accuracy"]))
+    )
     report = {
         "data_version": "v0.2-local-data",
         "selection_split": "local validation only",

@@ -23,9 +23,7 @@ from sklearn.svm import SVC
 ROOT = Path("data/ws2")
 
 
-def evaluate(
-    predictions: Path, embeddings_path: Path, hsv_path: Path
-) -> dict[str, object]:
+def evaluate(predictions: Path, embeddings_path: Path, hsv_path: Path) -> dict[str, object]:
     """Evaluate frozen-feature SVM candidates on the same local validation rows."""
     with predictions.open(encoding="utf-8", newline="") as handle:
         rows = list(csv.DictReader(handle))
@@ -53,7 +51,9 @@ def evaluate(
     cnn_val = cnn[val]
     cnn_correct = cnn_val == y_val
     baseline = {
-        "macro_f1": float(f1_score(y_val, cnn_val, labels=classes, average="macro", zero_division=0)),
+        "macro_f1": float(
+            f1_score(y_val, cnn_val, labels=classes, average="macro", zero_division=0)
+        ),
         "accuracy": float(accuracy_score(y_val, cnn_val)),
     }
     trials: list[dict[str, object]] = []
@@ -121,10 +121,14 @@ def evaluate(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--embeddings", type=Path, default=ROOT / "v0.2-local-data/embeddings.npy")
     parser.add_argument("--hsv", type=Path, default=ROOT / "features/hsv.npy")
-    parser.add_argument("--output", type=Path, default=Path("results/ws2/embedding_svm_validation.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/ws2/embedding_svm_validation.json")
+    )
     args = parser.parse_args()
     result = evaluate(args.predictions, args.embeddings, args.hsv)
     args.output.parent.mkdir(parents=True, exist_ok=True)

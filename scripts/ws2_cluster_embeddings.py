@@ -14,10 +14,11 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +35,9 @@ OUT = Path("results/ws2/clustering")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--predictions", type=Path, default=DATA / "v0.2-local-data/predictions.csv")
+    parser.add_argument(
+        "--predictions", type=Path, default=DATA / "v0.2-local-data/predictions.csv"
+    )
     parser.add_argument("--embeddings", type=Path, default=DATA / "v0.2-local-data/embeddings.npy")
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--max-plot", type=int, default=2500)
@@ -65,14 +68,20 @@ def main() -> None:
     pca = PCA(n_components=50, random_state=SEED).fit(x_scaled)
     x_pca = pca.transform(x_scaled)
     umap_2d = umap.UMAP(
-        n_components=2, n_neighbors=30, min_dist=0.1,
-        metric="cosine", random_state=SEED, n_jobs=1,
+        n_components=2,
+        n_neighbors=30,
+        min_dist=0.1,
+        metric="cosine",
+        random_state=SEED,
+        n_jobs=1,
     ).fit_transform(x)
 
     methods: dict[str, np.ndarray] = {
         "kmeans_10": KMeans(n_clusters=10, n_init=10, random_state=SEED).fit_predict(x_pca),
         "hdbscan": hdbscan.HDBSCAN(
-            min_cluster_size=40, min_samples=10, metric="euclidean",
+            min_cluster_size=40,
+            min_samples=10,
+            metric="euclidean",
         ).fit_predict(x_pca),
     }
     args.output.mkdir(parents=True, exist_ok=True)
@@ -104,13 +113,21 @@ def main() -> None:
     )
     with (args.output / "labelling_priority.csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["path", "source", "material", "cnn_predicted", "confidence", "nearest_cosine_distance"])
+        writer.writerow(
+            ["path", "source", "material", "cnn_predicted", "confidence", "nearest_cosine_distance"]
+        )
         for i in ranked[:150]:
             row = train_rows[i]
-            writer.writerow([
-                row["path"], row["source"], row["material"], row["predicted"],
-                f"{confidence[i]:.6f}", f"{novelty[i]:.6f}",
-            ])
+            writer.writerow(
+                [
+                    row["path"],
+                    row["source"],
+                    row["material"],
+                    row["predicted"],
+                    f"{confidence[i]:.6f}",
+                    f"{novelty[i]:.6f}",
+                ]
+            )
 
     for name, assignments in methods.items():
         valid = assignments >= 0
@@ -131,23 +148,37 @@ def main() -> None:
         sampled_valid = sampled_labels >= 0
         silhouette = None
         if 1 < len(set(sampled_labels[sampled_valid])) < int(sampled_valid.sum()):
-            silhouette = float(silhouette_score(
-                x_pca[sample][sampled_valid],
-                sampled_labels[sampled_valid],
-            ))
+            silhouette = float(
+                silhouette_score(
+                    x_pca[sample][sampled_valid],
+                    sampled_labels[sampled_valid],
+                )
+            )
         summaries["methods"][name] = {
             "clusters": len(cluster_ids),
             "noise_fraction": float(np.mean(~valid)),
-            "nmi_with_material": float(normalized_mutual_info_score(labels[valid], assignments[valid])) if valid.any() else None,
-            "ari_with_material": float(adjusted_rand_score(labels[valid], assignments[valid])) if valid.any() else None,
+            "nmi_with_material": float(
+                normalized_mutual_info_score(labels[valid], assignments[valid])
+            )
+            if valid.any()
+            else None,
+            "ari_with_material": float(adjusted_rand_score(labels[valid], assignments[valid]))
+            if valid.any()
+            else None,
             "silhouette_sampled_pca": silhouette,
             "composition": compositions,
         }
         fig, ax = plt.subplots(figsize=(10, 7))
-        plot_idx = rng.choice(len(train_idx), size=min(args.max_plot, len(train_idx)), replace=False)
+        plot_idx = rng.choice(
+            len(train_idx), size=min(args.max_plot, len(train_idx)), replace=False
+        )
         ax.scatter(
-            umap_2d[plot_idx, 0], umap_2d[plot_idx, 1],
-            c=assignments[plot_idx], s=8, alpha=0.65, cmap="tab20",
+            umap_2d[plot_idx, 0],
+            umap_2d[plot_idx, 1],
+            c=assignments[plot_idx],
+            s=8,
+            alpha=0.65,
+            cmap="tab20",
             rasterized=True,
         )
         ax.set_title(f"Training embeddings: {name} (UMAP projection)")
@@ -163,27 +194,43 @@ def main() -> None:
     plot_idx = rng.choice(len(train_idx), size=min(args.max_plot, len(train_idx)), replace=False)
     fig, ax = plt.subplots(figsize=(10, 7))
     scatter = ax.scatter(
-        umap_2d[plot_idx, 0], umap_2d[plot_idx, 1],
-        c=class_ids[plot_idx], s=8, alpha=0.65, cmap="tab10", rasterized=True,
+        umap_2d[plot_idx, 0],
+        umap_2d[plot_idx, 1],
+        c=class_ids[plot_idx],
+        s=8,
+        alpha=0.65,
+        cmap="tab10",
+        rasterized=True,
     )
     ax.legend(
-        scatter.legend_elements()[0], classes,
-        title="Material", bbox_to_anchor=(1.02, 1), loc="upper left", fontsize=8,
+        scatter.legend_elements()[0],
+        classes,
+        title="Material",
+        bbox_to_anchor=(1.02, 1),
+        loc="upper left",
+        fontsize=8,
     )
     ax.set_title("Training embeddings: known material labels (UMAP)")
     fig.tight_layout()
     fig.savefig(args.output / "materials_umap.png", dpi=160, bbox_inches="tight")
     plt.close(fig)
 
-    (args.output / "summary.json").write_text(json.dumps(summaries, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({
-        "n_train": len(train_idx),
-        "methods": {
-            name: {key: value for key, value in data.items() if key != "composition"}
-            for name, data in summaries["methods"].items()
-        },
-        "output": str(args.output),
-    }, indent=2))
+    (args.output / "summary.json").write_text(
+        json.dumps(summaries, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {
+                "n_train": len(train_idx),
+                "methods": {
+                    name: {key: value for key, value in data.items() if key != "composition"}
+                    for name, data in summaries["methods"].items()
+                },
+                "output": str(args.output),
+            },
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

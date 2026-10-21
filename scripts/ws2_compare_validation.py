@@ -34,7 +34,10 @@ def compare(predictions: Path, features: Path) -> dict[str, object]:
     )
     if not len(train) or not len(val):
         raise ValueError("Missing training or local validation images")
-    group = lambda i: (rows[int(i)]["source"], rows[int(i)]["group"])
+
+    def group(i: object) -> tuple[str, str]:
+        return (rows[int(str(i))]["source"], rows[int(str(i))]["group"])
+
     if {group(i) for i in train} & {group(i) for i in val}:
         raise ValueError("Physical-item group leakage between train and validation")
     hsv = np.load(features / "hsv.npy", mmap_mode="r")
@@ -62,9 +65,7 @@ def compare(predictions: Path, features: Path) -> dict[str, object]:
         raise AssertionError("Disagreement partition does not cover validation rows")
 
     confusion_pairs = Counter(
-        (str(true), str(pred))
-        for true, pred in zip(y, svm_val, strict=True)
-        if true != pred
+        (str(true), str(pred)) for true, pred in zip(y, svm_val, strict=True) if true != pred
     )
     rescued = [
         {
@@ -79,9 +80,11 @@ def compare(predictions: Path, features: Path) -> dict[str, object]:
     ]
     report = {
         "scope": "Local validation only; exploratory and SVM-selected-on-validation",
-        "n_local_validation": int(len(val)),
+        "n_local_validation": len(val),
         "cnn": {
-            "macro_f1": float(f1_score(y, cnn_val, labels=classes, average="macro", zero_division=0)),
+            "macro_f1": float(
+                f1_score(y, cnn_val, labels=classes, average="macro", zero_division=0)
+            ),
             "accuracy": float(accuracy_score(y, cnn_val)),
             "per_class": classification_report(
                 y, cnn_val, labels=classes, output_dict=True, zero_division=0
@@ -91,7 +94,9 @@ def compare(predictions: Path, features: Path) -> dict[str, object]:
             "features": "HSV (48 dimensions)",
             "kernel": "rbf",
             "C": 10.0,
-            "macro_f1": float(f1_score(y, svm_val, labels=classes, average="macro", zero_division=0)),
+            "macro_f1": float(
+                f1_score(y, svm_val, labels=classes, average="macro", zero_division=0)
+            ),
             "accuracy": float(accuracy_score(y, svm_val)),
             "per_class": classification_report(
                 y, svm_val, labels=classes, output_dict=True, zero_division=0
@@ -124,7 +129,9 @@ def main() -> None:
         "--predictions", type=Path, default=ROOT / "v0.2-local-data/predictions.csv"
     )
     parser.add_argument("--features", type=Path, default=ROOT / "features")
-    parser.add_argument("--output", type=Path, default=Path("results/ws2/validation_comparison.json"))
+    parser.add_argument(
+        "--output", type=Path, default=Path("results/ws2/validation_comparison.json")
+    )
     args = parser.parse_args()
     result = compare(args.predictions, args.features)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -132,7 +139,9 @@ def main() -> None:
     print(f"Local validation images: {result['n_local_validation']}")
     for name in ("cnn", "svm"):
         metrics = result[name]
-        print(f"{name.upper()}: macro-F1={metrics['macro_f1']:.4f}, accuracy={metrics['accuracy']:.4f}")
+        print(
+            f"{name.upper()}: macro-F1={metrics['macro_f1']:.4f}, accuracy={metrics['accuracy']:.4f}"
+        )
     print("Disagreement breakdown:")
     print(json.dumps(result["agreement"], indent=2))
     print("SVM's most frequent confusions:")

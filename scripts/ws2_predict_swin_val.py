@@ -4,6 +4,7 @@
 
 This performs inference only. It never changes splits, trains, or touches test images.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -14,17 +15,24 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from torchvision import transforms as T
+from torchvision import transforms
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ml"))
-from binbuddy_ml.experiments import PROTOCOL_RUN3, model as model_spec  # noqa: E402
-from binbuddy_contracts.enums import Material  # noqa: E402
+from binbuddy_contracts.enums import Material
+from binbuddy_ml.experiments import PROTOCOL_RUN3
+from binbuddy_ml.experiments import model as model_spec
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint", type=Path, default=Path("data/ws2/models/run3/E2_public_plus_local_swin_t.pt"))
-    parser.add_argument("--predictions", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv"))
+    parser.add_argument(
+        "--checkpoint",
+        type=Path,
+        default=Path("data/ws2/models/run3/E2_public_plus_local_swin_t.pt"),
+    )
+    parser.add_argument(
+        "--predictions", type=Path, default=Path("data/ws2/v0.2-local-data/predictions.csv")
+    )
     parser.add_argument("--images", type=Path, default=Path("data/ws2/prepared_v2"))
     parser.add_argument("--output", type=Path, default=Path("data/ws2/run3/swin_validation.csv"))
     parser.add_argument("--limit", type=int, default=None)
@@ -48,12 +56,12 @@ def main() -> None:
     model.eval()
     config = timm.data.resolve_data_config({}, model=model)
     size = PROTOCOL_RUN3.input_size
-    transform = T.Compose(
+    transform = transforms.Compose(
         [
-            T.Resize(int(size / 0.875)),
-            T.CenterCrop(size),
-            T.ToTensor(),
-            T.Normalize(config["mean"], config["std"]),
+            transforms.Resize(int(size / 0.875)),
+            transforms.CenterCrop(size),
+            transforms.ToTensor(),
+            transforms.Normalize(config["mean"], config["std"]),
         ]
     )
     with args.predictions.open(encoding="utf-8", newline="") as handle:
@@ -77,7 +85,10 @@ def main() -> None:
                 "split": row["split"],
                 "material": row["material"],
                 "group": row["group"],
-                **{f"p_{name}": f"{float(value):.8f}" for name, value in zip(classes, probabilities, strict=True)},
+                **{
+                    f"p_{name}": f"{float(value):.8f}"
+                    for name, value in zip(classes, probabilities, strict=True)
+                },
                 "predicted": classes[int(np.argmax(probabilities))],
             }
             output.append(record)
@@ -88,7 +99,11 @@ def main() -> None:
         writer = csv.DictWriter(handle, fieldnames=list(output[0]))
         writer.writeheader()
         writer.writerows(output)
-    print(json.dumps({"images": len(output), "output": str(args.output), "classes": classes}, indent=2))
+    print(
+        json.dumps(
+            {"images": len(output), "output": str(args.output), "classes": classes}, indent=2
+        )
+    )
 
 
 if __name__ == "__main__":
