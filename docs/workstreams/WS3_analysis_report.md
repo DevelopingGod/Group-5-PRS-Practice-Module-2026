@@ -5,34 +5,45 @@
 [`ws3_analysis/tables.md`](ws3_analysis/tables.md), produced by `scripts/analyse_decisions.py`
 (see "Reproduce" at the end).
 
+> **Note (22 Oct):** all numbers below were rerun for **D-004** (the rinse question, Q2, opens for
+> recyclable items; the earlier Q1-first design is kept as the "old design" variant for comparison).
+> Same predictions (`v0.2-local-data`), same seeds. Section 2 shows the two designs side by side.
+
 ## Summary
 
-1. **Recommended gate: 0.75** (it was 0.80, PROVISIONAL; my earlier note proposed 0.70). Against 0.80 it is
-   1.8 points more accurate (95% interval +1.1 to +2.6), asks 0.09 fewer questions and falls back to
-   general waste on 6.6% of items instead of 11.0%. Its costly-error rate is 2.9%, within the 5% target.
-   0.70 is no more accurate than 0.75 (+0.4 points, interval −0.2 to +1.1) but makes 1.0 point more
-   costly errors, and it breaks the target as soon as 10% of answers are careless.
-2. **Adaptive beats the static questionnaire** (proposal baseline 2). At the same gate it asks
-   1.54 questions instead of 3, with 87.0% accuracy against 81.8%. The held-out test split confirms
-   this: 86.5% against 80.7%.
+0. **D-004 (Q2 opens for recyclables) halves the questions without losing accuracy, but costs some
+   safety margin.** At gate 0.75: 0.90 questions instead of 1.54, accuracy 87.5% against 87.0%,
+   costly errors 3.6% against 2.9%. At gate 0.80: 1.17 questions instead of 1.63, 85.6% against
+   85.2%, costly errors 2.7% against 2.4%. Likely cause (not isolated in the data): with Q2 first, a "yes, rinsed"
+   answer can settle a confident recyclable without a second question, so there is less corroborating
+   evidence.
+1. **Recommended gate: keep 0.80 for now** (PROVISIONAL, no contract change). Under D-004, 0.75 is
+   1.9 points more accurate (95% interval +1.0 to +2.8) and asks 0.27 fewer questions, but makes 0.9
+   points more costly errors (+0.4 to +1.5) and has little margin: 3.6% at best, 5.0% with just 10%
+   random answers. 0.80 keeps costly errors at 2.7% and stays within 5% up to about 18% random
+   answers. 0.75 is the better choice only if real recorded answers show careless answering is rare.
+   0.70 is no more accurate than 0.75 (+0.0, interval −0.8 to +0.8) and already breaks the target
+   at 10% random answers.
+2. **Adaptive beats the static questionnaire** (proposal baseline 2). At gate 0.80 it asks 1.17
+   questions instead of 3, with 85.6% accuracy against 79.0%; at 0.75, 0.90 questions and 87.5%
+   against 81.8%. The held-out test split confirms this (0.75: 87.1% against 80.7%).
 3. **D-003 matters.** D-003 is the rule "a recyclable item always gets the rinse question". Without
    it, at a 0.70 gate, 97% of items get no questions and every recyclable of unknown cleanliness goes
-   to general waste, so accuracy falls to 65%. Choosing questions by expected entropy reduction always
-   picked the better order; a fixed Q3-first order loses 6 points at a 0.80 gate.
-4. **The flow is robust within limits.** At 0.75 the costly-error target holds:
-   - with up to about 15% random answers;
-   - in every one of 20 worlds where users' answer tables differ moderately from ours;
-   - for any share of clean items from 30% to 70%.
-5. **The confidence Bin Buddy shows can be trusted.** When it says 80–90% sure, it is right 85.8% of
-   the time; the expected calibration error (ECE) is 0.026. **Over-confident vision scores are the
-   real danger.** Sharpening them (temperature 0.5) pushes costly errors above 5%. WS2's calibration
-   therefore protects WS3's safety target.
-6. **Styrofoam is the weak spot:** 10.7% of styrofoam runs are costly errors (7 photos), because it
+   to general waste, so accuracy falls to 65%. Choosing questions by expected entropy reduction beat
+   every fixed order: by 1.0 point at 0.75 and 2.0 points at 0.80.
+4. **The flow is robust within limits.** At 0.80 the costly-error target holds:
+   - with up to about 18% random answers (at 0.75: about 10%);
+   - in 100% of worlds where users' answer tables differ moderately from ours (σ = 0.25), and 85%
+     where they differ a lot (σ = 0.5) (at 0.75: 95% and 65%);
+   - for any share of clean items from 30% to 70% (at 0.75, 70% clean already gives 4.1%).
+5. **The confidence Bin Buddy shows can be trusted.** At gate 0.80 the expected calibration error
+   (ECE) is 0.022; when it says 80–90% sure it is right 85.6% of the time. **Over-confident vision
+   scores are the real danger.** Sharpening them (temperature 0.5) pushes costly errors above 5% at
+   every gate we use; at 0.75 even a mild sharpening (0.75) does. WS2's calibration therefore
+   protects WS3's safety target.
+6. **Styrofoam is the weak spot:** 11.4% of styrofoam runs are costly errors (7 photos), because it
    is misread as plastic and carries a recycling symbol.
 
-**Limitation that applies to everything above:** the photos have no recorded Q1–Q3 answers, so the
-true cleanliness and the user's answers are **simulated**. Analyses 3, 4 and 9 deliberately make the
-simulated users disagree with the tables the flow uses, to test how much this matters.
 
 ## What WS3 built (work log)
 
@@ -44,6 +55,7 @@ simulated users disagree with the tables the flow uses, to test how much this ma
 | 19 Oct | Likelihood counting from recorded answers (`estimate_likelihoods.py`), WS3 docs | `aa74bb9` |
 | 19 Oct | Gate sweep on the team's own photos (`simulate_gate.py --source local`) | `b4f1cd9` |
 | 19 Oct | Fix: fallback verdict shows the confidence of the bin it recommends; team report | `7393a73` |
+| 22 Oct | D-004: Q2 (empty and rinsed) opens for recyclable top materials; Q1 can follow Q2; analysis rerun | `ws3/rinse-question-first` |
 | 19 Oct | Copilot review fixes (e-waste rule, likelihood floor, costly-error definition); merged as PR #13 | `deb7826` |
 | 21 Oct | **This report:** 9 analyses, bootstrap intervals, held-out check, ablation switches, SVG figures, tests | this branch |
 
@@ -77,55 +89,68 @@ completed as the multi-stream site.
 
 | Gate (adaptive) | Avg questions | Accuracy | Costly errors | Fallback |
 |---|---|---|---|---|
-| 0.60 | 1.49 | 88.0% (86.1–89.8) | 4.5% (3.1–6.1) | 2.7% |
-| 0.70 | 1.51 | 87.5% (85.5–89.4) | 3.8% (2.6–5.3) | 4.0% |
-| **0.75** | **1.54** | **87.0% (84.9–89.1)** | **2.9% (2.0–3.9)** | **6.6%** |
-| 0.80 (current) | 1.63 | 85.2% (82.9–87.5) | 2.4% (1.8–3.2) | 11.0% |
-| 0.90 | 2.06 | 71.9% (68.7–75.6) | 0.3% (0.1–0.6) | 42.3% |
-| 0.95 | 2.17 | 64.2% (60.2–69.1) | 0.0% | 54.8% |
+| 0.60 | 0.79 | 87.2% (84.9–89.2) | 6.6% (4.2–9.4) | 1.4% |
+| 0.70 | 0.85 | 87.5% (85.3–89.5) | 4.8% (3.1–6.8) | 3.4% |
+| 0.75 | 0.90 | 87.5% (85.3–89.5) | 3.6% (2.4–5.2) | 5.2% |
+| **0.80 (current)** | **1.17** | **85.6% (83.2–87.8)** | **2.7% (1.9–3.8)** | **11.3%** |
+| 0.90 | 1.72 | 72.2% (69.0–76.0) | 0.5% (0.1–1.0) | 40.4% |
+| 0.95 | 1.93 | 64.2% (60.2–69.1) | 0.0% | 52.4% |
 
 | Paired comparison | Accuracy | Costly errors | Questions |
 |---|---|---|---|
-| 0.75 vs 0.80 | +1.8 (+1.1 to +2.6) | +0.5 (+0.2 to +0.8) | −0.09 |
-| 0.70 vs 0.75 | +0.4 (−0.2 to +1.1) | +1.0 (+0.4 to +1.7) | −0.04 |
-| adaptive 0.75 vs static 0.80 | +8.0 (+6.5 to +9.4) | +1.7 (+1.2 to +2.3) | −1.46 |
+| 0.75 vs 0.80 | +1.9 (+1.0 to +2.8) | +0.9 (+0.4 to +1.5) | −0.27 |
+| 0.70 vs 0.75 | +0.0 (−0.8 to +0.8) | +1.2 (+0.4 to +2.2) | −0.04 |
+| adaptive 0.80 vs static 0.80 | +6.5 (+5.0 to +7.9) | +1.5 (+0.9 to +2.4) | −1.83 |
+| adaptive 0.75 vs static 0.80 | +8.4 (+6.5 to +10.1) | +2.4 (+1.5 to +3.7) | −2.10 |
 
 **Finding.** Raising the gate trades accuracy for safety. Above 0.80, most of the extra caution
-becomes "general waste because unsure": the fallback rate reaches 42% at 0.90. Moving from 0.70 to
-0.75 costs no measurable accuracy, but costly errors fall by a significant margin. Moving from 0.75
-to 0.80 costs 1.8 points of accuracy for half a point fewer costly errors.
+becomes "general waste because unsure": the fallback rate reaches 40% at 0.90. Moving from 0.70 to
+0.75 costs no measurable accuracy and cuts costly errors by 1.2 points. Moving from 0.75 to 0.80
+costs 1.9 points of accuracy for 0.9 points fewer costly errors, and roughly doubles the fallback
+rate (5.2% to 11.3%). Because the costly error is the proposal's headline risk, and 0.80 leaves a
+wider margin once answers are imperfect (analyses 3 and 4), we keep 0.80 until real answers are recorded.
 
 ## 2. Does entropy-based question selection matter? (ablation)
 
-`Gate` gained two switches, used only in analysis: D-003 on or off, and how the follow-up after Q1
-is chosen (expected entropy reduction, or a fixed order).
+`Gate` has switches used only in analysis: D-003 on or off, how the follow-up after the opening
+question is chosen (expected entropy reduction, or a fixed order), and the opening question itself
+(`opening="q1"` is the old design, where Q1 always opens).
 
 | Variant | Gate | Avg questions | No questions | Accuracy | Costly errors |
 |---|---|---|---|---|---|
-| As designed (entropy, D-003 on) | 0.75 | 1.54 | 25.9% | 87.0% | 2.9% |
-| Fixed order Q2→Q3, D-003 on | 0.75 | 1.54 | 25.9% | 87.0% | 2.9% |
-| Fixed order Q3→Q2, D-003 on | 0.75 | 1.55 | 25.9% | 87.0% | 2.9% |
+| **As designed (D-004: Q2 opens for recyclables)** | 0.75 | 0.90 | 25.9% | 87.5% | 3.6% |
+| Old design (Q1 always opens) | 0.75 | 1.54 | 25.9% | 87.0% | 2.9% |
+| Fixed order Q2→Q3 (then Q1), D-003 on | 0.75 | 0.91 | 25.9% | 86.5% | 3.9% |
+| Fixed order Q3→Q2 (then Q1), D-003 on | 0.75 | 0.91 | 25.9% | 86.5% | 3.9% |
+| **As designed** | 0.80 | 1.17 | 25.1% | 85.6% | 2.7% |
+| Old design (Q1 always opens) | 0.80 | 1.63 | 25.1% | 85.2% | 2.4% |
+| Fixed order Q2→Q3, D-003 on | 0.80 | 1.20 | 25.1% | 83.6% | 2.6% |
 | Entropy, **D-003 off** | 0.70 | 0.05 | 96.8% | **65.4%** | 0.0% |
 | Entropy, **D-003 off** | 0.75 | 0.82 | 42.5% | 70.5% | 0.6% |
 | Entropy, D-003 off | 0.80 | 1.60 | 26.7% | 85.2% | 2.4% |
 | Fixed order **Q3→Q2**, D-003 off | 0.80 | 1.92 | 26.7% | **79.0%** | 1.2% |
 
 **Findings.**
+- **D-004 trades safety margin for fewer questions.** It saves 0.64 questions per item at 0.75 and
+  0.46 at 0.80, with the same or slightly better accuracy, and adds 0.3 to 0.7 points of costly
+  errors. Dirty recyclables are now settled after one question (the answer "not empty or not
+  rinsed" alone sends them to general waste), which is the case that matters most.
 - **D-003 is what keeps recyclables recyclable at lower gates.** The vision model cannot see
   cleanliness, so a plastic bottle starts at P(not clean) = 0.75 and therefore P(general waste) ≈ 0.75.
   Without D-003, a 0.70 gate settles that at once as general waste, with no questions.
   Costly errors look perfect (0%), but almost every clean recyclable is lost.
-- **Entropy selection picks the better order by itself.** It matches the best fixed order (Q2
-  first) and avoids the worse one, which loses 6.2 points at 0.80. With D-003 on, the order is mostly
-  fixed anyway: Q1, then Q2 for recyclables, so only Q3 is left. No run followed Q1 → Q3. The
-  observed paths at 0.75 were:
+- **Entropy selection beats every fixed order.** The fixed orders lose 1.0 point at 0.75 and 2.0
+  points at 0.80; the worst (Q3 first, D-003 off) loses 6.2 points at 0.80. With Q1 now allowed after
+  Q2, the order varies by item. The observed paths at 0.75 were:
 
   | Path | Share of runs |
   |---|---|
-  | Q1 → Q2 | 64.4% |
+  | Q2 | 64.6% |
   | No questions | 25.9% |
-  | Q1 → Q2 → Q3 | 8.0% |
-  | Q1 only | 1.7% |
+  | Q2 → Q1 → Q3 | 5.3% |
+  | Q2 → Q1 | 3.0% |
+  | Q1 → Q2 → Q3 | 0.7% |
+  | Q1 → Q2 | 0.5% |
 
 ## 3. What if users answer carelessly? (answer noise)
 
@@ -133,18 +158,18 @@ Each answer is replaced by a random one with probability 0–30%. The flow still
 
 ![Answer noise](ws3_analysis/fig_answer_noise.svg)
 
-| Random answers | 0.70 costly | **0.75 costly** | 0.80 costly | 0.75 accuracy | Static 0.75 costly |
+| Random answers | 0.70 costly | 0.75 costly | **0.80 costly** | 0.80 accuracy | Static 0.80 costly |
 |---|---|---|---|---|---|
-| 0% | 3.8% | **2.9%** | 2.4% | 87.0% | 1.8% |
-| 10% | 5.3% ✗ | **4.1%** | 3.5% | 84.2% | 2.5% |
-| 20% | 6.8% ✗ | **5.5%** ✗ | 4.7% | 81.5% | 3.4% |
-| 30% | 8.4% ✗ | **7.1%** ✗ | 6.1% ✗ | 78.9% | 4.3% |
+| 0% | 4.8% | 3.6% | **2.7%** | 85.6% | 1.2% |
+| 10% | 6.4% ✗ | 5.0% (at the limit) | **3.8%** | 83.2% | 1.9% |
+| 20% | 7.9% ✗ | 6.4% ✗ | **5.2%** ✗ | 80.7% | 2.4% |
+| 30% | 9.7% ✗ | 8.2% ✗ | **6.6%** ✗ | 78.3% | 3.3% |
 
-**Finding.** Each extra 10% of random answers costs about 2.7 points of accuracy and adds about 1.4
-points of costly errors. 0.70 breaks the target at 10% noise, 0.75 at about 15–20% and 0.80 a
-little above 20%. **This is why I now recommend 0.75 rather than 0.70.** The static questionnaire makes fewer
-costly errors under noise, but at the price of 5 points of accuracy and about three times as many
-fallbacks.
+**Finding.** Each extra 10% of random answers costs about 2.4 points of accuracy and adds about 1.3
+points of costly errors. 0.70 breaks the target at 10% noise, 0.75 reaches it at about 10% and 0.80
+holds to about 18%. **Under D-004 this is the main reason to keep 0.80** (before D-004, 0.75 held to
+about 15%). The static questionnaire makes fewer costly errors under noise, but at the price of 6
+points of accuracy and twice as many fallbacks.
 
 ## 4. What if our answer tables are wrong? (misspecification)
 
@@ -153,26 +178,26 @@ exp(N(0, σ)) and renormalised. This was run in 20 random worlds per σ.
 
 | σ | Gate | Accuracy, mean (range) | Costly, mean (worst) | Worlds within 5% |
 |---|---|---|---|---|
-| 0.25 | 0.70 | 86.9% (84.4–89.5) | 4.0% (5.9%) | 90% |
-| 0.25 | **0.75** | 86.2% (84.1–88.7) | 3.2% (4.7%) | **100%** |
-| 0.25 | 0.80 | 84.5% (82.3–86.8) | 2.6% (3.8%) | 100% |
-| 0.5 | 0.70 | 85.4% (80.4–90.0) | 4.4% (9.1%) | 70% |
-| 0.5 | **0.75** | 84.7% (79.9–89.3) | 3.6% (7.7%) | **85%** |
-| 0.5 | 0.80 | 83.0% (78.7–87.3) | 2.9% (6.2%) | 90% |
+| 0.25 | 0.70 | 86.9% (84.5–89.3) | 5.3% (7.2%) | 45% |
+| 0.25 | 0.75 | 86.8% (84.5–89.2) | 4.1% (5.8%) | 95% |
+| 0.25 | **0.80** | 84.9% (82.8–87.4) | 3.0% (4.4%) | **100%** |
+| 0.5 | 0.70 | 85.6% (80.4–89.8) | 5.6% (10.5%) | 50% |
+| 0.5 | 0.75 | 85.5% (80.2–89.8) | 4.5% (8.8%) | 65% |
+| 0.5 | **0.80** | 83.5% (78.8–88.0) | 3.4% (7.0%) | **85%** |
 
 The other unknown is the share of clean items people bring:
 
-| Clean items | 0.75 accuracy | 0.75 costly errors |
-|---|---|---|
-| 30% | 90.9% | 3.1% |
-| 50% | 87.0% | 2.9% |
-| 70% | 83.4% | 2.8% |
+| Clean items | 0.80 accuracy | 0.80 costly errors | 0.75 accuracy | 0.75 costly errors |
+|---|---|---|---|---|
+| 30% | 90.3% | 2.7% | 91.2% | 3.6% |
+| 50% | 85.6% | 2.7% | 87.5% | 3.6% |
+| 70% | 81.2% | 2.4% | 84.4% | 4.1% |
 
-**Finding.** With moderately wrong tables (σ = 0.25, cells off by about ±25%), 0.75 stays within
-the target in every world. With badly wrong tables (σ = 0.5) it does so in 85% of worlds. Costly
-errors at 0.75 barely move with the share of clean items. The hand-set tables are therefore not a
-single point of failure, but recording real answers (team decision 2) is still the way to remove
-this uncertainty.
+**Finding.** With moderately wrong tables (σ = 0.25, cells off by about ±25%), 0.80 stays within
+the target in every world and 0.75 in 95%. With badly wrong tables (σ = 0.5) it is 85% against 65%.
+Costly errors at 0.80 barely move with the share of clean items; at 0.75 they rise to 4.1% when 70%
+of items are clean. The hand-set tables are therefore not a single point of failure, but recording
+real answers (team decision 2) is still the way to remove this uncertainty.
 
 ## 5. Calibration: can users trust the confidence shown?
 
@@ -180,75 +205,83 @@ this uncertainty.
 - The vision material scores on these photos are close to calibrated: 81.4% top-1 accuracy at 82.6%
   mean confidence, ECE 0.044.
 
-**Outputs (WS3), adaptive at 0.75 (ECE 0.026):**
+**Outputs (WS3), adaptive at 0.80 (ECE 0.022):**
 
 | Confidence shown on the verdict | Runs | Mean shown | Actually right |
 |---|---|---|---|
-| 70–80% | 488 | 78.2% | 75.4% |
-| 80–90% | 1,800 | 82.8% | 85.8% |
-| 90–95% | 253 | 92.4% | 92.9% |
-| 95–100% | 2,094 | 98.1% | 96.6% |
+| 70–80% | 43 | 73.8% | 74.4% |
+| 80–90% | 1,973 | 83.3% | 85.6% |
+| 90–95% | 410 | 93.1% | 92.4% |
+| 95–100% | 1,997 | 97.8% | 97.1% |
 
 **What if the vision scores were over- or under-confident?** Each score p was raised to the power
 1/T and renormalised:
 
 ![Calibration](ws3_analysis/fig_calibration.svg)
 
-| Temperature | Accuracy | Costly errors | Questions | Fallback |
-|---|---|---|---|---|
-| 0.5 (over-confident) | 87.6% | **5.2%** ✗ | 1.51 | 2.9% |
-| 1.0 (as delivered) | 87.0% | 2.9% | 1.54 | 6.6% |
-| 2.0 (under-confident) | 76.9% | 1.2% | 1.85 | 23.5% |
+| Temperature | Gate | Accuracy | Costly errors | Questions | Fallback |
+|---|---|---|---|---|---|
+| 0.5 (over-confident) | 0.80 | 86.9% | **5.6%** ✗ | 0.93 | 5.6% |
+| 0.75 | 0.75 | 87.4% | **5.2%** ✗ | 0.84 | 3.2% |
+| 1.0 (as delivered) | 0.75 | 87.5% | 3.6% | 0.90 | 5.2% |
+| 1.0 (as delivered) | 0.80 | 85.6% | 2.7% | 1.17 | 11.3% |
+| 2.0 (under-confident) | 0.80 | 69.0% | 0.3% | 1.81 | 34.4% |
 
 **Findings.**
-- The confidence a verdict shows is honest: shown and actual agree within about 3 points in every
-  well-populated band. Part of this agreement holds by construction, because the simulated answers
-  follow the flow's own tables.
+- The confidence a verdict shows is honest: shown and actual agree within about 4 points in every
+  well-populated band at 0.80. Part of this agreement holds by construction, because the simulated
+  answers follow the flow's own tables.
 - **Over-confidence is the dangerous direction:** the gate passes items it should have asked about,
-  and costly errors break the target. Under-confidence is only inefficient: more questions, more
-  fallbacks.
+  and costly errors break the target. Under D-004 the margin is thinner: at 0.75 a mild sharpening
+  (T = 0.75) already breaks it, at 0.80 it takes T = 0.5. Under-confidence is only inefficient: more
+  questions, more fallbacks.
 
 ## 6. Where do the questions and errors go? (per material, 0.75)
 
 | Material | Photos | Avg questions | Accuracy | Costly errors |
 |---|---|---|---|---|
-| Plastic | 83 | 1.95 | 79.0% | 2.8% |
-| Glass | 35 | 2.03 | 88.6% | 3.5% |
-| Metal | 21 | 2.11 | 78.8% | 5.9% |
-| Paper | 16 | 2.06 | 81.9% | 5.5% |
-| Beverage carton | 15 | 2.05 | 89.0% | 3.8% |
-| Styrofoam | 7 | 1.61 | 89.3% | **10.7%** |
-| Other general | 40 | 0.72 | 98.0% | 2.0% |
+| Plastic | 83 | 1.14 | 80.5% | 2.9% |
+| Glass | 35 | 1.02 | 89.4% | 3.7% |
+| Metal | 21 | 1.25 | 79.5% | 5.9% |
+| Paper | 16 | 1.09 | 84.4% | 5.5% |
+| Beverage carton | 15 | 1.09 | 89.0% | 3.8% |
+| Styrofoam | 7 | 1.17 | 88.6% | **11.4%** |
+| Other general | 40 | 0.56 | 95.5% | 4.5% |
 | E-waste, textile, food waste | 30 | 0.00 | 100% | 0.0% |
 
 **Findings.**
-- All the questions go to recyclables (about 2 each, as D-003 intends). Items that go to the same
-  bin whatever their condition get **none**, which is what keeps the average at 1.5.
+- The questions go to recyclables, about one each now (about two before D-004). Items that go to the
+  same bin whatever their condition get **none**, which keeps the average near 0.9.
 - Styrofoam's costly errors come from photos the model reads as plastic: Q1 cannot fix this, because
   styrofoam often carries a recycling symbol (resin code 6). The fix belongs to the vision model (more
   styrofoam photos), not the questions.
-- The sample is small (7 photos), so treat the styrofoam figure as a warning, not an estimate.
+- "Other general" items rose from 2.0% to 4.5% costly errors under D-004: probably because items the
+  model reads as recyclable now get one question, and a "yes" can settle them as blue bin (not
+  isolated in the data). This is worth watching.
+- Samples are small (7 styrofoam photos), so treat these figures as warnings, not estimates.
 
 ## 7. Held-out check (test split, checked once)
 
 | System | Gate | Avg questions | Accuracy | Costly errors | Fallback |
 |---|---|---|---|---|---|
-| Adaptive | **0.75** | 1.62 (1.51–1.73) | 86.5% (84.8–88.0) | 2.6% (2.1–3.2) | 7.3% |
+| Adaptive | 0.75 | 0.93 (0.85–1.02) | 87.1% (85.4–88.6) | 3.1% (2.4–4.0) | 5.3% |
 | Static | 0.75 | 3.00 | 80.7% (78.9–82.4) | 1.6% (1.2–2.1) | 19.2% |
-| Adaptive | 0.80 | 1.73 (1.61–1.84) | 84.7% (82.9–86.5) | 2.2% (1.7–2.7) | 12.4% |
+| **Adaptive** | **0.80** | **1.21 (1.12–1.31)** | **85.2% (83.4–87.0)** | **2.4% (1.8–3.0)** | **12.5%** |
 
-**Finding.** The test split agrees with validation: 86.5% against 87.0% accuracy, and 2.6% against
-2.9% costly errors. So the gate was not overfitted to the validation photos.
+**Finding.** The test split agrees with validation: at 0.80, 85.2% against 85.6% accuracy and 2.4%
+against 2.7% costly errors; at 0.75, 87.1% against 87.5% and 3.1% against 3.6%. So the gate was not
+overfitted to the validation photos.
 
 ## 8. A second site policy (multi-stream campus bins)
 
 | System | Gate | Avg questions | Accuracy | Costly errors | Fallback |
 |---|---|---|---|---|---|
-| Adaptive | 0.75 | 1.60 | 81.9% | 2.4% | 11.8% |
-| Static | 0.75 | 3.00 | 77.7% | 1.5% | 22.7% |
+| Adaptive | 0.80 | 1.28 | 79.8% | 1.7% | 18.0% |
+| Adaptive | 0.75 | 1.03 | 82.1% | 2.7% | 11.1% |
+| Static | 0.80 | 3.00 | 75.1% | 0.7% | 27.3% |
 
 **Finding.** The same flow works unchanged on separate paper, plastic and cans/glass bins.
-Accuracy is about 5 points lower than HDB because material mix-ups now change the bin (paper vs
+Accuracy is about 4–6 points lower than HDB because material mix-ups now change the bin (paper vs
 plastic), whereas HDB's single blue bin absorbs them.
 
 ## 9. Should the flow assume more items are clean? (condition prior)
@@ -256,22 +289,26 @@ plastic), whereas HDB's single blue bin absorbs them.
 The flow starts every item at P(clean) = 0.25 (uniform over the four conditions). Would 0.50 be
 better?
 
-| Prior P(clean) | Accuracy | Costly errors | Fallback |
-|---|---|---|---|
-| **0.25 (current)** | 87.0% | **2.9%** | **6.6%** |
-| 0.50 | 87.6% | 3.8% | 17.4% |
+| Prior P(clean) | Gate | Accuracy | Costly errors | Fallback |
+|---|---|---|---|---|
+| **0.25 (current)** | 0.75 | 87.5% | **3.6%** | **5.2%** |
+| 0.50 | 0.75 | 87.3% | 5.4% | 15.9% |
+| **0.25 (current)** | 0.80 | 85.6% | **2.7%** | **11.3%** |
+| 0.50 | 0.80 | 87.7% | 4.3% | 18.0% |
 
-(Gate 0.75, 50% clean items; the same holds at 30% and 70%.)
+(50% clean items; the pattern is the same at 30% and 70%.)
 
-**Finding.** Keep the uniform prior. A higher prior adds 0.6 points of accuracy but makes 0.9 points
-more costly errors and nearly three times as many fallbacks. The reason is that "Not sure if it was
-rinsed" settles as general waste under the current prior, but stays undecided under the higher one.
+**Finding.** Keep the uniform prior. A higher prior makes 1.6 to 1.8 points more costly errors and
+up to three times as many fallbacks, and at 0.75 it is not even more accurate. The reason is that "Not
+sure" settles as general waste under the current prior, but stays undecided under the higher one.
 A data-driven prior would need cleanliness labels, which the dataset does not have.
 
 ## Decisions for the team
 
-1. **Set `CONFIDENCE_THRESHOLD` to 0.75.** This replaces my earlier 0.70 proposal and is a contract
-   change: version bump, changelog, and approval from WS3 and WS4.
+1. **Keep `CONFIDENCE_THRESHOLD` at 0.80** (no contract change for the gate). This reverses my 21 Oct
+   proposal of 0.75, which was made before D-004: under D-004, 0.75 has too little margin (5.0% costly
+   errors at 10% random answers). Revisit once real answers are recorded; 0.75 then saves another 0.27
+   questions per item.
 2. **Record Q1–Q3 answers** when photographing items (unchanged). Analyses 3 and 4 show the flow
    tolerates moderate errors in the tables, but real answers remove the main limitation.
 3. **WS1/WS2:** keep the material scores calibrated, never sharpened (analysis 5), and add styrofoam

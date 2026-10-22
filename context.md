@@ -306,7 +306,7 @@ Next.js web app (TypeScript, App Router, Tailwind) ── hosted on Vercel
 ### 15.2 Model API rules
 - Unknown fields are rejected. Scores cover every label exactly once and sum to 1. Embeddings have `EMBEDDING_DIM` values and unit norm.
 - `/predict` returns status `retake` (failed quality check, nothing else), `question` (next question plus a signed decision state) or `verdict`. `/answer` never returns `retake`.
-- The decision state is HMAC-signed by the API; altered states are rejected. Q1 always opens; at most three questions.
+- The decision state is HMAC-signed by the API; altered states are rejected. Q2 opens when the top material is recyclable, otherwise Q1 (D-004); at most three questions.
 - An `abstain` verdict has no bin and must link to NEA guidance. Every verdict carries `channel`, `bin_key` (null when abstaining), `bin_label`, `reason`, optional `tip`, `rule_id`, `rule_trace`, `source_url`, `confidence` and the questions asked.
 - `/verify` returns four checks (image match, bin matches verdict, within time window, not a duplicate) and `passed` is true exactly when all four pass.
 - Errors use `{code, message}` with codes `invalid_image`, `image_too_large`, `invalid_state`, `invalid_answer`, `unknown_policy`, `model_unavailable`, `internal`.
@@ -331,13 +331,13 @@ if OOD(image): return ABSTAIN (+ link to NEA Check My Item)
 if max_confidence >= tau: go to policy engine
 
 asked = []
-next_q = Q1                                   # Q1 always opens
+next_q = Q2 if top material is recyclable else Q1   # D-004: opening question
 while next_q is not None:
     answer = ask(next_q)
     p = normalise(p * likelihood[next_q][answer])   # naive-Bayes-style update
     asked.append((next_q, answer))
     if max_confidence(p) >= tau: break
-    next_q = argmax over remaining {Q2, Q3} of expected entropy reduction (None if none left)
+    next_q = argmax over remaining {Q1, Q2, Q3} of expected entropy reduction (None if none left)
 
 verdict = policy_engine(p) if max_confidence(p) >= tau else GENERAL_WASTE (+ NEA link)
 ```
@@ -400,7 +400,7 @@ The 1-minute clickable demo shows the intended product. Its numbers are **illust
 - [ ] Confirm PROVISIONAL constants (Section 15.6)
 - [ ] Decide the final report's look (NUS-ISS template or Bin Buddy look)
 - [ ] Set up demonstration bins with QR codes
-- Interpretations already applied (from the proposal's wording): still uncertain after all questions → general waste plus NEA link; Q1 "yes" is evidence, not a verdict; food residue → "general waste as-is" plus an empty-and-rinse tip; evaluation targets are indicative.
+- Interpretations already applied (from the proposal's wording): still uncertain after all questions → general waste plus NEA link; Q1 "yes" is evidence, not a verdict; food residue → "general waste as-is" plus an empty-and-rinse tip; evaluation targets are indicative. No contamination training data, so Q2 ("Is it empty, and did you rinse it?") opens for recyclable top materials (D-004, team decision 22 Oct); this deviates from proposal 5.2 "Q1 always opens".
 
 ## 22. References
 

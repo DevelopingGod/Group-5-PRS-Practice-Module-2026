@@ -54,9 +54,9 @@ Q1_GIVEN_MATERIAL: Final[dict[Material, Row]] = {
     Material.OTHER_GENERAL: _yes_no(0.10, 0.75, 0.15),
 }
 
-# Q2 "Did you clean or rinse it?" given the condition. The questions tell clean from not clean,
-# not which kind of contamination, so the three contaminated conditions share one row. "Not sure"
-# is kept close to neutral (proposal 1.2: Q3 follows when Q2 was "No or Not sure").
+# Q2 "Is it empty, and did you rinse it?" given the condition. The questions tell clean from not
+# clean, not which kind of contamination, so the three contaminated conditions share one row.
+# "Not sure" is kept close to neutral (proposal 1.2: Q3 follows when Q2 was "No or Not sure").
 _Q2_CONTAMINATED: Final[Row] = _yes_no(0.05, 0.75, 0.20)
 Q2_GIVEN_CONDITION: Final[dict[Condition, Row]] = {
     Condition.CLEAN: _yes_no(0.82, 0.03, 0.15),

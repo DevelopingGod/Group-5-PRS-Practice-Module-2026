@@ -275,6 +275,7 @@ def threshold_tradeoff(
 
 VARIANTS: tuple[tuple[str, decision.Gate], ...] = (
     ("as designed: entropy choice, D-003 on", decision.Gate()),
+    ("old design: Q1 always opens, D-003 on", decision.Gate(opening="q1")),
     ("fixed order Q2 then Q3, D-003 on", decision.Gate(follow_up="q2_first")),
     ("fixed order Q3 then Q2, D-003 on", decision.Gate(follow_up="q3_first")),
     ("entropy choice, D-003 off", decision.Gate(require_q2=False)),

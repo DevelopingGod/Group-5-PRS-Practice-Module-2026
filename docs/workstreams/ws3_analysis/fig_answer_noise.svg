@@ -23,18 +23,18 @@
 <text x="188.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">20%</text>
 <text x="256.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">30%</text>
 <text x="154.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Share of answers given at random</text>
-<polyline points="52.0,147.9 120.0,158.9 188.0,169.2 256.0,179.3" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="52.0" cy="147.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="120.0" cy="158.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="188.0" cy="169.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="256.0" cy="179.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline points="52.0,146.2 120.0,155.6 188.0,164.6 256.0,174.9" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="146.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="120.0" cy="155.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="188.0" cy="164.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="174.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polyline points="52.0,168.0 120.0,176.4 188.0,184.1 256.0,191.3" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="52.0" cy="168.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="120.0" cy="176.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="188.0" cy="184.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="256.0" cy="191.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="274" y="183.3" font-size="10.5" fill="#0b0b0b">Adaptive 78.9%</text>
-<text x="274" y="196.3" font-size="10.5" fill="#0b0b0b">Static (all 3) 75.8%</text>
+<text x="274" y="178.9" font-size="10.5" fill="#0b0b0b">Adaptive 80.0%</text>
+<text x="274" y="195.3" font-size="10.5" fill="#0b0b0b">Static (all 3) 75.8%</text>
 <text x="432" y="82" font-size="13" font-weight="600" fill="#0b0b0b">Costly errors</text>
 <line x1="432" x2="636" y1="252.0" y2="252.0" stroke="#e4e3df" stroke-width="1"/>
 <text x="426" y="256.0" font-size="11" text-anchor="end" fill="#52514e">0%</text>
@@ -55,16 +55,16 @@
 <text x="534.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Share of answers given at random</text>
 <line x1="432" x2="636" y1="175.0" y2="175.0" stroke="#52514e" stroke-width="1" stroke-dasharray="4 3"/>
 <text x="436" y="171.0" font-size="10" fill="#52514e">target 5%</text>
-<polyline points="432.0,207.7 500.0,188.6 568.0,166.7 636.0,143.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="432.0" cy="207.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="500.0" cy="188.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="568.0" cy="166.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="636.0" cy="143.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polyline points="432.0,196.7 500.0,175.8 568.0,153.4 636.0,126.2" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="196.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="500.0" cy="175.8" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="568.0" cy="153.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="126.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polyline points="432.0,224.4 500.0,212.9 568.0,200.1 636.0,185.8" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="432.0" cy="224.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="500.0" cy="212.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="568.0" cy="200.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="636.0" cy="185.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
-<text x="654" y="147.4" font-size="10.5" fill="#0b0b0b">Adaptive 7.1%</text>
+<text x="654" y="130.2" font-size="10.5" fill="#0b0b0b">Adaptive 8.2%</text>
 <text x="654" y="189.8" font-size="10.5" fill="#0b0b0b">Static (all 3) 4.3%</text>
 </svg>

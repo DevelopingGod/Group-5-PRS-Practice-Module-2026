@@ -27,13 +27,13 @@
 <text x="226.9" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
 <text x="256.0" y="268" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
 <text x="154.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
-<polygon points="52.0,129.5 110.3,130.6 139.4,131.6 168.6,136.5 226.9,173.2 256.0,193.3 256.0,220.5 226.9,194.5 168.6,150.8 139.4,144.4 110.3,142.7 52.0,140.9" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
-<polyline points="52.0,135.0 110.3,136.5 139.4,137.9 168.6,143.5 226.9,184.6 256.0,208.2" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="52.0" cy="135.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="110.3" cy="136.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="139.4" cy="137.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="168.6" cy="143.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="226.9" cy="184.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="52.0,131.2 110.3,130.4 139.4,130.3 168.6,135.4 226.9,171.9 256.0,193.3 256.0,220.5 226.9,193.5 168.6,149.9 139.4,143.4 110.3,143.3 52.0,144.5" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,137.5 110.3,136.6 139.4,136.6 168.6,142.5 226.9,183.7 256.0,208.2" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="137.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="136.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="136.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="142.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="183.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="256.0" cy="208.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polygon points="52.0,129.2 110.3,132.5 139.4,146.7 168.6,154.3 226.9,174.2 256.0,194.8 256.0,221.5 226.9,195.4 168.6,170.6 139.4,161.1 110.3,144.9 52.0,140.0" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
 <polyline points="52.0,134.3 110.3,138.5 139.4,154.0 168.6,162.6 226.9,185.6 256.0,209.4" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -65,13 +65,13 @@
 <text x="534.0" y="288" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
 <line x1="432" x2="636" y1="155.8" y2="155.8" stroke="#52514e" stroke-width="1" stroke-dasharray="4 3"/>
 <text x="436" y="151.8" font-size="10" fill="#52514e">target 5%</text>
-<polygon points="432.0,133.9 490.3,149.7 519.4,177.7 548.6,190.8 606.9,240.7 636.0,252.0 636.0,252.0 606.9,250.8 548.6,218.2 519.4,213.0 490.3,201.6 432.0,192.3" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
-<polyline points="432.0,165.6 490.3,178.1 519.4,196.6 548.6,205.5 606.9,246.6 636.0,252.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="432.0" cy="165.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="490.3" cy="178.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="519.4" cy="196.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="548.6" cy="205.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="606.9" cy="246.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="432.0,98.0 490.3,120.3 519.4,152.8 548.6,178.5 606.9,232.3 636.0,252.0 636.0,252.0 606.9,249.2 548.6,216.2 519.4,205.8 490.3,192.0 432.0,170.3" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,125.7 490.3,159.1 519.4,182.9 548.6,199.6 606.9,241.9 636.0,252.0" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="125.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="159.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="182.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="199.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="241.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="636.0" cy="252.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polygon points="432.0,140.8 490.3,169.9 519.4,200.7 548.6,217.6 606.9,240.7 636.0,252.0 636.0,252.0 606.9,250.8 548.6,238.0 519.4,230.6 490.3,210.6 432.0,194.1" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
 <polyline points="432.0,169.2 490.3,192.4 519.4,217.5 548.6,228.8 606.9,246.6 636.0,252.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
@@ -105,14 +105,14 @@
 <text x="226.9" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
 <text x="256.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
 <text x="154.0" y="518" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
-<polygon points="52.0,399.2 110.3,397.9 139.4,395.6 168.6,390.8 226.9,368.2 256.0,362.3 256.0,379.8 226.9,386.0 168.6,406.5 139.4,411.1 110.3,412.9 52.0,413.9" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
-<polyline points="52.0,405.6 110.3,404.7 139.4,402.7 168.6,398.1 226.9,376.2 256.0,370.5" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="52.0" cy="405.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="110.3" cy="404.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="139.4" cy="402.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="168.6" cy="398.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="226.9" cy="376.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="256.0" cy="370.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="52.0,437.3 110.3,433.8 139.4,431.0 168.6,416.4 226.9,386.5 256.0,375.8 256.0,391.5 226.9,401.6 168.6,428.3 139.4,441.3 110.3,443.1 52.0,445.8" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="52.0,441.3 110.3,438.3 139.4,436.0 168.6,422.2 226.9,393.6 256.0,383.2" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="441.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="110.3" cy="438.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="139.4" cy="436.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="168.6" cy="422.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="226.9" cy="393.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="256.0" cy="383.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polygon points="52.0,328.0 110.3,328.0 139.4,328.0 168.6,328.0 226.9,328.0 256.0,328.0 256.0,328.0 226.9,328.0 168.6,328.0 139.4,328.0 110.3,328.0 52.0,328.0" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
 <polyline points="52.0,328.0 110.3,328.0 139.4,328.0 168.6,328.0 226.9,328.0 256.0,328.0" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="52.0" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -122,7 +122,7 @@
 <circle cx="226.9" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="256.0" cy="328.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <text x="274" y="332.0" font-size="10.5" fill="#0b0b0b">Static (all 3) 3</text>
-<text x="274" y="374.5" font-size="10.5" fill="#0b0b0b">Adaptive 2.17</text>
+<text x="274" y="387.2" font-size="10.5" fill="#0b0b0b">Adaptive 1.93</text>
 <text x="432" y="312" font-size="13" font-weight="600" fill="#0b0b0b">Fell back to general waste</text>
 <line x1="432" x2="636" y1="482.0" y2="482.0" stroke="#e4e3df" stroke-width="1"/>
 <text x="426" y="486.0" font-size="11" text-anchor="end" fill="#52514e">0%</text>
@@ -141,14 +141,14 @@
 <text x="606.9" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.9</text>
 <text x="636.0" y="498" font-size="11" text-anchor="middle" fill="#52514e">0.95</text>
 <text x="534.0" y="518" font-size="11" text-anchor="middle" fill="#52514e">Confidence gate</text>
-<polygon points="432.0,471.8 490.3,467.1 519.4,459.1 548.6,446.8 606.9,363.1 636.0,329.7 636.0,354.0 606.9,384.3 548.6,459.9 519.4,470.4 490.3,475.4 432.0,478.2" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
-<polyline points="432.0,475.2 490.3,471.7 519.4,465.2 548.6,453.9 606.9,373.4 636.0,341.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-<circle cx="432.0" cy="475.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="490.3" cy="471.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="519.4" cy="465.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="548.6" cy="453.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="606.9" cy="373.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
-<circle cx="636.0" cy="341.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<polygon points="432.0,475.0 490.3,468.7 519.4,462.7 548.6,445.9 606.9,368.7 636.0,336.7 636.0,359.7 606.9,388.4 548.6,458.9 519.4,474.0 490.3,477.7 432.0,481.2" fill="#2a78d6" fill-opacity="0.15" stroke="none"/>
+<polyline points="432.0,478.5 490.3,473.4 519.4,468.6 548.6,452.9 606.9,378.3 636.0,347.4" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="432.0" cy="478.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="490.3" cy="473.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="519.4" cy="468.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="548.6" cy="452.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="606.9" cy="378.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
+<circle cx="636.0" cy="347.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"/>
 <polygon points="432.0,462.0 490.3,448.9 519.4,428.4 548.6,415.6 606.9,359.9 636.0,328.0 636.0,347.9 606.9,379.7 548.6,429.3 519.4,440.1 490.3,459.6 432.0,469.7" fill="#eb6834" fill-opacity="0.15" stroke="none"/>
 <polyline points="432.0,465.9 490.3,454.4 519.4,434.1 548.6,422.7 606.9,369.5 636.0,335.8" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
 <circle cx="432.0" cy="465.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
@@ -158,5 +158,5 @@
 <circle cx="606.9" cy="369.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <circle cx="636.0" cy="335.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"/>
 <text x="654" y="339.8" font-size="10.5" fill="#0b0b0b">Static (all 3) 56.9%</text>
-<text x="654" y="352.8" font-size="10.5" fill="#0b0b0b">Adaptive 54.8%</text>
+<text x="654" y="352.8" font-size="10.5" fill="#0b0b0b">Adaptive 52.4%</text>
 </svg>

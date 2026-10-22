@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from binbuddy_contracts.api import AnswerResponse, PredictResponse, VerifyResponse
 from binbuddy_contracts.constants import EMBEDDING_DIM
-from binbuddy_contracts.enums import ResponseStatus
+from binbuddy_contracts.enums import QuestionId, ResponseStatus
 from binbuddy_contracts.questions import OPENING_QUESTION, QUESTION_BANK
 from tests.conftest import image_b64
 
@@ -34,7 +34,8 @@ def _run_to_verdict(client: TestClient, seed: int) -> PredictResponse:
         client.post("/predict", json={"image_base64": image_b64(seed)}).json()
     )
     if res.status is ResponseStatus.QUESTION:
-        assert res.next_question is not None and res.next_question.id is OPENING_QUESTION
+        assert res.next_question is not None
+        assert res.next_question.id in {OPENING_QUESTION, QuestionId.Q2_CLEANED}
     return res
 
 
@@ -67,7 +68,8 @@ def test_tampered_state_is_rejected(client: TestClient) -> None:
             continue
         state: dict[str, Any] = res.state.model_dump(mode="json")
         state["confidence"] = 0.99
-        ans = {"question_id": OPENING_QUESTION.value, "answer": "yes"}
+        assert res.next_question is not None
+        ans = {"question_id": res.next_question.id.value, "answer": "yes"}
         r = client.post("/answer", json={"state": state, "answer": ans})
         assert r.status_code == 400
         assert r.json()["code"] == "invalid_state"

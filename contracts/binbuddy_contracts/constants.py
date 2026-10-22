@@ -2,7 +2,7 @@
 
 from typing import Final
 
-CONTRACTS_VERSION: Final = "0.1.0"
+CONTRACTS_VERSION: Final = "0.2.0"
 
 DEFAULT_SITE_POLICY: Final = "hdb_default"
 
