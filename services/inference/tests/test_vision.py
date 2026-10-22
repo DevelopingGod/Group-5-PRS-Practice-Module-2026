@@ -204,3 +204,11 @@ def test_missing_model_is_a_503(monkeypatch: pytest.MonkeyPatch, tmp_path: Path)
     r = TestClient(main.app).post("/predict", json={"image_base64": _b64(_photo((0, 0, 255)))})
     assert r.status_code == 503
     assert r.json()["code"] == "model_unavailable"
+
+
+def test_conservative_fusion_averages_only_when_bin_groups_agree() -> None:
+    c = np.array([0.6, 0.3, 0, 0, 0, 0, 0, 0, 0, 0.1], np.float32)  # top: paper (blue bin)
+    agree = np.array([0.2, 0.7, 0, 0, 0, 0, 0, 0, 0, 0.1], np.float32)  # top: plastic (blue bin)
+    disagree = np.array([0.1, 0.1, 0, 0, 0, 0.7, 0, 0, 0, 0.1], np.float32)  # top: styrofoam
+    np.testing.assert_allclose(vision.conservative_fusion(c, agree), (c + agree) / 2)
+    np.testing.assert_array_equal(vision.conservative_fusion(c, disagree), c)
