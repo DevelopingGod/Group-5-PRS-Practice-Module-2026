@@ -31,6 +31,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Pages only: route handlers set cookies themselves, and static files need no session.
-  matcher: ["/((?!api/|_next/static|_next/image|favicon.ico|.*\\.[a-z0-9]+$).*)"],
+  // Pages only: route handlers set cookies themselves, and static files and generated images
+  // (the app icon and the link preview) need no session.
+  matcher: ["/((?!api/|_next/static|_next/image|apple-icon|opengraph-image|.*\\.[a-z0-9]+$).*)"],
 };

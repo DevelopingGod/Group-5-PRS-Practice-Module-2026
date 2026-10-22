@@ -125,6 +125,13 @@
   animation: fill 900ms var(--ease-out) 150ms both;
 }
 
+/* The sticky header (about 4rem) must not cover a heading or control that is scrolled or
+   focused into view, such as a screen heading taking focus after "Scan another item". */
+html {
+  scroll-padding-top: 5rem;
+  scroll-padding-bottom: 5.5rem; /* the sticky bottom navigation */
+}
+
 body {
   /* Calm atmosphere: a faint daylight wash at the top of the paper background. */
   background:

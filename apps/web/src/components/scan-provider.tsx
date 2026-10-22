@@ -10,7 +10,7 @@ import { DEFAULT_SITE_POLICY } from "@/contracts/constants";
 import * as api from "@/lib/api-client";
 import { fileToBase64Jpeg, fileToThumbnail } from "@/lib/image";
 import { fromAnswer, fromPredict, type ScanState } from "@/lib/scan-flow";
-import { startProgress, withUpload, type ReadingProgress } from "@/lib/scan-progress";
+import { startProgress, wakingAfter, withUpload, type ReadingProgress } from "@/lib/scan-progress";
 import { SCAN_SESSION_KEY, restoreScan, serialiseScan } from "@/lib/scan-session";
 import { ensureSignedIn } from "@/lib/supabase/browser";
 
@@ -74,6 +74,8 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
   // never because a screen unmounted.
   const photo = useRef<string | null>(null);
   const thumbnail = useRef<string | null>(null);
+  // When the model last replied: while it is awake, a slow scan is not called "waking up".
+  const lastReply = useRef<number | null>(null);
 
   // Start the anonymous (pseudonymous) session early so the first scan can be saved. The browser
   // client also keeps the session cookie refreshed while the app is open.
@@ -110,7 +112,8 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
 
   async function predict(id: number, photoUrl: string, image: string) {
     setPreviousConfidence(0);
-    setProgress(startProgress(Date.now()));
+    const now = Date.now();
+    setProgress(startProgress(now, wakingAfter(lastReply.current, now)));
     setState({ step: "reading", photoUrl });
     const res = await api.predict(
       { image_base64: image, site_policy: DEFAULT_SITE_POLICY },
@@ -120,6 +123,7 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
     );
     if (id !== run.current) return;
     if (res.ok) {
+      lastReply.current = Date.now();
       setProgress((p) => p && { ...p, done: true });
       await new Promise((r) => setTimeout(r, DONE_HOLD_MS));
       if (id !== run.current) return;
@@ -179,6 +183,7 @@ export function ScanProvider({ children }: { children: React.ReactNode }) {
       answer: { question_id: current.question.id, answer: value },
     });
     if (id !== run.current) return;
+    if (res.ok) lastReply.current = Date.now();
     setPreviousConfidence(current.decision.confidence);
     setState(
       res.ok

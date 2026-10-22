@@ -32,6 +32,35 @@ export function CameraIcon({ className }: IconProps) {
   );
 }
 
+export function GalleryIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <rect x="4" y="5" width="16" height="14" rx="2" />
+      <circle cx="9" cy="10" r="1.5" />
+      <path d="m20 15-4-4-7 8" />
+    </svg>
+  );
+}
+
+export function SwitchCameraIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2.2l1.4-2h5.8l1.4 2h2.2A1.5 1.5 0 0 1 20 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5Z" />
+      <path d="M9 12.5a3 3 0 0 1 5.2-1.7M15 13.5a3 3 0 0 1-5.2 1.7" />
+      <path d="M14.5 9v2h-2M9.5 17v-2h2" />
+    </svg>
+  );
+}
+
+export function InfoIcon({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5M12 8h.01" />
+    </svg>
+  );
+}
+
 export function QuestionIcon({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

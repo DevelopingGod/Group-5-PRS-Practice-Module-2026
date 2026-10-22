@@ -14,6 +14,16 @@ const atkinson = Atkinson_Hyperlegible({
 export const metadata: Metadata = {
   title: "Bin Buddy",
   description: "Which bin does this go in? An explainable recycling assistant for Singapore.",
+  // The preview image is app/opengraph-image.tsx; X reuses it for the large card.
+  openGraph: {
+    title: "Bin Buddy: which bin does this go in?",
+    description:
+      "Snap a photo, answer at most one or two questions, get the right bin with the reason.",
+    siteName: "Bin Buddy",
+    type: "website",
+    locale: "en_SG",
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = { themeColor: "#10233F" };

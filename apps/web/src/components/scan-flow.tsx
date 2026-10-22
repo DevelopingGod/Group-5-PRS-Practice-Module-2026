@@ -18,10 +18,11 @@ import {
   SparkIcon,
   Spinner,
 } from "@/components/icons";
+import { CaptureButton, GalleryButton, usePhotoCapture } from "@/components/photo-capture";
 import { flyReward } from "@/components/points-pill";
 import { QrScanner } from "@/components/qr-scanner";
 import { useScan } from "@/components/scan-provider";
-import { Button, CaptureButton, Notice, PhotoInput, ScanLine, Screen, at } from "@/components/ui";
+import { Button, Notice, ScanLine, Screen, at } from "@/components/ui";
 import {
   DAILY_POINTS_CAP,
   DEFAULT_SITE_POLICY,
@@ -36,9 +37,11 @@ import { checkRows, type VerifyRouteResponse } from "@/lib/verify-record";
 import {
   NEA_CHECK_MY_ITEM,
   answerLabel,
+  answerSentence,
   binColour,
   issueText,
   questionsLine,
+  ruleLine,
   textOn,
   topCondition,
   topMaterial,
@@ -46,8 +49,6 @@ import {
   type VisionAnalysis,
 } from "@/lib/scan-flow";
 import { progressText, progressView, type ReadingProgress } from "@/lib/scan-progress";
-
-const WAKING_AFTER_MS = 8_000;
 
 const QUESTION_SHORT: Record<keyof typeof QUESTION_BANK, string> = {
   q1_recycling_symbol: "Recycling symbol",
@@ -92,7 +93,7 @@ export function ScanFlow() {
           </ul>
           <ItemFrame url={state.photoUrl} style={at(2)} dim small />
           <div style={at(3)}>
-            <CaptureButton label="Retake photo" onPhoto={onPhoto} />
+            <CaptureButton label="Retake photo" onPhoto={onPhoto} gallery />
           </div>
         </Screen>
       );
@@ -144,7 +145,7 @@ function CaptureScreen({
   onPhoto: (file: File) => void;
   focusOnMount: boolean;
 }) {
-  const input = useRef<HTMLInputElement>(null);
+  const capture = usePhotoCapture(onPhoto);
   const steps = [
     { Icon: CameraIcon, title: "Photograph one item", body: "On its own, as it is now." },
     { Icon: QuestionIcon, title: "Answer a question", body: "Only if the photo is not enough." },
@@ -158,32 +159,23 @@ function CaptureScreen({
       titleClassName="text-4xl"
       focusOnMount={focusOnMount}
     >
-      <PhotoInput ref={input} onPhoto={onPhoto} />
-      <button
-        type="button"
-        aria-label="Take a photo of one item"
-        onClick={() => input.current?.click()}
-        style={at(1)}
-        className="viewfinder group relative grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-[1.75rem] bg-ink text-sticker shadow-[var(--shadow-lift)] transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
-      >
-        <span aria-hidden className="corners" />
-        <span
-          aria-hidden
-          className="absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_45%,rgb(31_95_209/0.45),transparent_70%)]"
-        />
-        <span className="relative flex flex-col items-center gap-3 text-light">
-          <span className="grid size-20 place-items-center rounded-full bg-bin-blue shadow-[0_0_0_10px_rgb(31_95_209/0.25)] transition-transform duration-300 group-hover:scale-105 animate-breathe">
-            <CameraIcon className="size-9" />
-          </span>
-          <span className="font-heading text-2xl font-bold">Take a photo</span>
-          <span className="text-sm text-light/80">One item, on its own</span>
-        </span>
-      </button>
-      <p className="text-sm text-muted" style={at(2)}>
+      {capture.inputs}
+      {capture.webcam ? (
+        <div style={at(1)}>{capture.webcam}</div>
+      ) : (
+        <ViewfinderButton onClick={capture.take} />
+      )}
+      {capture.notice}
+      {!capture.webcam && (
+        <div style={at(2)}>
+          <GalleryButton onClick={capture.choose} />
+        </div>
+      )}
+      <p className="text-sm text-muted" style={at(3)}>
         Keep people and faces out of the picture. Bin Buddy keeps a fingerprint of each photo, not
         the photo itself.
       </p>
-      <ol className="grid gap-3 sm:grid-cols-3" style={at(3)}>
+      <ol className="grid gap-3 sm:grid-cols-3" style={at(4)}>
         {steps.map(({ Icon, title, body }, i) => (
           <li key={title} className="card flex items-start gap-3 p-4 sm:flex-col">
             <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-paper text-bin-blue">
@@ -198,6 +190,32 @@ function CaptureScreen({
         ))}
       </ol>
     </Screen>
+  );
+}
+
+/** The big "Take photo" target on the capture screen. */
+function ViewfinderButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Take a photo of one item"
+      onClick={onClick}
+      style={at(1)}
+      className="viewfinder group relative grid aspect-[4/3] w-full place-items-center overflow-hidden rounded-[1.75rem] bg-ink text-sticker shadow-[var(--shadow-lift)] transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.99]"
+    >
+      <span aria-hidden className="corners" />
+      <span
+        aria-hidden
+        className="absolute inset-0 bg-[radial-gradient(70%_60%_at_50%_45%,rgb(31_95_209/0.45),transparent_70%)]"
+      />
+      <span className="relative flex flex-col items-center gap-3 text-light">
+        <span className="grid size-20 place-items-center rounded-full bg-bin-blue shadow-[0_0_0_10px_rgb(31_95_209/0.25)] transition-transform duration-300 group-hover:scale-105 animate-breathe">
+          <CameraIcon className="size-9" />
+        </span>
+        <span className="font-heading text-2xl font-bold">Take photo</span>
+        <span className="text-sm text-light/80">One item, on its own</span>
+      </span>
+    </button>
   );
 }
 
@@ -222,14 +240,15 @@ function ReadingScreen({
   progress: ReadingProgress | null;
 }) {
   const now = useNow(progress && !progress.done ? 250 : null);
-  const view = progress ? progressView(progress, now, WAKING_AFTER_MS) : null;
+  const view = progress ? progressView(progress, now) : null;
   const uploaded = progress?.uploadDoneAt != null;
-  const server: RowStatus = progress?.done ? "done" : uploaded ? "active" : "next";
-  // The upload is measured; the two server steps run inside one request, so they show together.
+  // One step at a time: the upload, then the server's check and identification (one request).
   const rows: { line: string; status: RowStatus }[] = [
     { line: "Uploading photo", status: uploaded ? "done" : "active" },
-    { line: "Checking it is sharp and well lit", status: server },
-    { line: "Identifying the material", status: server },
+    {
+      line: "Checking the photo and identifying the material",
+      status: progress?.done ? "done" : uploaded ? "active" : "next",
+    },
   ];
   return (
     <div aria-busy="true">
@@ -237,12 +256,7 @@ function ReadingScreen({
         <ItemFrame url={photoUrl} style={at(1)} scanning />
         {view && (
           <div className="card space-y-2 p-4" style={at(2)}>
-            <div className="flex items-baseline justify-between gap-3 text-sm">
-              <span className="font-bold">{view.label}</span>
-              <span aria-hidden className="font-heading text-lg font-bold tabular-nums">
-                {view.percent}%
-              </span>
-            </div>
+            {/* The bar after the upload is an estimate, so it shows no percentage. */}
             <div
               role="progressbar"
               aria-label="Reading your photo"
@@ -257,10 +271,11 @@ function ReadingScreen({
                 style={{ width: `${view.percent}%` }}
               />
             </div>
-            <p className="text-xs text-muted">
-              {view.estimated
-                ? "After the upload this is an estimate: the server only says when it is done."
-                : "Measured as your photo uploads."}
+            <p aria-hidden className="flex items-baseline justify-between gap-3 text-sm">
+              <span className={view.stage === "waking" ? "font-bold" : "text-muted"}>
+                {view.stage === "waking" ? `${view.label}.` : "Time so far"}
+              </span>
+              <span className="shrink-0 font-bold tabular-nums">{view.seconds} s</span>
             </p>
           </div>
         )}
@@ -275,11 +290,6 @@ function ReadingScreen({
             </li>
           ))}
         </ul>
-        {view?.stage === "waking" && (
-          <Notice role="status">
-            Waking up the model. The first scan can take up to a minute.
-          </Notice>
-        )}
       </Screen>
     </div>
   );
@@ -790,7 +800,10 @@ function HeatmapFigure({
   );
 }
 
-/** "How Bin Buddy decided": what it saw, what you said, and the rule, as one trail. */
+/**
+ * "How Bin Buddy decided": what the photo showed, what you said, and the one rule that decided.
+ * Cleanliness is never shown as something the camera saw: the answers decide it.
+ */
 function DecisionTrace({
   verdict,
   analysis,
@@ -803,7 +816,6 @@ function DecisionTrace({
   const material = topMaterial(analysis);
   const condition = topCondition(analysis);
   const answers = verdict.questions_asked ?? [];
-  const trace = verdict.rule_trace.length > 0 ? verdict.rule_trace : [verdict.rule_id];
   return (
     <div className="card space-y-4 p-4" style={style}>
       <h2 className="font-heading text-lg font-bold">How Bin Buddy decided</h2>
@@ -811,41 +823,21 @@ function DecisionTrace({
         {material && <Fact term="Material" value={material} />}
         {condition && <Fact term="Condition" value={condition} />}
         {answers.map((qa) => (
-          <Fact
-            key={qa.question_id}
-            term={QUESTION_SHORT[qa.question_id]}
-            value={answerLabel(qa.answer)}
-            you
-          />
+          <Fact key={qa.question_id} term="You said" value={answerSentence(qa)} wide />
         ))}
       </dl>
-      <div>
-        <p className="mb-2 text-sm font-bold text-muted">Rule applied</p>
-        <ol className="relative space-y-3 pl-6 before:absolute before:top-2 before:bottom-2 before:left-[7px] before:w-0.5 before:rounded-full before:bg-line">
-          {trace.map((step, i) => (
-            <li key={`${i}-${step}`} className="relative">
-              <span
-                aria-hidden
-                className={`absolute top-1.5 -left-6 size-4 rounded-full border-[3px] border-white ${
-                  i === trace.length - 1 ? "bg-bin-blue" : "bg-muted"
-                } shadow-[0_0_0_1px_var(--color-line)]`}
-              />
-              {step}
-            </li>
-          ))}
-        </ol>
+      <div className="rounded-xl border-2 border-line p-3">
+        <p className="text-xs font-bold text-muted">Rule applied</p>
+        <p className="font-bold">{ruleLine(verdict)}</p>
       </div>
     </div>
   );
 }
 
-function Fact({ term, value, you = false }: { term: string; value: string; you?: boolean }) {
+function Fact({ term, value, wide = false }: { term: string; value: string; wide?: boolean }) {
   return (
-    <div className="rounded-xl bg-paper p-3">
-      <dt className="text-xs font-bold text-muted">
-        {term}
-        {you && " · you said"}
-      </dt>
+    <div className={`rounded-xl bg-paper p-3 ${wide ? "col-span-2" : ""}`}>
+      <dt className="text-xs font-bold text-muted">{term}</dt>
       <dd className="font-bold">{value}</dd>
     </div>
   );
