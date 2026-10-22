@@ -13,7 +13,7 @@
 | Edge-case rules (Section 5.3) | **Done** in both policies and covered by tests |
 | Rule-trace explanations | **Done**: plain English, shown in the app's "How Bin Buddy decided" panel |
 | Next.js question-flow screens | **Built by WS4** (PR #1); unchanged, they show WS3's questions, confidence and trace |
-| Confidence-threshold tuning | **Analysis done**; recommend 0.75 (revised 21 Oct; needs team approval, see below). Full analysis: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md) |
+| Confidence-threshold tuning | **Analysis done**; **recommend keeping 0.80** (revised 22 Oct after D-004; see below). Full analysis: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md) |
 | Answer-likelihood estimation | **Partly done**: tables are hand-set; `scripts/estimate_likelihoods.py` replaces them once Q1–Q3 answers are recorded |
 
 All checks pass on the branch: ruff, mypy, all 146 Python tests, policy validation, repo hygiene, `pnpm gen` (no diff), web checks.
@@ -25,17 +25,17 @@ All checks pass on the branch: ruff, mypy, all 146 Python tests, policy validati
 4. Stop when P(bin) ≥ threshold, except: a recyclable is never sent to the blue bin before Q2 (the camera cannot see if it is clean), and not while e-waste is a likely runner-up (P > 0.2 and the e-waste bin is not the most likely, from the WS1 handoff).
 5. Still unsure after 3 questions: **general waste plus the NEA Check My Item link**.
 
-Example trace: *Looks like plastic (98% sure) → Probably not clean (99% likely) → You see a recycling symbol → Not rinsed → Container food residue rule, so: General waste.*
+Example trace: *Looks like plastic (95% sure) → Probably not clean (99% likely) → Not empty or not rinsed → Container food residue rule, so: General waste.*
 
-## Threshold results (WS1 `predictions.csv`, 247 local val photos × 20 simulated users)
+## Threshold results with D-004 (WS1 `predictions.csv`, 247 local val photos × 20 simulated users; rerun 22 Oct)
 
 | Gate | Avg questions | Answered with no questions | Accuracy | Costly errors | Fell back to general waste |
 |---|---|---|---|---|---|
-| 0.60 | 1.49 | 26% | 88.0% | 4.5% | 2.7% |
-| 0.70 | 1.51 | 26% | 87.5% | 3.8% | 4.0% |
-| **0.75** | **1.54** | **26%** | **87.0%** | **2.9%** | **6.6%** |
-| 0.80 (current) | 1.63 | 25% | 85.2% | 2.4% | 11.0% |
-| 0.90 | 2.06 | 21% | 71.9% | 0.3% | 42.3% |
+| 0.60 | 0.79 | 26% | 87.2% | 6.6% | 1.4% |
+| 0.70 | 0.85 | 26% | 87.5% | 4.8% | 3.4% |
+| 0.75 | 0.90 | 26% | 87.5% | 3.6% | 5.2% |
+| **0.80 (current)** | **1.17** | **25%** | **85.6%** | **2.7%** | **11.3%** |
+| 0.90 | 1.72 | 21% | 72.2% | 0.5% | 40.4% |
 | Static, all 3 questions (0.80) | 3.00 | 0% | 79.0% | 1.2% | 23.1% |
 
 Costly errors: of the items whose true bin is not the blue bin, the share sent to it (the same definition as `scripts/evaluate_baselines.py`). Caveat: the photos have no recorded answers, so the condition and the answers are simulated from WS3's own tables. This compares gate settings; it does not prove the tables.
@@ -46,7 +46,7 @@ Costly errors: of the items whose true bin is not the blue bin, the share sent t
 - **Shreyash (WS4):** no web changes needed. `state.confidence` now means "how sure of the bin", so the meter moves towards the verdict with each answer. In `scripts/evaluate_baselines.py`: new `--system static` (baseline 2), and a fix: full-system contamination recall was always 0 because the vision condition is always "clean"; it now takes the condition from the rule applied.
 
 ## Decisions needed from the team
-1. **Threshold 0.80 → 0.75?** (Revised 21 Oct; I first proposed 0.70.) Against 0.80: +1.8 points accuracy, 4 points fewer fallbacks, costly errors 2.9% against ≤ 5%. 0.70 is no more accurate than 0.75 but breaks the 5% target once 10% of answers are careless; 0.75 holds up to about 15%, and the test split confirms it (86.5%, 2.6%). Details: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md). It is a contract change (version bump, changelog, WS3 + WS4 approve).
+1. **Threshold: keep 0.80?** (Revised 22 Oct; I had proposed 0.75 on 21 Oct, before D-004.) With D-004, 0.75 is 1.9 points more accurate and asks 0.27 fewer questions than 0.80, but makes 0.9 points more costly errors (3.6% against 2.7%) and reaches the 5% limit at just 10% careless answers (0.80 holds to about 18%). Details: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md). Keeping 0.80 needs no contract change; moving to 0.75 later would (version bump, changelog, WS3 + WS4 approve).
 2. **Record Q1–Q3 answers** for the photos (columns already in `data/labels.csv`), about 60 items. Then one command counts the real likelihoods.
 3. **Report trade-off:** dirty recyclables settle after 1 question (Q2 opens, D-004); a clean one usually needs 2 unless the vision model is very sure of the material (the 89% coke bottle needs 2, a 95% plastic needs 1). Numbers from the Q1-first design (1.5–1.6 questions) are being rerun, so the "≤ 1 question on average" target is still to be re-measured. We choose safety over fewer questions because the model cannot see cleanliness.
 

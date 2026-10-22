@@ -19,7 +19,7 @@
 - [x] Confidence format: WS1's calibrated material probabilities (`state.confidence` is the verdict bin's probability, see below)
 
 **18–24 Oct**
-- [ ] Tune `CONFIDENCE_THRESHOLD` on validation data (contract change): analysis done, **recommend 0.75** ([`WS3_analysis_report.md`](WS3_analysis_report.md)); waiting for the team's decision
+- [ ] Tune `CONFIDENCE_THRESHOLD` on validation data (contract change): analysis done, **recommend keeping 0.80 under D-004** ([`WS3_analysis_report.md`](WS3_analysis_report.md)); waiting for the team's decision
 - [x] Question-flow screens: built by WS4 (PR #1) against the contract; WS3 supplies the plain-English rule trace and the confidence the meter shows
 - [x] `campus_example.yaml` as the multi-stream demonstration
 
