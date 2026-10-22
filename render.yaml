@@ -15,7 +15,7 @@ services:
       - key: MODEL_REPO
         value: sankalp-indish/bin-buddy-vision
       - key: MODEL_REVISION
-        value: v0.2-local-data
+        value: v0.3-ensemble
       - key: HF_TOKEN
         sync: false
       - key: STATE_SECRET
