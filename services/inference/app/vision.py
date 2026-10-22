@@ -41,6 +41,8 @@ from binbuddy_contracts.enums import Condition, Material
 Array = npt.NDArray[np.float32]
 STUB_REVISION = "stub"
 MODEL_FILES = ("config.json", "model.onnx", "head.npz")
+FUSION_FILE = "swin.onnx"  # optional second model (WS2 conservative fusion)
+BLUE_IDS = frozenset(range(5))  # paper, plastic, glass, metal, beverage_carton
 HEATMAP_ALPHA = 0.45  # weight of the heatmap colours over the photo
 
 
@@ -61,6 +63,8 @@ class VisionModel:
     pca_mean: Array  # K
     norm_weight: Array | None  # K; set when the head is pool -> LayerNorm -> linear (ConvNeXt)
     norm_eps: float
+    swin_session: Any = None  # set when swin.onnx is in the model folder
+    swin_temperature: float = 1.0
 
     @classmethod
     def load(cls, folder: Path) -> VisionModel:
@@ -92,6 +96,12 @@ class VisionModel:
             pca_mean=head["pca_mean"].astype(np.float32),
             norm_weight=head["norm_weight"].astype(np.float32) if "norm_weight" in head else None,
             norm_eps=float(cfg.get("head_norm_eps") or 1e-6),
+            swin_session=(
+                ort.InferenceSession(str(folder / FUSION_FILE), providers=["CPUExecutionProvider"])
+                if (folder / FUSION_FILE).exists()
+                else None
+            ),
+            swin_temperature=float(cfg.get("swin_temperature", 1.0)),
         )
 
     def preprocess(self, img: Image.Image) -> tuple[Array, Image.Image]:
@@ -114,6 +124,10 @@ class VisionModel:
         x, crop = self.preprocess(img)
         logits, pooled, fmap = self.session.run(None, {"image": x})
         probs = softmax(np.asarray(logits[0], dtype=np.float32) / self.temperature)
+        if self.swin_session is not None:  # same preprocessing and normalisation as ConvNeXt
+            (swin_logits,) = self.swin_session.run(None, {"image": x})
+            swin = softmax(np.asarray(swin_logits[0], dtype=np.float32) / self.swin_temperature)
+            probs = conservative_fusion(probs, swin)
         top = int(probs.argmax())
         feature_map = np.asarray(fmap[0], dtype=np.float32)
         grad = head_gradient(
@@ -139,6 +153,17 @@ class VisionModel:
     def embed(self, pooled: Array) -> list[float]:
         e = self.pca_components @ (pooled - self.pca_mean)
         return [float(v) for v in e / np.linalg.norm(e)]
+
+
+def conservative_fusion(convnext: Array, swin: Array) -> Array:
+    """WS2's selected ensemble: average the two models when they agree on blue-bin vs other
+    material, otherwise keep ConvNeXt (the safer, better-calibrated model). On the 395 team test
+    photos: macro-F1 0.830 vs 0.799 for ConvNeXt alone, with the same costly errors (15 of 108).
+    """
+    if (int(convnext.argmax()) in BLUE_IDS) != (int(swin.argmax()) in BLUE_IDS):
+        return convnext
+    out: Array = (0.5 * (convnext + swin)).astype(np.float32)
+    return out
 
 
 def softmax(z: Array) -> Array:
@@ -217,7 +242,7 @@ def _model_folder(s: Settings) -> Path:
             snapshot_download(
                 s.model_repo,
                 revision=s.model_revision,
-                allow_patterns=list(MODEL_FILES),
+                allow_patterns=[*MODEL_FILES, FUSION_FILE],
                 token=s.hf_token,
             )
         )
