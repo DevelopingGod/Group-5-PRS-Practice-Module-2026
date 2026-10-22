@@ -23,7 +23,7 @@ QUESTION_BANK: Final[dict[QuestionId, QuestionSpec]] = {
     ),
     QuestionId.Q2_CLEANED: QuestionSpec(
         id=QuestionId.Q2_CLEANED,
-        text="Did you clean or rinse it?",
+        text="Is it empty, and did you rinse it? (e.g. a milk carton)",
         options=tuple(v.value for v in YesNoUnsure),
     ),
     QuestionId.Q3_SITTING_TIME: QuestionSpec(
@@ -33,5 +33,6 @@ QUESTION_BANK: Final[dict[QuestionId, QuestionSpec]] = {
     ),
 }
 
-# Q1 always opens when questions are needed (proposal 1.2).
+# Opening question when the top material is not recyclable. For recyclables Q2 opens (D-004): the
+# camera cannot see whether the item is clean.
 OPENING_QUESTION: Final = QuestionId.Q1_RECYCLING_SYMBOL

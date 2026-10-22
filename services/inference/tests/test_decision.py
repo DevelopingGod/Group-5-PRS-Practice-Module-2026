@@ -121,16 +121,26 @@ def test_q2_moves_the_condition_belief() -> None:
 # --------------------------------------------------------------------------- questions
 
 
-def test_q1_always_opens() -> None:
-    for materials in ({Material.PLASTIC: 0.99}, {Material.PAPER: 0.3}, {Material.E_WASTE: 0.5}):
+def test_opening_question_depends_on_material() -> None:
+    """D-004: Q2 opens for a recyclable top material, Q1 otherwise."""
+    for materials, expected in (
+        ({Material.PLASTIC: 0.99}, Q2),
+        ({Material.PAPER: 0.5}, Q2),
+        ({Material.TEXTILE: 0.6}, Q1),
+        ({Material.E_WASTE: 0.5}, Q1),
+    ):
         question, _ = decision.step(make_state(materials), HDB)
-        assert question is not None and question.id is OPENING_QUESTION
+        assert question is not None and question.id is expected
+    assert OPENING_QUESTION is Q1
+    old = decision.Gate(opening="q1")
+    question, _ = decision.step(make_state({Material.PLASTIC: 0.99}), HDB, old)
+    assert question is not None and question.id is Q1
 
 
 def test_confident_recyclable_still_asks_q2() -> None:
     """D-003: the camera cannot see whether a container is clean."""
     asked, verdict = run(make_state({Material.METAL: 0.99}), {Q1: "yes", Q2: "yes", Q3: "same_day"})
-    assert asked[:2] == [Q1, Q2]
+    assert asked[0] is Q2
     assert verdict.bin_key == "blue_bin"
 
 
@@ -138,8 +148,7 @@ def test_q2_is_asked_even_when_the_bin_is_already_confident() -> None:
     clean = {c: (0.97 if c is Condition.CLEAN else 0.01) for c in Condition}
     state = make_state({Material.PLASTIC: 0.99}, clean)
     assert not decision.is_settled(state, HDB)
-    q1_done = decision.answer(state, QuestionAnswer(question_id=Q1, answer="yes"), SECRET, HDB)
-    question, _ = decision.step(q1_done, HDB)
+    question, _ = decision.step(state, HDB)
     assert question is not None and question.id is Q2
 
 
@@ -157,7 +166,6 @@ def test_ablation_switches_change_only_what_they_name() -> None:
     # For scripts/analyse_decisions.py; the API always uses DEFAULT_GATE.
     clean = {c: (0.97 if c is Condition.CLEAN else 0.01) for c in Condition}
     state = make_state({Material.PLASTIC: 0.99}, clean)
-    state = decision.answer(state, QuestionAnswer(question_id=Q1, answer="yes"), SECRET, HDB)
     assert not decision.is_settled(state, HDB)
     assert decision.is_settled(state, HDB, decision.Gate(require_q2=False))
 
@@ -172,7 +180,7 @@ def test_ablation_switches_change_only_what_they_name() -> None:
 def test_q3_follows_an_unsure_q2() -> None:
     answers = {Q1: "yes", Q2: "not_sure", Q3: "same_day"}
     asked, _ = run(make_state({Material.PLASTIC: 0.95}), answers)
-    assert asked == [Q1, Q2, Q3]
+    assert asked[0] is Q2 and Q3 in asked
 
 
 def test_never_more_than_three_questions() -> None:
@@ -183,19 +191,44 @@ def test_never_more_than_three_questions() -> None:
         answers = {q: rng.choice(QUESTION_BANK[q].options) for q in (Q1, Q2, Q3)}
         asked, verdict = run(state, answers)
         assert len(asked) <= 3 and len(set(asked)) == len(asked)
-        assert verdict.questions_asked == [] or verdict.questions_asked[0].question_id is Q1
+        opener = Q2 if top in decision.RECYCLABLE_MATERIALS else Q1
+        assert verdict.questions_asked == [] or verdict.questions_asked[0].question_id is opener
 
 
 def test_answer_to_the_wrong_question_is_rejected() -> None:
     state = make_state({Material.PLASTIC: 0.6})
     with pytest.raises(decision.InvalidStateError):
-        decision.answer(state, QuestionAnswer(question_id=Q2, answer="yes"), SECRET, HDB)
+        decision.answer(state, QuestionAnswer(question_id=Q1, answer="yes"), SECRET, HDB)
 
 
 def test_tampered_state_is_rejected() -> None:
     state = make_state({Material.PLASTIC: 0.6}).model_copy(update={"confidence": 0.99})
     with pytest.raises(decision.InvalidStateError):
-        decision.answer(state, QuestionAnswer(question_id=Q1, answer="yes"), SECRET, HDB)
+        decision.answer(state, QuestionAnswer(question_id=Q2, answer="yes"), SECRET, HDB)
+
+
+def test_coke_bottle_dirty_settles_in_one_question() -> None:
+    asked, verdict = run(
+        make_state({Material.PLASTIC: 0.89}), {Q1: "yes", Q2: "no", Q3: "same_day"}
+    )
+    assert asked == [Q2]
+    assert verdict.bin_key == "general_waste"
+
+
+def test_coke_bottle_clean_needs_a_second_question() -> None:
+    answers = {Q1: "yes", Q2: "yes", Q3: "under_1_hour"}
+    asked, verdict = run(make_state({Material.PLASTIC: 0.89}), answers)
+    assert asked[0] is Q2 and len(asked) == 2
+    assert verdict.bin_key == "blue_bin"
+
+
+def test_q1_can_follow_q2() -> None:
+    state = make_state({Material.PLASTIC: 0.89})
+    state = decision.answer(state, QuestionAnswer(question_id=Q2, answer="yes"), SECRET, HDB)
+    question, _ = decision.step(state, HDB)
+    assert question is not None
+    gains = {q: decision.information_gain(state, HDB, q) for q in (Q1, Q3)}
+    assert question.id is max(gains, key=gains.__getitem__)
 
 
 # ----------------------------------------------------------------------------- verdicts
@@ -203,7 +236,7 @@ def test_tampered_state_is_rejected() -> None:
 
 def test_clean_plastic_goes_to_the_blue_bin() -> None:
     asked, verdict = run(make_state({Material.PLASTIC: 0.95}), {Q1: "yes", Q2: "yes", Q3: "x"})
-    assert asked == [Q1, Q2]
+    assert asked == [Q2]
     assert verdict.bin_key == "blue_bin" and verdict.confidence >= 0.8
 
 
@@ -212,10 +245,9 @@ def test_unrinsed_container_is_general_waste_with_a_tip() -> None:
     assert verdict.bin_key == "general_waste"
     assert verdict.tip is not None
     assert verdict.rule_trace == [
-        "Looks like plastic (98% sure)",
+        "Looks like plastic (95% sure)",
         "Probably not clean (99% likely)",
-        "You see a recycling symbol",
-        "Not rinsed",
+        "Not empty or not rinsed",
         "Container food residue rule, so: General waste",
     ]
 
@@ -304,8 +336,7 @@ def test_unsure_condition_leans_to_general_waste() -> None:
 def test_state_confidence_tracks_the_verdict_bin() -> None:
     """The app's confidence meter reads state.confidence; it must move towards the verdict."""
     state = make_state({Material.PLASTIC: 0.95})
-    for qid, ans in ((Q1, "yes"), (Q2, "yes")):
-        state = decision.answer(state, QuestionAnswer(question_id=qid, answer=ans), SECRET, HDB)
+    state = decision.answer(state, QuestionAnswer(question_id=Q2, answer="yes"), SECRET, HDB)
     _, verdict = decision.step(state, HDB)
     assert verdict is not None and verdict.bin_key == "blue_bin"
     assert state.confidence == pytest.approx(verdict.confidence)

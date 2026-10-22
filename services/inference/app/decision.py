@@ -18,8 +18,9 @@ Gate (proposal 1.2 and the WS1 handoff):
   - D-003: a recyclable top material is never settled before Q2 has been asked;
   - e-waste rule: not settled on another bin while P(e_waste) > E_WASTE_ALERT (redundant at a
     0.80 gate, which no other bin can reach then; it matters if the gate is tuned lower);
-  - Q1 always opens; then the remaining question with the largest expected entropy reduction
-    of the bin distribution; at most three questions;
+  - D-004: Q2 opens when the top material is recyclable, otherwise Q1; then whichever remaining
+    question has the largest expected entropy reduction of the bin distribution; at most three
+    questions;
   - still not settled when the bank is exhausted: general waste plus the NEA link.
 
 Every verdict carries a plain-English rule trace (shown in the app as "How Bin Buddy decided").
@@ -57,7 +58,11 @@ RECYCLABLE_MATERIALS: Final = frozenset(
 # WS1 handoff: treat an item as possible e-waste when P(e_waste) > 0.2 (catches 15 of 17 e-waste
 # items on the team test photos, with 6 false flags).
 E_WASTE_ALERT: Final = 0.20
-FOLLOW_UP_QUESTIONS: Final = (QuestionId.Q2_CLEANED, QuestionId.Q3_SITTING_TIME)
+ALL_QUESTIONS: Final = (
+    QuestionId.Q1_RECYCLING_SYMBOL,
+    QuestionId.Q2_CLEANED,
+    QuestionId.Q3_SITTING_TIME,
+)
 
 # Rule-trace wording (user-facing: short, plain, never blaming the user).
 MATERIAL_WORDS: Final[dict[Material, str]] = {
@@ -76,9 +81,9 @@ ANSWER_WORDS: Final[dict[tuple[QuestionId, str], str]] = {
     (QuestionId.Q1_RECYCLING_SYMBOL, "yes"): "You see a recycling symbol",
     (QuestionId.Q1_RECYCLING_SYMBOL, "no"): "No recycling symbol",
     (QuestionId.Q1_RECYCLING_SYMBOL, "not_sure"): "Not sure about a recycling symbol",
-    (QuestionId.Q2_CLEANED, "yes"): "Rinsed",
-    (QuestionId.Q2_CLEANED, "no"): "Not rinsed",
-    (QuestionId.Q2_CLEANED, "not_sure"): "Not sure if it was rinsed",
+    (QuestionId.Q2_CLEANED, "yes"): "Empty and rinsed",
+    (QuestionId.Q2_CLEANED, "no"): "Not empty or not rinsed",
+    (QuestionId.Q2_CLEANED, "not_sure"): "Not sure if it is empty and rinsed",
     (QuestionId.Q3_SITTING_TIME, "under_1_hour"): "Used less than an hour ago",
     (QuestionId.Q3_SITTING_TIME, "same_day"): "Used earlier today",
     (QuestionId.Q3_SITTING_TIME, "more_than_1_day"): "Left for more than a day",
@@ -95,9 +100,11 @@ class Gate:
 
     threshold: float = CONFIDENCE_THRESHOLD
     e_waste_alert: float | None = E_WASTE_ALERT  # None switches the e-waste rule off
-    # Ablations only (scripts/analyse_decisions.py): D-003 on or off, and how the follow-up after
-    # Q1 is chosen ("entropy" as designed, or a fixed order).
+    # Ablations only (scripts/analyse_decisions.py): D-003 on or off, how the follow-up after the
+    # opening question is chosen ("entropy" as designed, or a fixed order), and the opening
+    # question ("adaptive" = D-004, Q2 for recyclables; "q1" = the old design, Q1 always opens).
     require_q2: bool = True
+    opening: Literal["adaptive", "q1"] = "adaptive"
     follow_up: Literal["entropy", "q2_first", "q3_first"] = "entropy"
 
 
@@ -318,19 +325,24 @@ def _next_question(
     if is_settled(state, policy, gate):
         return None
     asked = _asked(state)
+    materials, conditions = beliefs(state)
     if not asked:
-        return OPENING_QUESTION  # Q1 always opens (proposal 1.2)
-    remaining = [q for q in FOLLOW_UP_QUESTIONS if q not in asked]
+        if gate.opening == "adaptive" and _must_ask_q2(state, materials, gate):
+            return QuestionId.Q2_CLEANED  # D-004: the camera cannot see whether it is clean
+        return OPENING_QUESTION
+    remaining = [q for q in ALL_QUESTIONS if q not in asked]
     if not remaining:
         return None
-    materials, conditions = beliefs(state)
     if _must_ask_q2(state, materials, gate):
         return QuestionId.Q2_CLEANED
-    if gate.follow_up == "q2_first":
-        return remaining[0]
-    if gate.follow_up == "q3_first":
-        return remaining[-1]
-    # max() keeps the first of equal gains, so ties go to Q2.
+    if gate.follow_up != "entropy":
+        order = (
+            (QuestionId.Q2_CLEANED, QuestionId.Q3_SITTING_TIME, QuestionId.Q1_RECYCLING_SYMBOL)
+            if gate.follow_up == "q2_first"
+            else (QuestionId.Q3_SITTING_TIME, QuestionId.Q2_CLEANED, QuestionId.Q1_RECYCLING_SYMBOL)
+        )
+        return next(q for q in order if q in remaining)
+    # max() keeps the first of equal gains, so ties go to the earlier question in ALL_QUESTIONS.
     return max(
         remaining, key=lambda q: _expected_information_gain(materials, conditions, policy, q)
     )

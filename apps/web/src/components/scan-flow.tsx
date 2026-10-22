@@ -51,7 +51,7 @@ const WAKING_AFTER_MS = 8_000;
 
 const QUESTION_SHORT: Record<keyof typeof QUESTION_BANK, string> = {
   q1_recycling_symbol: "Recycling symbol",
-  q2_cleaned: "Cleaned or rinsed",
+  q2_cleaned: "Empty and rinsed",
   q3_sitting_time: "Time sitting",
 };
 
