@@ -592,12 +592,12 @@ function VerifyScreen({
         This is the bin Bin Buddy recommended: {bin.location_label}.
       </p>
       <p style={at(2)}>
-        Take a new photo of the item at the bin, before you drop it in. Keep people out of the
-        picture.
+        Take a new photo of the item at the bin, before you drop it in, or upload one from your
+        device. Keep people out of the picture.
       </p>
       {phase.kind === "error" && <Notice role="alert">{phase.message}</Notice>}
       <div className="flex flex-col gap-3" style={at(3)}>
-        <CaptureButton label="Take the photo" onPhoto={onPhoto} />
+        <CaptureButton label="Take the photo" onPhoto={onPhoto} gallery />
         <BackButton onClick={onBack}>Back to the verdict</BackButton>
       </div>
     </Screen>
@@ -670,7 +670,7 @@ function VerifyResult({
         The photo is deleted now. Only a fingerprint of it is kept, to stop reuse.
       </p>
       <div className="flex flex-col gap-3" style={at(3)}>
-        {!result.passed && <CaptureButton label="Try another photo" onPhoto={onPhoto} />}
+        {!result.passed && <CaptureButton label="Try another photo" onPhoto={onPhoto} gallery />}
         <Button variant={result.passed ? "primary" : "secondary"} onClick={onDone}>
           Scan another item
         </Button>

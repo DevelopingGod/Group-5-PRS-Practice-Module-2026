@@ -63,8 +63,8 @@ export function usePhotoCapture(onPhoto: (file: File) => void) {
 }
 
 /**
- * "Take photo" and, with `gallery`, "Choose from gallery". The disposal check leaves the gallery
- * out: the photo has to be taken at the bin.
+ * "Take photo" and, with `gallery`, "Choose from gallery". An uploaded disposal photo is checked
+ * like a new one: /verify rejects the original scan photo and any photo used before.
  */
 export function CaptureButton({
   label,
