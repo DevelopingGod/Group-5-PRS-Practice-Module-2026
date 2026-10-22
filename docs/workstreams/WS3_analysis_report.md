@@ -5,6 +5,10 @@
 [`ws3_analysis/tables.md`](ws3_analysis/tables.md), produced by `scripts/analyse_decisions.py`
 (see "Reproduce" at the end).
 
+> **Note (22 Oct):** the numbers below are from the Q1-first design. D-004 (Q2 opens for recyclable top
+> materials) changes the question flow; the analysis has an "old design" variant for comparison and the
+> rerun is pending (needs `predictions.csv`).
+
 ## Summary
 
 1. **Recommended gate: 0.75** (it was 0.80, PROVISIONAL; my earlier note proposed 0.70). Against 0.80 it is
@@ -44,6 +48,7 @@ simulated users disagree with the tables the flow uses, to test how much this ma
 | 19 Oct | Likelihood counting from recorded answers (`estimate_likelihoods.py`), WS3 docs | `aa74bb9` |
 | 19 Oct | Gate sweep on the team's own photos (`simulate_gate.py --source local`) | `b4f1cd9` |
 | 19 Oct | Fix: fallback verdict shows the confidence of the bin it recommends; team report | `7393a73` |
+| 22 Oct | D-004: Q2 (empty and rinsed) opens for recyclable top materials; Q1 can follow Q2 | this branch |
 | 19 Oct | Copilot review fixes (e-waste rule, likelihood floor, costly-error definition); merged as PR #13 | `deb7826` |
 | 21 Oct | **This report:** 9 analyses, bootstrap intervals, held-out check, ablation switches, SVG figures, tests | this branch |
 

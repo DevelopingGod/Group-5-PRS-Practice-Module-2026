@@ -47,13 +47,15 @@ likely bin, with the rule of the most likely pair inside it. Consequences:
   the e-waste one (e-waste can be the top material while the rest adds up to general waste). At a
   0.80 gate this is redundant (no other bin can then reach 80%); it matters if the gate is tuned lower.
 
-**Questions.** Q1 always opens. The follow-up is Q2 when D-003 applies, otherwise whichever of Q2/Q3
-has the larger expected entropy reduction of P(bin). At most three questions. Still not settled when
+**Questions (D-004).** Q2 ("Is it empty, and did you rinse it?") opens when the top material is recyclable,
+otherwise Q1 opens. The follow-up is whichever remaining question (Q1, Q2 or Q3) has the largest
+expected entropy reduction of P(bin); D-003 still forces Q2 if it has not been asked. At most three questions. Still not settled when
 the bank is exhausted: general waste plus the NEA Check My Item link.
 
-**Trade-off to report.** Every recyclable item takes at least two questions (Q1 opens, D-003 adds Q2),
-so "≤ 1 question per item on average" is not met for recyclables by design: safety over efficiency,
-since the vision model has no condition head.
+**Trade-off to report.** There is no contamination training data, so the rinse question stands in for a
+condition head. A dirty recyclable settles after 1 question; a clean one usually needs 2 (a 95% plastic
+needs 1, an 89% coke bottle needs 2). "≤ 1 question per item on average" may not be met for
+recyclables: safety over efficiency. Report the question count next to the costly-error rate.
 
 ## Likelihoods (`app/likelihoods.py`)
 

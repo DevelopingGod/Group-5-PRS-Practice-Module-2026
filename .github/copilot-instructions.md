@@ -18,7 +18,7 @@ Prioritise, in this order:
    embeddings have `EMBEDDING_DIM` values and unit norm; `/predict` returns `retake`, `question`
    or `verdict`; decision states stay HMAC-signed; errors use the `{code, message}` shape.
 4. **Safety of advice:** out-of-distribution items must abstain; low confidence after the question
-   bank must fall back to general waste; Q1 always opens and at most three questions are asked.
+   bank must fall back to general waste; Q2 opens for recyclable top materials and Q1 otherwise (D-004), and at most three questions are asked.
 5. **Privacy and secrets:** no secrets in client-side code (`apps/web` files without `"use server"`
    or outside `src/app/api/`), verification photos deleted after `/verify`, pseudonyms only, no NUS
    student IDs, photos or model weights committed.

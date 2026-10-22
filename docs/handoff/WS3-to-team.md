@@ -8,7 +8,7 @@
 | WS3 task (proposal Section 11) | Status |
 |---|---|
 | Naive-Bayes belief updating | **Done**: `_update_belief` in `services/inference/app/decision.py` |
-| Entropy-based next-question selection | **Done**: Q1 always first, then Q2 or Q3 by expected entropy reduction; at most 3 |
+| Entropy-based next-question selection | **Done**: Q2 opens for recyclable top materials, otherwise Q1 (D-004); then the remaining question with the largest expected entropy reduction; at most 3 |
 | YAML policy engine (HDB + multi-stream) | **Done**: `hdb_default.yaml`; `campus_example.yaml` completed (paper, plastic, cans/glass bins) |
 | Edge-case rules (Section 5.3) | **Done** in both policies and covered by tests |
 | Rule-trace explanations | **Done**: plain English, shown in the app's "How Bin Buddy decided" panel |
@@ -48,7 +48,7 @@ Costly errors: of the items whose true bin is not the blue bin, the share sent t
 ## Decisions needed from the team
 1. **Threshold 0.80 → 0.75?** (Revised 21 Oct; I first proposed 0.70.) Against 0.80: +1.8 points accuracy, 4 points fewer fallbacks, costly errors 2.9% against ≤ 5%. 0.70 is no more accurate than 0.75 but breaks the 5% target once 10% of answers are careless; 0.75 holds up to about 15%, and the test split confirms it (86.5%, 2.6%). Details: [`WS3_analysis_report.md`](../workstreams/WS3_analysis_report.md). It is a contract change (version bump, changelog, WS3 + WS4 approve).
 2. **Record Q1–Q3 answers** for the photos (columns already in `data/labels.csv`), about 60 items. Then one command counts the real likelihoods.
-3. **Report trade-off:** recyclables always get at least 2 questions (Q1 opens, Q2 checks cleanliness), so the "≤ 1 question on average" target is not met (1.5–1.6). We choose safety over fewer questions because the model cannot see cleanliness.
+3. **Report trade-off:** dirty recyclables settle after 1 question (Q2 opens, D-004); a clean one usually needs 2 unless the vision model is very sure of the material (the 89% coke bottle needs 2, a 95% plastic needs 1). Numbers from the Q1-first design (1.5–1.6 questions) are being rerun, so the "≤ 1 question on average" target is still to be re-measured. We choose safety over fewer questions because the model cannot see cleanliness.
 
 ## Code review notes (self-review, 19 Oct)
 - **Fixed today:** when still unsure after 3 questions, the general-waste card showed the confidence of the best guess (e.g. "General waste, 77% sure" when the blue bin was the 77% guess). It now shows P(general waste), and the trace says "Best guess Blue recycling bin, only 77% sure". Test added.
