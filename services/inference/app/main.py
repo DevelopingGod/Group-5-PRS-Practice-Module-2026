@@ -11,7 +11,7 @@ from functools import lru_cache
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from PIL import Image
 
 from app import decision, vision
@@ -85,6 +85,29 @@ def _analyse(img: Image.Image) -> VisionAnalysis:
         return vision.analyse(img, settings())
     except vision.ModelUnavailableError as exc:
         raise ApiError(503, ErrorCode.MODEL_UNAVAILABLE, str(exc)) from exc
+
+
+WELCOME = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bin Buddy model API</title>
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:48px auto;padding:0 16px;
+color:#10233F;line-height:1.5}a{color:#1F5FD1}li{margin:6px 0}</style></head><body>
+<h1>Bin Buddy model API</h1>
+<p>The model service behind Bin Buddy, an explainable recycling assistant for Singapore
+(NUS-ISS Pattern Recognition Systems, Group 5). It checks photo quality, recognises the item's
+material, explains the decision with a heatmap and chooses the bin.</p>
+<ul>
+<li><a href="/docs">Interactive documentation</a>: try a photo with <code>POST /predict</code></li>
+<li><a href="/health">Health check</a> and <a href="/version">model version</a></li>
+<li><a href="https://prs-pm-ais-08-ft-grp-5-bin-buddy.vercel.app/">Bin Buddy web app</a></li>
+<li><a href="https://github.com/DevelopingGod/PRS-PM-AIS08FT-GRP-5-BinBuddy">Source code</a></li>
+</ul>
+<p>Advisory only; follow NEA guidance.</p></body></html>"""
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def welcome() -> str:
+    return WELCOME
 
 
 @app.get("/health", response_model=HealthResponse, responses=ERRORS)

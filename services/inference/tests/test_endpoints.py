@@ -110,3 +110,9 @@ def test_verify_same_photo_right_bin_passes(client: TestClient) -> None:
     reused = {**payload, "known_phashes": [res.analysis.phash]}
     dup = VerifyResponse.model_validate(client.post("/verify", json=reused).json())
     assert not dup.checks.not_duplicate
+
+
+def test_root_shows_a_welcome_page_with_links(client: TestClient) -> None:
+    r = client.get("/")
+    assert r.status_code == 200 and "text/html" in r.headers["content-type"]
+    assert 'href="/docs"' in r.text
