@@ -20,8 +20,8 @@ demonstration bin's QR code and photograph the item there to earn pseudonymous l
 
 The system combines all four required techniques: supervised and unsupervised learning, deep and
 classical machine learning, an ensemble with Bayesian-style fusion of the user's answers, and
-intelligent sensing (image-quality checks). Its vision model was trained on public datasets and
-**1,241 photos the team took in Singapore**, and reaches **81.8% accuracy (macro-F1 0.799)** on 395
+intelligent sensing (image-quality checks). Its vision ensemble (ConvNeXt-T + Swin-T) was trained on public datasets and
+**1,241 photos the team took in Singapore**, and reaches **85.3% accuracy (macro-F1 0.830)** on 395
 Singapore photos it never saw in training.
 
 ---
@@ -52,12 +52,12 @@ not in this repository.
 
 | What | Link |
 | :-- | :-- |
-| Web app | `Vercel link to be added` |
+| Web app | https://prs-pm-ais-08-ft-grp-5-bin-buddy.vercel.app/ |
 | Model API (try a photo at `/docs`) | https://bin-buddy-api.onrender.com/docs |
 | First-presentation demo (clickable prototype) | https://developinggod.github.io/PRS-Practice-Module-2026-Demo/ |
 
 The model API runs on a free plan: the first request after 15 minutes of inactivity takes about a
-minute while it wakes up.
+minute while it wakes up, then about 10 seconds per photo.
 
 ### Run it on your own computer
 
