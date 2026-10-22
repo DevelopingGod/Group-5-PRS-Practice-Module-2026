@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BottomNav } from "@/components/bottom-nav";
-import { CameraIcon, ProfileIcon } from "@/components/icons";
+import { CameraIcon, CheckIcon, ProfileIcon } from "@/components/icons";
+import { ResetIdentity } from "@/components/reset-identity";
 import { SiteHeader } from "@/components/site-header";
 import { DAILY_POINTS_CAP } from "@/contracts/constants";
-import { countText, todayPoints } from "@/lib/profile";
+import { countText, todayPoints, type HistoryItem } from "@/lib/profile";
 import { loadProfile, type Profile } from "@/lib/supabase/profile";
 
 export const metadata: Metadata = { title: "Profile · Bin Buddy" };
@@ -45,11 +46,16 @@ export default async function ProfilePage() {
           <ProfileDetails profile={profile} />
         )}
 
-        <p className="text-sm text-muted" style={at(4)}>
+        <p className="text-sm text-muted" style={at(5)}>
           Your pseudonym stays with this browser on this phone, through reloads and switches between
           Wi-Fi and mobile data, but not if you clear site data, browse privately or use another
           browser.
         </p>
+        {profile !== "unavailable" && profile !== null && (
+          <div style={at(6)}>
+            <ResetIdentity />
+          </div>
+        )}
       </main>
       <BottomNav />
     </>
@@ -123,6 +129,41 @@ function ProfileDetails({ profile }: { profile: Profile }) {
             : `You have reached today's limit of ${today.cap} points. Thank you!`}
         </p>
       </div>
+
+      <History items={profile.history} />
     </>
+  );
+}
+
+/** Results only, never photos: verification photos are deleted after the check. */
+function History({ items }: { items: HistoryItem[] }) {
+  return (
+    <section aria-labelledby="history-title" className="card p-4" style={at(4)}>
+      <h2 id="history-title" className="font-heading text-lg font-bold">
+        Your scans
+      </h2>
+      {items.length === 0 ? (
+        <p className="mt-1 text-muted">Your finished scans appear here.</p>
+      ) : (
+        <ul className="mt-2 divide-y divide-paper">
+          {items.map((item) => (
+            <li key={item.id} className="flex items-center gap-3 py-3">
+              <span className="min-w-0 flex-1">
+                <span className="block font-bold">{item.material}</span>
+                <span className="block text-sm text-muted">
+                  {item.bin} · {item.date}
+                </span>
+              </span>
+              {item.verified && (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-bin-blue px-2.5 py-1 text-xs font-bold text-light">
+                  <CheckIcon className="size-3.5" />
+                  Verified
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

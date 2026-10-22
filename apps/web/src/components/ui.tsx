@@ -3,8 +3,6 @@
 // Shared building blocks for the app's screens (design system in globals.css).
 import { useEffect, useRef, type ReactNode } from "react";
 
-import { CameraIcon } from "@/components/icons";
-
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary";
 };
@@ -19,41 +17,25 @@ export function Button({ variant = "primary", className = "", ...props }: Button
   );
 }
 
-/** Opens the camera on phones (a file picker on desktops) and hands back the chosen photo. */
-export function CaptureButton({
-  label,
-  onPhoto,
-  variant = "primary",
-}: {
-  label: string;
-  onPhoto: (file: File) => void;
-  variant?: "primary" | "secondary";
-}) {
-  const input = useRef<HTMLInputElement>(null);
-  return (
-    <>
-      <PhotoInput ref={input} onPhoto={onPhoto} />
-      <Button variant={variant} onClick={() => input.current?.click()}>
-        <CameraIcon className="size-5" />
-        {label}
-      </Button>
-    </>
-  );
-}
-
+/**
+ * A hidden file input that hands back the chosen photo. With `camera`, phones open the back
+ * camera straight away; without it they offer the photo library (and the camera).
+ */
 export function PhotoInput({
   ref,
   onPhoto,
+  camera = false,
 }: {
   ref: React.Ref<HTMLInputElement>;
   onPhoto: (file: File) => void;
+  camera?: boolean;
 }) {
   return (
     <input
       ref={ref}
       type="file"
       accept="image/*"
-      capture="environment"
+      capture={camera ? "environment" : undefined}
       className="sr-only"
       tabIndex={-1}
       aria-hidden

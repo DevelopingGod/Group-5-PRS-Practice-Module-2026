@@ -6,7 +6,9 @@ import {
   contrast,
   fromAnswer,
   fromPredict,
+  answerSentence,
   questionsLine,
+  ruleLine,
   textOn,
   topCondition,
   topMaterial,
@@ -119,6 +121,48 @@ describe("display helpers", () => {
     };
     expect(topMaterial(analysis)).toBe("Metal");
     expect(topMaterial(null)).toBeNull();
+  });
+
+  it("words a material below 50% as a possibility", () => {
+    const analysis = {
+      material_scores: [
+        { label: "plastic" as const, probability: 0.36 },
+        { label: "metal" as const, probability: 0.34 },
+        { label: "paper" as const, probability: 0.3 },
+      ],
+      condition_scores: [],
+      confidence: 0.36,
+      is_ood: false,
+      embedding: [],
+      phash: "0",
+    };
+    expect(topMaterial(analysis)).toBe("Possibly plastic");
+  });
+
+  it("says what the user answered, as a sentence", () => {
+    expect(answerSentence({ question_id: "q2_cleaned", answer: "no" })).toBe(
+      "It is not empty and rinsed",
+    );
+    expect(answerSentence({ question_id: "q3_sitting_time", answer: "same_day" })).toBe(
+      "Used earlier today",
+    );
+  });
+
+  it("names only the deciding rule", () => {
+    const dirty = {
+      ...verdict,
+      channel: "general_waste" as const,
+      bin_label: "General waste",
+      rule_id: "container_food_residue",
+      rule_trace: [
+        "Looks like plastic (36% sure)",
+        "Container food residue rule, so: General waste",
+      ],
+    };
+    expect(ruleLine(dirty)).toBe("Container with food residue → General waste");
+    expect(ruleLine({ ...dirty, rule_id: "site_rule", rule_trace: ["Site rule"] })).toBe(
+      "Site rule",
+    );
   });
 
   it("shows a condition only when the model judged one", () => {

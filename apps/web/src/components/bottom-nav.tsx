@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { ProfileIcon, ScanIcon, TrophyIcon } from "@/components/icons";
+import { InfoIcon, ProfileIcon, ScanIcon, TrophyIcon } from "@/components/icons";
 import { useScan } from "@/components/scan-provider";
 
 const ITEMS = [
   { href: "/", label: "Scan", Icon: ScanIcon },
   { href: "/leaderboard", label: "Leaderboard", Icon: TrophyIcon },
   { href: "/profile", label: "Profile", Icon: ProfileIcon },
+  { href: "/about", label: "About", Icon: InfoIcon },
 ] as const;
 
-// Bottom navigation (context.md Section 19, screen 1): Scan, Leaderboard and Profile.
+// Bottom navigation (context.md Section 19, screen 1): Scan, Leaderboard, Profile and About.
 // The current page is marked by a filled pill, bold text and aria-current, never colour alone.
 // A dot on Scan, named in its accessible label, shows a scan is still running or needs an answer.
 export function BottomNav() {
@@ -29,17 +30,17 @@ export function BottomNav() {
       aria-label="Main"
       className="sticky bottom-0 z-20 border-t border-ink/10 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
-      <ul className="mx-auto flex max-w-xl gap-2 px-4 py-2">
+      <ul className="mx-auto flex max-w-xl gap-1 px-2 py-2 min-[400px]:gap-2 min-[400px]:px-4">
         {ITEMS.map(({ href, label, Icon }) => {
           const current = pathname === href;
           const badge = href === "/" ? pending : null;
           return (
-            <li key={href} className="flex-1">
+            <li key={href} className="min-w-0 flex-1">
               <Link
                 href={href}
                 aria-current={current ? "page" : undefined}
                 aria-label={badge ? `${label}, ${badge}` : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl text-sm font-bold transition-colors duration-200 ${
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl text-xs font-bold transition-colors min-[400px]:text-sm duration-200 ${
                   current ? "bg-ink text-light" : "text-muted hover:bg-paper hover:text-ink"
                 }`}
               >

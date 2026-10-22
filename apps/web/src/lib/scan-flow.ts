@@ -102,6 +102,31 @@ export function answerLabel(answer: string): string {
   return ANSWER_LABELS[answer] ?? answer.replaceAll("_", " ");
 }
 
+type QuestionAnswer = Schemas["QuestionAnswer"];
+
+// What the user said, as a sentence: cleanliness comes from these answers, not from the photo.
+const ANSWER_SENTENCES: Record<QuestionAnswer["question_id"], Record<string, string>> = {
+  q1_recycling_symbol: {
+    yes: "It has a recycling symbol",
+    no: "It has no recycling symbol",
+    not_sure: "Not sure about a recycling symbol",
+  },
+  q2_cleaned: {
+    yes: "It is empty and rinsed",
+    no: "It is not empty and rinsed",
+    not_sure: "Not sure it is empty and rinsed",
+  },
+  q3_sitting_time: {
+    under_1_hour: "Used less than an hour ago",
+    same_day: "Used earlier today",
+    more_than_1_day: "Left for more than a day",
+  },
+};
+
+export function answerSentence(qa: QuestionAnswer): string {
+  return ANSWER_SENTENCES[qa.question_id][qa.answer] ?? answerLabel(qa.answer);
+}
+
 const MATERIAL_LABELS: Record<Schemas["Material"], string> = {
   paper: "Paper or cardboard",
   plastic: "Plastic",
@@ -122,9 +147,22 @@ const CONDITION_LABELS: Record<Schemas["Condition"], string> = {
   item_inside: "Something left inside",
 };
 
+// Below this the material is a guess, worded as "Possibly ..." so it does not read as a fact
+// next to a firm verdict (the answers explain the decision).
+const POSSIBLY_BELOW = 0.5;
+
+export function materialLabel(material: Schemas["Material"]): string {
+  return MATERIAL_LABELS[material];
+}
+
+/** "Metal", or "Possibly metal" when the model is less than 50% sure. */
 export function topMaterial(analysis: VisionAnalysis | null): string | null {
-  const best = top(analysis?.material_scores);
-  return best ? MATERIAL_LABELS[best] : null;
+  const scores = analysis?.material_scores;
+  const best = top(scores);
+  if (!best || !scores) return null;
+  const p = scores.find((s) => s.label === best)?.probability ?? 0;
+  const label = MATERIAL_LABELS[best];
+  return p < POSSIBLY_BELOW ? `Possibly ${label.toLowerCase()}` : label;
 }
 
 /**
@@ -148,6 +186,34 @@ function top<L extends string>(scores?: { label: L; probability: number }[]): L 
 
 export function percent(confidence: number): number {
   return Math.round(Math.min(1, Math.max(0, confidence)) * 100);
+}
+
+// The deciding rule in plain words, for "Rule applied". Rule ids are shared by the HDB and
+// campus policies; an unknown id falls back to the last step of the model's rule trace.
+const RULE_NAMES: Record<string, string> = {
+  e_waste_items: "Small electronics and light bulbs",
+  textiles: "Old clothing",
+  styrofoam: "Styrofoam, even with a recycling symbol",
+  food_waste: "Food",
+  other_general: "Not accepted for recycling",
+  stained_paper: "Oil- or food-stained paper",
+  wet_or_filled_paper: "Wet or filled paper",
+  container_item_inside: "Container with something left inside",
+  container_leftover_liquid: "Container with drink left inside",
+  container_food_residue: "Container with food residue",
+  clean_recyclables: "Clean paper, plastic, glass, metal or carton",
+  clean_paper: "Clean paper",
+  clean_plastic: "Clean plastic",
+  clean_cans_glass: "Clean cans and glass",
+  uncertain_fallback: "Still not sure after the questions",
+  abstain_ood: "Unfamiliar item",
+};
+
+/** "Container with food residue → General waste". */
+export function ruleLine(verdict: VerdictResult): string {
+  const name = RULE_NAMES[verdict.rule_id];
+  if (name) return `${name} → ${verdict.bin_label}`;
+  return verdict.rule_trace.at(-1) ?? verdict.rule_id;
 }
 
 /** "No questions needed" / "After 2 questions", shown next to the "94% sure" figure. */

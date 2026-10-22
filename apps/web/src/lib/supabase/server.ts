@@ -85,3 +85,12 @@ export async function saveVerdict(
     .eq("user_id", userId);
   if (error) throw new Error(`scan update failed: ${error.message}`);
 }
+
+/**
+ * Deletes the user and everything about them: the profile, scans and disposals go with the
+ * auth user (on delete cascade), so their pseudonym and points leave the leaderboard.
+ */
+export async function deleteUser(userId: string): Promise<void> {
+  const { error } = await adminClient().auth.admin.deleteUser(userId);
+  if (error) throw new Error(`user delete failed: ${error.message}`);
+}

@@ -4,14 +4,18 @@ import { createBrowserClient } from "@supabase/ssr";
 
 let signedIn: Promise<void> | null = null;
 
+function browserClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return url && key ? createBrowserClient(url, key) : null;
+}
+
 /** Signs in anonymously once. Never throws: scanning works even if this fails. */
 export function ensureSignedIn(): Promise<void> {
   signedIn ??= (async () => {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) return;
+    const client = browserClient();
+    if (!client) return;
     try {
-      const client = createBrowserClient(url, key);
       const { data } = await client.auth.getSession();
       if (data.session) return;
       const { error } = await client.auth.signInAnonymously();
@@ -21,4 +25,15 @@ export function ensureSignedIn(): Promise<void> {
     }
   })();
   return signedIn;
+}
+
+/** Forgets the session in this browser (after the server deleted the user) and starts a new one. */
+export async function startNewIdentity(): Promise<void> {
+  signedIn = null;
+  try {
+    await browserClient()?.auth.signOut({ scope: "local" });
+  } catch {
+    // the cookies are already cleared by the server
+  }
+  await ensureSignedIn();
 }
